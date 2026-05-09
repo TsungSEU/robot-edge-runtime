@@ -1494,7 +1494,7 @@ struct Path {
     "broker": "emqx-dna-vehicle.perf.dftccloud.t.home:9881",
     "broker_ssl": "ssl://dna-emq-perfs.dfiov.com.cn:10006",
     "username": "dnaapp",
-    "password": "D7f%dnD&63B",
+    "password": "${AER_MQTT_PASSWORD:-}",
     "upTopic": "/SHADOW/sd@{VIN}/{DEVICE_ID}/terminal/up/request",
     "downTopic": "/SHADOW/sd@{VIN}/tsp/down/response"
   }
@@ -1510,8 +1510,8 @@ Topic: /SHADOW/sd@LFBGEV070LJD45885/V-Box2103010456/terminal/up/request
   "timestamp": "2026-03-07T14:30:22Z",
   "payload": {
     "collection_id": "col_20260307_143022",
-    "vin": "LFBGEV070LJD45885",
-    "device_id": "V-Box2103010456",
+    "vin": "${AER_VIN:-}",
+    "device_id": "${AER_DEVICE_ID:-}",
     "position": {"x": 1.23, "y": 4.56, "yaw": 0.78},
     "reward": 0.85,
     "scene_type": "indoor_flat",
@@ -1638,10 +1638,10 @@ rosbag2_bag_file_information:
     "is_stable": true
   },
   "robot": {
-    "vin": "LFBGEV070LJD45885",
+    "vin": "${AER_VIN:-}",
     "software_version": "v1.1.2",
     "hardware_version": "rc3.0",
-    "device_id": "V-Box2103010456"
+    "device_id": "${AER_DEVICE_ID:-}"
   },
   "environment": {
     "scene_type": "indoor_flat",
