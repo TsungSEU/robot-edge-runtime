@@ -1,6 +1,6 @@
 {
-  "version": "v1.1.2",
-  "dataStorage":{
+  "version": "${AER_CONFIG_VERSION:-v1.10.3}",
+  "dataStorage": {
     "rollingDeleteThreshold": 10,
     "rollInterval": 10,
     "bagInterval": 10,
@@ -11,13 +11,13 @@
     },
     "capacityMb": 102400,
     "requiredSpaceMb": 256,
-    "compressionFormat": "lz4"
+    "compressionFormat": "${AER_COMPRESSION_FORMAT:-gzip}"
   },
-  "dataProto":{
+  "dataProto": {
     "vin": "${AER_VIN:-}",
-    "software_version": "rc3.0",
-    "hardware_version": "rc3.0",
-    "device": "${AER_DEVICE:-device1}",
+    "software_version": "${AER_SOFTWARE_VERSION:-}",
+    "hardware_version": "${AER_HARDWARE_VERSION:-}",
+    "device": "${AER_DEVICE:-}",
     "device_id": "${AER_DEVICE_ID:-}",
     "mqtt": {
       "broker": "${AER_MQTT_BROKER:-}",
@@ -29,7 +29,7 @@
     }
   },
   "dataUpload": {
-    "retryCount":3,
+    "retryCount": 3,
     "retryIntervalSec": 10,
     "uploadFileIntervalMs": 100,
     "uploadFileSliceIntervalMs": 100,
@@ -47,29 +47,28 @@
       "MaskedPath": "${AER_DATA_ROOT:-/data/aer}/masked"
     },
     "aws": {
-      "enabled": true,
+      "enabled": false,
       "accessKeyId": "${AWS_ACCESS_KEY_ID:-}",
       "secretAccessKey": "${AWS_SECRET_ACCESS_KEY:-}",
-      "region": "${AWS_DEFAULT_REGION:-US}",
-      "bucketName": "${AER_S3_BUCKET:-caic-dataset}",
+      "region": "${AWS_DEFAULT_REGION:-}",
+      "bucketName": "${AER_S3_BUCKET:-}",
       "endpointUrl": "${AER_S3_ENDPOINT:-}"
     }
   },
-  "log":{
-    "LOG_level":"${AER_LOG_LEVEL:-info}",
-    "LOG_pattern":"%Y%m%d-%H%M%S",
-    "LOG_path":"${AER_LOG_DIR:-/tmp/dcp/log/}",
-    "LOG_basename":"dcp"
+  "log": {
+    "LOG_level": "${AER_LOG_LEVEL:-info}",
+    "LOG_pattern": "%Y%m%d-%H%M%S",
+    "LOG_path": "${AER_LOG_DIR:-/tmp/aer/log/}",
+    "LOG_basename": "aer"
   },
-  "debug":{
-    "closeMqttSsl":false,
-    "closeDataReporter":false,
-    "closeDataStorage":false,
-    "closeDataEnc":true,
-    "closeDataUpload":false,
-    "deleteFileAfterDataUpload":true,
-    "closeLogUpload":true,
-    "cloudtimeOutMs":1000
+  "debug": {
+    "closeMqttSsl": false,
+    "closeDataReporter": false,
+    "closeDataStorage": false,
+    "closeDataEnc": true,
+    "closeDataUpload": true,
+    "deleteFileAfterDataUpload": true,
+    "closeLogUpload": true,
+    "cloudtimeOutMs": 1000
   }
-
 }
