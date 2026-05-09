@@ -1,0 +1,21 @@
+==2317805== LEAK SUMMARY:
+==2317805==    definitely lost: 73,596 bytes in 183 blocks
+==2317805==    indirectly lost: 453 bytes in 8 blocks
+==2317805==      possibly lost: 14,140 bytes in 286 blocks
+==2317805==    still reachable: 6,922,041 bytes in 30,231 blocks
+==2317805==                       of which reachable via heuristic:
+==2317805==                         stdstring          : 205,589 bytes in 4,783 blocks
+==2317805==         suppressed: 0 bytes in 0 blocks
+==2317805== 
+==2317805== ERROR SUMMARY: 558 errors from 59 contexts (suppressed: 0 from 0)
+==2317805== 
+==2317805== 1 errors in context 1 of 59:
+==2317805== Source and destination overlap in memcpy_chk(0x1ffeffdf90, 0x1ffeffdf90, 5)
+==2317805==    at 0x48539B2: __memcpy_chk (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2317805==    by 0x625EB45: ??? (in /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/3rdparty/onnxruntime/lib/libonnxruntime.so.1.16.3)
+==2317805==    by 0x625AF57: ??? (in /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/3rdparty/onnxruntime/lib/libonnxruntime.so.1.16.3)
+==2317805==    by 0x625938D: ??? (in /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/3rdparty/onnxruntime/lib/libonnxruntime.so.1.16.3)
+==2317805==    by 0x6AA3EE7: __pthread_once_slow (pthread_once.c:116)
+==2317805==    by 0x6258FFA: ??? (in /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/3rdparty/onnxruntime/lib/libonnxruntime.so.1.16.3)
+==2317805==    by 0x60D082B: ??? (in /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/3rdparty/onnxruntime/lib/libonnxruntime.so.1.16.3)
+==2317805==    by 0x60D101E: ??? (in /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/3rdparty/onnxruntime/lib/libonnxruntime.so.1.16.3)

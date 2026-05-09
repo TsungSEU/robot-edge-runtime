@@ -1,5 +1,5 @@
 ## 3rdparty lib
-SET(THIRD_DEPS_DIR "/workspaces/ad_data_closed_loop/3rdparty")
+SET(THIRD_DEPS_DIR "/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/3rdparty")
 
 # YAML-CPP
 SET(YAML_CPP_INCLUDE_DIR ${THIRD_DEPS_DIR}/yaml-cpp/include CACHE INTERNAL "yaml-cpp include dir.")
@@ -18,9 +18,18 @@ SET(AWS_SDK_LIBRARIES
     ${AWS_SDK_LIBRARY_DIR}/libaws-cpp-sdk-core.so
     ${AWS_SDK_LIBRARY_DIR}/libaws-cpp-sdk-s3.so
     ${AWS_SDK_LIBRARY_DIR}/libaws-crt-cpp.so
+    ${AWS_SDK_LIBRARY_DIR}/libaws-c-s3.so
+    ${AWS_SDK_LIBRARY_DIR}/libaws-c-sdkutils.so
+    ${AWS_SDK_LIBRARY_DIR}/libaws-checksums.so
+    ${AWS_SDK_LIBRARY_DIR}/libaws-crt-cpp.so
     ${AWS_SDK_LIBRARY_DIR}/libaws-c-common.so
     ${AWS_SDK_LIBRARY_DIR}/libaws-c-auth.so
     ${AWS_SDK_LIBRARY_DIR}/libaws-c-http.so
+    ${AWS_SDK_LIBRARY_DIR}/libaws-c-cal.so
+    ${AWS_SDK_LIBRARY_DIR}/libaws-c-compression.so
+    ${AWS_SDK_LIBRARY_DIR}/libaws-c-event-stream.so
+    ${AWS_SDK_LIBRARY_DIR}/libaws-c-io.so
+    ${AWS_SDK_LIBRARY_DIR}/libaws-c-mqtt.so
     ${AWS_SDK_LIBRARY_DIR}/libs2n.so CACHE INTERNAL "aws sdk libraries.")
 message(STATUS "Found aws-sdk: ${THIRD_DEPS_DIR}/aws-sdk")
 
@@ -56,6 +65,10 @@ SET(LZ4_LIBRARY_DIR ${THIRD_DEPS_DIR}/lz4/x86/lib CACHE INTERNAL "lz4 library di
 SET(LZ4_LIBRARIES ${LZ4_LIBRARY_DIR}/liblz4.so CACHE INTERNAL "lz4 libraries.")
 message(STATUS "Found lz4: ${THIRD_DEPS_DIR}/lz4")
 
+# zlib (system library)
+find_package(ZLIB REQUIRED)
+message(STATUS "Found zlib: ${ZLIB_LIBRARIES}")
+
 # Manif
 SET(MANIF_INCLUDE_DIR ${THIRD_DEPS_DIR}/manif CACHE INTERNAL "manif include dir.")
 message(STATUS "Found manif: ${THIRD_DEPS_DIR}/manif")
@@ -80,7 +93,9 @@ message(STATUS "Found onnxruntime: ${THIRD_DEPS_DIR}/onnxruntime")
 SET(OPENSSL_ROOT_DIR ${THIRD_DEPS_DIR}/openssl/x86 CACHE INTERNAL "openssl root dir.")
 SET(OPENSSL_INCLUDE_DIR ${THIRD_DEPS_DIR}/openssl/x86/include CACHE INTERNAL "openssl include dir.")
 SET(OPENSSL_LIBRARY_DIR ${THIRD_DEPS_DIR}/openssl/x86/lib CACHE INTERNAL "openssl library dir.")
-SET(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} CACHE INTERNAL "openssl libraries.")
+SET(OPENSSL_LIBRARIES
+    ${OPENSSL_LIBRARY_DIR}/libssl.so
+    ${OPENSSL_LIBRARY_DIR}/libcrypto.so CACHE INTERNAL "openssl libraries.")
 message(STATUS "Found openssl: ${THIRD_DEPS_DIR}/openssl")
 
 # Paho-MQTT-CPP
@@ -100,5 +115,12 @@ message(STATUS "Found Tl: ${THIRD_DEPS_DIR}/tl")
 SET(EXPRTK_INCLUDE_DIR ${THIRD_DEPS_DIR}/exprtk CACHE INTERNAL "exprtk include dir.")
 message(STATUS "Found exprtk: ${THIRD_DEPS_DIR}/exprtk")
 
-include_directories(${YAML_CPP_INCLUDE_DIR} ${THREADPOOL_INCLUDE_DIR} ${AWS_SDK_INCLUDE_DIR} ${CURL_INCLUDE_DIR} ${FFMPEG_INCLUDE_DIR} ${LZ4_INCLUDE_DIR} ${MANIF_INCLUDE_DIR} ${MICROTAR_INCLUDE_DIR} ${NLOHMANN_JSON_INCLUDE_DIR} ${ONNXRUNTIME_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} ${PAHO_MQTT_CPP_INCLUDE_DIR} ${TL_INCLUDE_DIR} ${EXPRTK_INCLUDE_DIR})
-list(APPEND THIRD_LIBRARIES ${YAML_CPP_LIBRARIES} ${AWS_SDK_LIBRARIES} ${CURL_LIBRARIES} ${FFMPEG_LIBRARIES} ${LZ4_LIBRARIES} ${MICROTAR_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} ${OPENSSL_LIBRARY} ${PAHO_MQTT_CPP_LIBRARIES})
+# Eigen3 (header-only library)
+SET(EIGEN3_INCLUDE_DIR ${THIRD_DEPS_DIR}/Eigen CACHE INTERNAL "eigen3 include dir.")
+message(STATUS "Found Eigen3: ${THIRD_DEPS_DIR}/Eigen")
+
+# ruckig
+add_subdirectory(${THIRD_DEPS_DIR}/ruckig)
+
+include_directories(${YAML_CPP_INCLUDE_DIR} ${THREADPOOL_INCLUDE_DIR} ${AWS_SDK_INCLUDE_DIR} ${CURL_INCLUDE_DIR} ${FFMPEG_INCLUDE_DIR} ${LZ4_INCLUDE_DIR} ${MANIF_INCLUDE_DIR} ${MICROTAR_INCLUDE_DIR} ${NLOHMANN_JSON_INCLUDE_DIR} ${ONNXRUNTIME_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} ${PAHO_MQTT_CPP_INCLUDE_DIR} ${TL_INCLUDE_DIR} ${EXPRTK_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR} ${ZLIB_INCLUDE_DIRS})
+list(APPEND THIRD_LIBRARIES ${YAML_CPP_LIBRARIES} ${AWS_SDK_LIBRARIES} ${CURL_LIBRARIES} ${FFMPEG_LIBRARIES} ${LZ4_LIBRARIES} ${MICROTAR_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} ${OPENSSL_LIBRARIES} ${PAHO_MQTT_CPP_LIBRARIES} ZLIB::ZLIB)

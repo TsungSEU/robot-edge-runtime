@@ -7,17 +7,24 @@
 
 #include "trigger_base.h"
 #include "trigger/common/trigger_checker.h"
-#include "state_machine/state_machine.h"
+#include "aurora_edge_runtime/srv/trigger_recording.hpp"
 
 #include <unordered_map>
 #include <string>
 #include <functional>
 #include <memory>
+#include <rclcpp/rclcpp.hpp>
 
-namespace dcp::trigger
-{
+namespace aurora::collector {
 
-class RuleTrigger : public TriggerBase {
+// Trigger-level state (separate from system-level SystemState)
+enum class TriggerState {
+    IDLE,
+    TRIGGERED,
+    UNTRIGGERED
+};
+
+class RuleTrigger : public TriggerBase, public rclcpp::Node {
 public:
     RuleTrigger();
     ~RuleTrigger() override = default;
@@ -29,8 +36,14 @@ public:
     void OnMessageReceived(const std::string& topic, const rclcpp::SerializedMessage& subject) override;
 
 private:
+    // ROS2 service client for triggering recording
+    rclcpp::Client<aurora_edge_runtime::srv::TriggerRecording>::SharedPtr trigger_client_;
+
+    // Async trigger method
+    void triggerRecordingViaService(const TriggerContext& context);
+
     TriggerChecker trigger_checker_;
-    SystemState current_state_;
+    std::atomic<TriggerState> current_state_{TriggerState::IDLE};
     std::unordered_map<std::string, std::function<TriggerChecker::Value()>> variable_getters_;
 
     mutable std::unordered_map<std::string, TriggerChecker::Value> current_variables_;

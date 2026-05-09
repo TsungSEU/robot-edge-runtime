@@ -12,7 +12,7 @@
 #include "common/base.h"
 #include "common/data.h"
 
-namespace dcp::common {
+namespace aurora::collector {
 
 struct UploadItem {
     std::string file_path;

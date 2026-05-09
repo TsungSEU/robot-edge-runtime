@@ -5,9 +5,9 @@
 //
 
 #include "mqtt_wrapper.h"
+#include "common/log/logger.h"
 
-namespace dcp::uploader
-{
+namespace aurora::collector {
 
 MqttWrapper::MqttWrapper() : isConnected_(false), autoReconnect_(true) {}
 
@@ -158,22 +158,33 @@ void MqttWrapper::MqttCallbackImpl::message_arrived(mqtt::const_message_ptr msg)
 void MqttWrapper::MqttCallbackImpl::connection_lost(const std::string& cause) {
     std::lock_guard<std::mutex> lock(parent_->mutex_);
     parent_->isConnected_ = false;
+    AD_WARN(MqttWrapper, "MQTT connection lost: %s", cause.c_str());
+
     if (parent_->autoReconnect_) {
         std::thread([parent = parent_]() {
             int retryCount = 0;
             const int maxRetries = 5;
-            const int retryIntervalMs = 5000; // 每5秒重试一次
+            double retryIntervalMs = 5000.0;  // 初始5秒，指数退避
 
             while (retryCount < maxRetries && !parent->isConnected_) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(retryIntervalMs));
+                std::this_thread::sleep_for(std::chrono::milliseconds(
+                    static_cast<int64_t>(retryIntervalMs)));
+                AD_INFO(MqttWrapper, "MQTT reconnect attempt %d/%d", retryCount + 1, maxRetries);
+
                 if (parent->Connect(3000) == ErrorCode::SUCCESS) {
                     std::lock_guard<std::mutex> lock(parent->mutex_);
                     for (const auto& sub : parent->subscriptions_) {
                         parent->client_->subscribe(sub.first, sub.second)->wait();
                     }
+                    AD_INFO(MqttWrapper, "MQTT reconnected successfully");
                     break;
                 }
                 retryCount++;
+                retryIntervalMs = std::min(retryIntervalMs * 2.0, 60000.0);  // 最大60秒
+            }
+
+            if (retryCount >= maxRetries && !parent->isConnected_) {
+                AD_ERROR(MqttWrapper, "MQTT reconnection failed after %d attempts, giving up", maxRetries);
             }
         }).detach();
     }

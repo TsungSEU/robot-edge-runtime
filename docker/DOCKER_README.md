@@ -44,7 +44,7 @@
 
 ## 在容器中编译项目
 
-进入容器后，可以按照以下步骤编译项目：
+进入容器后，可以按照以下Step编译项目：
 
 ```bash
 cd /workspaces/ad_data_closed_loop/src

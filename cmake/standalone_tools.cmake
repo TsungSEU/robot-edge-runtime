@@ -1,7 +1,7 @@
 # Third-party dependencies for ad_shadowmode project
 
 # set(SENSEAUTO_RSCL /opt/senseauto/senseauto-rscl/active)
-# set(SENSEAUTO_MSG /opt/senseauto/senseauto-msgs/active)
+# set(SENSEAUTO_MSG /opt/senseauto/senseauto-humanoid_interfaces/active)
 set(TDR_3RDPARTY /opt/senseauto/senseauto-3rdparty/active/3rdparty)
 
 # Include directories

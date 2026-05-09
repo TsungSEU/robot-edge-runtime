@@ -5,7 +5,7 @@
 #include <iterator>
 #include <mutex>
 
-namespace dcp::common{
+namespace aurora::collector {
 
 template <typename T>
 class RingBuffer {

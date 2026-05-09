@@ -1,0 +1,52 @@
+#!/bin/bash
+# Git commit-msg hook for Aurora Edge Runtime
+# Checks if commit message follows Conventional Commits format
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Check if this is a merge commit
+if echo "$COMMIT_MSG" | grep -q "^Merge branch"; then
+    exit 0
+fi
+
+# Check if this is a revert commit
+if echo "$COMMIT_MSG" | grep -q "^Revert \""; then
+    exit 0
+fi
+
+# Conventional Commits format check
+# Format: type(scope): subject
+PATTERN='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .{1,72}'
+
+if ! echo "$COMMIT_MSG" | head -n1 | grep -qE "$PATTERN"; then
+    echo "❌ Commit message format error"
+    echo ""
+    echo "Correct format: type(scope): subject"
+    echo ""
+    echo "Supported types:"
+    echo "  feat     - New features"
+    echo "  fix      - Bug fixes"
+    echo "  docs     - Documentation changes"
+    echo "  style    - Code style (formatting, no logic change)"
+    echo "  refactor - Code refactoring"
+    echo "  perf     - Performance improvements"
+    echo "  test     - Adding or updating tests"
+    echo "  build    - Build system changes"
+    echo "  ci       - CI configuration changes"
+    echo "  chore    - Maintenance tasks"
+    echo "  revert   - Revert a previous commit"
+    echo ""
+    echo "Examples:"
+    echo "  feat(logger): fix use-after-free error in Uninit()"
+    echo "  fix(planner): resolve memory leak in CostMap"
+    echo "  docs: update installation guide"
+    echo "  refactor(gait): simplify foot trajectory generation"
+    echo ""
+    echo "Current commit message:"
+    echo "  $COMMIT_MSG"
+    exit 1
+fi
+
+echo "✅ Commit message format is correct"
+exit 0

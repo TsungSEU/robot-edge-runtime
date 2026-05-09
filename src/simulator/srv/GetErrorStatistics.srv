@@ -1,0 +1,11 @@
+# GetErrorStatistics.srv
+# Service to get path tracking error statistics
+
+---
+# Response
+bool success                     # True if statistics retrieved successfully
+float64 average_error            # Average position error (meters)
+float64 max_error                # Maximum position error (meters)
+uint32 waypoints_within_tolerance  # Number of waypoints reached within tolerance
+uint32 total_waypoints           # Total number of waypoints
+string message                   # Status message

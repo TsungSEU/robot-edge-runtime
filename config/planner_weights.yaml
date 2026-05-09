@@ -1,52 +1,204 @@
 # Planner Weights Configuration
-# Weight values for different cost components in path planning
+# 统一的规划器配置文件，支持自动驾驶和人形机器人两种模式
 
-# Data closed loop parameters
-# Automatically updated after each data collection mission
-# Based on spatial distribution statistics of collected data
-sparse_threshold: 0.15     # Areas with density below this value are considered sparse
-exploration_bonus: 10.0    # Cost reduction for visiting sparse areas (encourages exploration)
-redundancy_penalty: 5.0    # Additional cost for high-density areas (discourages redundancy)
-grid_resolution: 1.0       # Grid resolution for density calculations (meters)
+# ========================================
+# 规划器模式选择
+# ========================================
+# planner_mode: "auto" | "humanoid"
+planner_mode: "humanoid"  # 默认使用人形机器人模式
 
-# Path planning parameters
-path_planning:
-  max_search_iterations: 1000   # Maximum iterations for path search algorithms
-  min_path_length: 2.0          # Minimum acceptable path length (meters)
-  path_smoothness_factor: 0.7   # Factor controlling path smoothing (0.0-1.0)
-  heuristic_weight: 1.0         # Weight for A* heuristic function
+# ========================================
+# 通用参数 (两种模式共享)
+# ========================================
+common:
+  # 数据闭环参数
+  sparse_threshold: 0.15        # 稀疏区域阈值
+  exploration_bonus: 10.0       # 探索奖励系数
+  redundancy_penalty: 5.0       # 冗余惩罚系数
+  grid_resolution: 0.5          # 网格分辨率 (米) - 匹配 LivelyBot 环境配置
 
-# PPO (Proximal Policy Optimization) agent parameters
-ppo_config:
-  learning_rate: 0.0003         # Learning rate for PPO training
-  gamma: 0.999                  # Discount factor for future rewards
-  gae_lambda: 0.95              # Generalized Advantage Estimation lambda
-  clip_epsilon: 0.2             # PPO clipping parameter
-  entropy_coef: 0.01            # Entropy regularization coefficient
-  value_loss_coef: 0.5          # Value function loss coefficient
-  batch_size: 64                # Batch size for training updates
-  epochs: 10                    # Number of training epochs per update
-  max_training_steps: 15000     # Maximum training steps
-  max_episode_steps: 200        # Maximum steps per episode
+  # 数据上传参数
+  upload_threshold: 1000        # 经验上传阈值 (条数)
 
-# Sampling optimizer parameters
-sampling_params:
-  exploration_weight: 1.0       # Weight for exploration component
-  efficiency_weight: 0.5        # Weight for efficiency component
-  redundancy_penalty: 5.0       # Penalty for redundancy
+  # 可视化参数
+  trail_publish_interval_sec: 0.2  # 轨迹发布间隔 (秒)，默认 0.2 (5Hz)
 
-# Coverage metric parameters
-coverage_params:
-  sparse_threshold: 0.15        # Threshold for sparse area classification
+  # 可达性参数
+  reachability_decay: 0.95       # 历史数据衰减系数
+  reachability_min_samples: 3    # 最小样本数（可靠阈值）
+  reachability_position_tolerance: 0.5  # 位置容差（米）
 
-# Semantic constraint parameters
-semantic_constraints:
-  traffic_light_penalty: 50.0   # Cost penalty for traffic light violations
-  building_penalty: 30.0        # Cost penalty for building proximity
-  pedestrian_crossing_penalty: 20.0 # Cost penalty for pedestrian crossing areas
-  road_preference: -10.0        # Negative cost (preference) for road areas
+  # 数据价值模型权重
+  w_spatial_rarity: 0.3         # 空间稀缺性权重
+  w_temporal_freshness: 0.15    # 时间新鲜度权重
+  w_scene_diversity: 0.2        # 场景多样性权重
+  w_quality: 0.15               # 数据质量权重
+  w_coverage: 0.2               # 覆盖率权重
 
-# Navigation planner parameters
-rl_planner:
-  local_path_lookahead: 10      # Number of waypoints to include in local path
-  waypoint_spacing: 1.0         # Desired spacing between waypoints (meters)
+  # 场景稀有度映射
+  scene_rarity:
+    indoor_flat: 0.3
+    indoor_stair: 0.7
+    indoor_ramp: 0.6
+    outdoor_flat: 0.4
+    outdoor_rough: 0.8
+    outdoor_slope: 0.7
+    mixed: 0.9
+
+# ========================================
+# 人形机器人模式配置
+# ========================================
+humanoid:
+  # 状态空间配置 (43维)
+  state:
+    state_dim: 43
+    map_width: 40.0                # 环境宽度 (m)
+    map_height: 40.0               # 环境高度 (m)
+    max_goal_range: 10.0           # 目标距离归一化范围 (m)
+    clip_observations: 18.0
+
+  # 动作空间配置 (3维连续速度命令)
+  action:
+    action_dim: 3
+    action_space: continuous
+    # 范围与 LivelyBot Pi 训练范围对齐
+    forward_vel_range: [-0.3, 0.6]    # m/s
+    lateral_vel_range: [-0.3, 0.3]    # m/s
+    angular_vel_range: [-0.3, 0.3]    # rad/s
+    clip_actions: 18.0
+    action_type: "velocity_cmd"       # 动作类型: "velocity_cmd"
+
+  # 推理参数
+  inference:
+    action_scale: 1.0
+    init_log_std: 0.0
+    min_log_std: -20.0
+    max_log_std: 2.0
+    num_inference_threads: 1
+
+  # 奖励函数配置 (10分量)
+  # 同步自 rl_planning_train/config/nav_data_training.yaml
+  reward:
+    # 导航奖励
+    w_approach: 15.0               # 目标接近奖励 (增强梯度)
+    w_goal: 30.0                   # 目标完成奖励
+
+    # 数据采集奖励 (核心)
+    w_data_value: 3.0              # 数据价值采集 (降低减少导航冲突)
+    w_value_guide: 0.5             # 高价值区域引导 (大幅降低避免与目标冲突)
+    w_coverage: 0.5                # 覆盖率奖励
+
+    # 效率/安全惩罚
+    w_efficiency: 0.5              # 路径效率
+    w_repeat: 1.0                  # 重复访问惩罚
+    w_collision: 10.0              # 碰撞危险惩罚
+    w_speed: 1.0                   # 速度跟踪 (增强鼓励移动)
+    w_time: 0.05                   # 时间惩罚 (增强紧迫感)
+
+    # 额外参数
+    first_visit_bonus: 2.0
+    collision_penalty: -2.0
+    near_obstacle_scale: 5.0
+    safe_distance: 1.0             # meters
+    stall_penalty: -0.5
+    min_speed_threshold: 0.05      # m/s
+
+  # 控制频率
+  control:
+    policy_hz: 10                  # Aurora 决策频率 (Hz)
+    livelybot_hz: 50               # LivelyBot 执行频率 (Hz)
+    physics_hz: 1000               # 物理仿真频率 (Hz)
+
+  # 规划参数
+  max_planning_steps: 500          # 最大规划步数
+
+  # 数据价值扫描参数
+  data_value_scan:
+    num_sectors: 8
+    scan_range: 10.0               # meters
+    noise_std: 0.1
+
+  # 障碍物扫描参数
+  obstacle_scan:
+    num_sectors: 4                 # 前/后/左/右
+    scan_range: 5.0                # meters
+
+  # 可达性参数
+  reachability:
+    decay: 0.95
+    min_samples: 3
+    position_tolerance: 0.5
+    effective_cost_threshold: 2.0
+
+# ========================================
+# 自动驾驶模式配置
+# ========================================
+auto:
+  # 状态空间配置
+  state:
+    state_dim: 25                 # 25维状态空间
+    # 状态组成:
+    # [0-1]:   norm_x, norm_y          (归一化坐标)
+    # [2-17]:  heatmap_summary          (4×4 热力图)
+    # [18-21]: last_n_actions           (历史动作)
+    # [22]:    remaining_budget_norm    (剩余预算)
+    # [23]:    local_traffic_density    (局部密度)
+    # [24]:    reachability_score       (当前位置可达性评分)
+
+  # 可达性参数
+  reachability:
+    decay: 0.95
+    min_samples: 3
+    position_tolerance: 0.5
+    effective_cost_threshold: 2.0
+    initial_score: 0.5
+    success_increment: 0.2
+    failure_decrement: 0.15
+
+  # 路径规划参数
+  path_planning:
+    max_search_iterations: 1000
+    min_path_length: 2.0
+    path_smoothness_factor: 0.7
+    heuristic_weight: 1.0
+
+  # 推理参数
+  inference:
+    action_scale: 1.0
+    init_log_std: -0.5
+    min_log_std: -2.0
+    max_log_std: 0.5
+    num_inference_threads: 1
+    use_quantized_model: false
+    enable_simd: true
+    enable_memory_pool: true
+
+  # 采样优化参数
+  sampling:
+    exploration_weight: 1.0
+    efficiency_weight: 0.5
+    redundancy_penalty: 5.0
+
+  # 语义约束参数
+  semantic_constraints:
+    traffic_light_penalty: 50.0
+    building_penalty: 30.0
+    pedestrian_crossing_penalty: 20.0
+    road_preference: -10.0
+
+  # 奖励参数
+  reward:
+    w_reachability: 0.3           # 可达性权重
+    distance_improvement_scale: 5.0
+    step_penalty: -0.01
+    goal_reward: 50.0
+    collision_penalty: -50.0
+    new_sparse_reward: 10.0
+    new_area_reward: 2.0
+    inefficient_path_penalty: -5.0
+    repeat_visit_penalty: -2.0
+    total_path_length_scale: 1000.0
+    # 可达性奖励
+    high_reachability_bonus: 2.0
+    low_reachability_penalty: -1.0
+    confidence_bonus: 0.5

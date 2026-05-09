@@ -1,0 +1,219 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - Aurora Edge Runtime - Code Coverage Report - src/data_collection/uploader/common/file_splitter.hpp</title>
+  <link rel="stylesheet" type="text/css" href="../../../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../../../index.html">top level</a> - <a href="index.html">src/data_collection/uploader/common</a> - file_splitter.hpp<span style="font-size: 80%;"> (source / <a href="file_splitter.hpp.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">Aurora Edge Runtime - Code Coverage Report</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">44</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2026-04-13 15:57:36</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">5</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Legend:</td>
+            <td class="headerValueLeg">            Lines:
+            <span class="coverLegendCov">hit</span>
+            <span class="coverLegendNoCov">not hit</span>
+            | Branches:
+            <span class="coverLegendCov">+</span> taken
+            <span class="coverLegendNoCov">-</span> not taken
+            <span class="coverLegendNoCov">#</span> not executed
+</td>
+            <td></td>
+            <td class="headerItem">Branches:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">76</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">           Branch data     Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>                :            : #pragma once</a>
+<a name="2"><span class="lineNum">       2 </span>                :            : </a>
+<a name="3"><span class="lineNum">       3 </span>                :            : #include &lt;iostream&gt;</a>
+<a name="4"><span class="lineNum">       4 </span>                :            : #include &lt;fstream&gt;</a>
+<a name="5"><span class="lineNum">       5 </span>                :            : #include &lt;vector&gt;</a>
+<a name="6"><span class="lineNum">       6 </span>                :            : #include &lt;string&gt;</a>
+<a name="7"><span class="lineNum">       7 </span>                :            : #include &lt;sstream&gt;</a>
+<a name="8"><span class="lineNum">       8 </span>                :            : #include &lt;iomanip&gt;</a>
+<a name="9"><span class="lineNum">       9 </span>                :            : #include &quot;common/log/logger.h&quot;</a>
+<a name="10"><span class="lineNum">      10 </span>                :            : </a>
+<a name="11"><span class="lineNum">      11 </span>                :            : namespace aurora::collector {</a>
+<a name="12"><span class="lineNum">      12 </span>                :            : </a>
+<a name="13"><span class="lineNum">      13 </span>                :            : </a>
+<a name="14"><span class="lineNum">      14 </span>                :            : //读取指定路径文件并对文件进行切片</a>
+<a name="15"><span class="lineNum">      15 </span>                :            : class FileSplitter {</a>
+<a name="16"><span class="lineNum">      16 </span>                :            : public:</a>
+<a name="17"><span class="lineNum">      17 </span>                :            :     // 错误码枚举</a>
+<a name="18"><span class="lineNum">      18 </span>                :            :     enum ErrorCode {</a>
+<a name="19"><span class="lineNum">      19 </span>                :            :         SUCCESS = 0,      // 成功</a>
+<a name="20"><span class="lineNum">      20 </span>                :            :         FILE_OPEN_FAILED, // 文件打开失败</a>
+<a name="21"><span class="lineNum">      21 </span>                :            :         INVALID_CHUNK,    // 分片号无效</a>
+<a name="22"><span class="lineNum">      22 </span>                :            :         FILE_SEEK_FAILED, // 文件定位失败</a>
+<a name="23"><span class="lineNum">      23 </span>                :            :         FILE_READ_FAILED  // 文件读取失败</a>
+<a name="24"><span class="lineNum">      24 </span>                :            :     };</a>
+<a name="25"><span class="lineNum">      25 </span>                :            : </a>
+<a name="26"><span class="lineNum">      26 </span>                :            :     //chunksize每个分片的大小</a>
+<a name="27"><span class="lineNum">      27 </span>                :<span class="lineNoCov">          0 :     FileSplitter(const std::string&amp; filePath_, size_t chunkSize_)</span></a>
+<a name="28"><span class="lineNum">      28 </span>                :<span class="lineNoCov">          0 :         : filePath(filePath_), chunkSize(chunkSize_) {</span></a>
+<a name="29"><span class="lineNum">      29 </span>                :<span class="lineNoCov">          0 :         chunkSize = chunkSize * 1024 * 1024;</span></a>
+<a name="30"><span class="lineNum">      30 </span>                :            :         // 打开文件以计算分片总数</a>
+<a name="31"><span class="lineNum">      31 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         std::ifstream file(filePath, std::ios::binary | std::ios::ate);</span></a>
+<a name="32"><span class="lineNum">      32 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :         if (!file) {</span></a>
+<a name="33"><span class="lineNum">      33 </span>                :<span class="lineNoCov">          0 :             errorCode = FILE_OPEN_FAILED; // 文件打开失败</span></a>
+<a name="34"><span class="lineNum">      34 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :             AD_ERROR(FileSplitter,&quot;File %s open failed.&quot;, filePath.c_str());</span></a>
+<a name="35"><span class="lineNum">      35 </span>                :<span class="lineNoCov">          0 :             return;</span></a>
+<a name="36"><span class="lineNum">      36 </span>                :            :         }</a>
+<a name="37"><span class="lineNum">      37 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         fileSize = file.tellg();//返回当前文件流的读写位置，配合ate标志，当前读写位置为文件总大小</span></a>
+<a name="38"><span class="lineNum">      38 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         file.close();//关闭文件流，释放资源</span></a>
+<a name="39"><span class="lineNum">      39 </span>                :<span class="lineNoCov">          0 :         chunkCount = (fileSize + chunkSize - 1) / chunkSize; // 计算分片总数，向上取整</span></a>
+<a name="40"><span class="lineNum">      40 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :         AD_INFO(FileSplitter,&quot;fileSize: %d chunkSize: %d chunkCount: %d&quot;, fileSize , chunkSize, chunkCount);</span></a>
+<a name="41"><span class="lineNum">      41 </span>                :<span class="lineNoCov">          0 :         errorCode = SUCCESS; // 初始化成功</span></a>
+<a name="42"><span class="lineNum">      42 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     }</span></a>
+<a name="43"><span class="lineNum">      43 </span>                :            : </a>
+<a name="44"><span class="lineNum">      44 </span>                :            :     // 获取错误码</a>
+<a name="45"><span class="lineNum">      45 </span>                :<span class="lineNoCov">          0 :     ErrorCode getErrorCode() const {</span></a>
+<a name="46"><span class="lineNum">      46 </span>                :<span class="lineNoCov">          0 :         return errorCode;</span></a>
+<a name="47"><span class="lineNum">      47 </span>                :            :     }</a>
+<a name="48"><span class="lineNum">      48 </span>                :            : </a>
+<a name="49"><span class="lineNum">      49 </span>                :            :     // 获取分片总数</a>
+<a name="50"><span class="lineNum">      50 </span>                :<span class="lineNoCov">          0 :     int getChunkCount() const {</span></a>
+<a name="51"><span class="lineNum">      51 </span>                :<span class="lineNoCov">          0 :         return chunkCount;</span></a>
+<a name="52"><span class="lineNum">      52 </span>                :            :     }</a>
+<a name="53"><span class="lineNum">      53 </span>                :            : </a>
+<a name="54"><span class="lineNum">      54 </span>                :            :     // 获取文件大小</a>
+<a name="55"><span class="lineNum">      55 </span>                :<span class="lineNoCov">          0 :     size_t getFileSize() const {</span></a>
+<a name="56"><span class="lineNum">      56 </span>                :<span class="lineNoCov">          0 :         return fileSize;</span></a>
+<a name="57"><span class="lineNum">      57 </span>                :            :     }</a>
+<a name="58"><span class="lineNum">      58 </span>                :            : </a>
+<a name="59"><span class="lineNum">      59 </span>                :            :     // 根据分片号获取分片数据</a>
+<a name="60"><span class="lineNum">      60 </span>                :<span class="lineNoCov">          0 :     ErrorCode getChunkData(int chunkNumber, std::vector&lt;char&gt;&amp; chunkData) const {</span></a>
+<a name="61"><span class="lineNum">      61 </span>                :<span class="lineNoCov">          0 :         chunkNumber-- ;</span></a>
+<a name="62"><span class="lineNum">      62 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :         AD_INFO(FileSplitter, &quot;Chunk number after: %d, Chunk count: %d&quot;, chunkNumber, chunkCount);</span></a>
+<a name="63"><span class="lineNum">      63 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :         if (chunkNumber &lt; 0 || chunkNumber &gt;= chunkCount) {</span></a>
+<a name="64"><span class="lineNum">      64 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :             AD_ERROR(FileSplitter, &quot;Invalid chunk number&quot;);</span></a>
+<a name="65"><span class="lineNum">      65 </span>                :<span class="lineNoCov">          0 :             return INVALID_CHUNK; // 分片号无效</span></a>
+<a name="66"><span class="lineNum">      66 </span>                :            :         }</a>
+<a name="67"><span class="lineNum">      67 </span>                :            : </a>
+<a name="68"><span class="lineNum">      68 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         std::ifstream file(filePath, std::ios::binary);</span></a>
+<a name="69"><span class="lineNum">      69 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :         if (!file) {</span></a>
+<a name="70"><span class="lineNum">      70 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :             AD_ERROR(FileSplitter, &quot;File %s open failed.&quot;, filePath.c_str());</span></a>
+<a name="71"><span class="lineNum">      71 </span>                :<span class="lineNoCov">          0 :             return FILE_OPEN_FAILED; // 文件打开失败</span></a>
+<a name="72"><span class="lineNum">      72 </span>                :            :         }</a>
+<a name="73"><span class="lineNum">      73 </span>                :            : </a>
+<a name="74"><span class="lineNum">      74 </span>                :            :         // 计算分片的起始位置和大小</a>
+<a name="75"><span class="lineNum">      75 </span>                :<span class="lineNoCov">          0 :         size_t offset = chunkNumber * chunkSize;</span></a>
+<a name="76"><span class="lineNum">      76 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         size_t size = (chunkNumber == chunkCount - 1) ? (fileSize - offset) : chunkSize;</span></a>
+<a name="77"><span class="lineNum">      77 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :         AD_INFO(FileSplitter, &quot;offset: %d, size: %d&quot;, (int)offset, (int)size);</span></a>
+<a name="78"><span class="lineNum">      78 </span>                :            : </a>
+<a name="79"><span class="lineNum">      79 </span>                :            :         // 定位到分片的起始位置</a>
+<a name="80"><span class="lineNum">      80 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         file.seekg(offset, std::ios::beg);</span></a>
+<a name="81"><span class="lineNum">      81 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :         if (!file) {</span></a>
+<a name="82"><span class="lineNum">      82 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :             AD_ERROR(FileSplitter, &quot;Seek to chunk %d failed.&quot;, (chunkNumber + 1));</span></a>
+<a name="83"><span class="lineNum">      83 </span>                :<span class="lineNoCov">          0 :             return FILE_SEEK_FAILED; // 文件定位失败</span></a>
+<a name="84"><span class="lineNum">      84 </span>                :            :         }</a>
+<a name="85"><span class="lineNum">      85 </span>                :            : </a>
+<a name="86"><span class="lineNum">      86 </span>                :            :         // 读取分片数据</a>
+<a name="87"><span class="lineNum">      87 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         chunkData.resize(size);</span></a>
+<a name="88"><span class="lineNum">      88 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         file.read(chunkData.data(), size);</span></a>
+<a name="89"><span class="lineNum">      89 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span> :<span class="lineNoCov">          0 :         if (!file &amp;&amp; !file.eof()) {</span></a>
+<span class="lineNum">         </span><span class="branchNoExec" title="Branch 4 was not executed"> # </span><span class="branchNoExec" title="Branch 5 was not executed"> # </span><span class="branchNoExec" title="Branch 6 was not executed"> # </span><span class="branchNoExec" title="Branch 7 was not executed"> # </span><span class="branchNoExec" title="Branch 8 was not executed"> # </span> 
+<span class="lineNum">         </span>            <span class="branchNoExec" title="Branch 9 was not executed"> # </span>]
+<a name="90"><span class="lineNum">      90 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :             AD_ERROR(FileSplitter, &quot;Read chunk %d failed.&quot;, (chunkNumber + 1));</span></a>
+<a name="91"><span class="lineNum">      91 </span>                :<span class="lineNoCov">          0 :             return FILE_READ_FAILED; // 文件读取失败</span></a>
+<a name="92"><span class="lineNum">      92 </span>                :            :         }</a>
+<a name="93"><span class="lineNum">      93 </span>                :            : </a>
+<a name="94"><span class="lineNum">      94 </span>                :<span class="lineNoCov">          0 :         return SUCCESS; // 成功</span></a>
+<a name="95"><span class="lineNum">      95 </span>                :<span class="lineNoCov">          0 :     }</span></a>
+<a name="96"><span class="lineNum">      96 </span>                :            : </a>
+<a name="97"><span class="lineNum">      97 </span>                :            :     // 根据分片号获取分片名</a>
+<a name="98"><span class="lineNum">      98 </span>                :            :     ErrorCode getChunkName(int chunkNumber, std::string&amp; chunkName) const {</a>
+<a name="99"><span class="lineNum">      99 </span>                :            :         if (chunkNumber &lt; 0 || chunkNumber &gt;= chunkCount) {</a>
+<a name="100"><span class="lineNum">     100 </span>                :            :             AD_ERROR(FileSplitter,&quot;Invalid chunk number&quot;);</a>
+<a name="101"><span class="lineNum">     101 </span>                :            :             return INVALID_CHUNK; // 分片号无效</a>
+<a name="102"><span class="lineNum">     102 </span>                :            :         }</a>
+<a name="103"><span class="lineNum">     103 </span>                :            :         chunkName = generateChunkFileName(chunkNumber);</a>
+<a name="104"><span class="lineNum">     104 </span>                :            :         return SUCCESS; // 成功</a>
+<a name="105"><span class="lineNum">     105 </span>                :            :     }</a>
+<a name="106"><span class="lineNum">     106 </span>                :            : </a>
+<a name="107"><span class="lineNum">     107 </span>                :            : private:</a>
+<a name="108"><span class="lineNum">     108 </span>                :            :     std::string filePath;       // 原文件路径</a>
+<a name="109"><span class="lineNum">     109 </span>                :            :     size_t chunkSize;           // 分片大小</a>
+<a name="110"><span class="lineNum">     110 </span>                :            :     size_t fileSize;            // 文件总大小</a>
+<a name="111"><span class="lineNum">     111 </span>                :            :     int chunkCount;             // 分片总数</a>
+<a name="112"><span class="lineNum">     112 </span>                :            :     ErrorCode errorCode;        // 错误码</a>
+<a name="113"><span class="lineNum">     113 </span>                :            : </a>
+<a name="114"><span class="lineNum">     114 </span>                :            :     // 生成分片文件名</a>
+<a name="115"><span class="lineNum">     115 </span>                :            :     std::string generateChunkFileName(int chunkNumber) const {</a>
+<a name="116"><span class="lineNum">     116 </span>                :            :         std::ostringstream oss;//输出字符串流</a>
+<a name="117"><span class="lineNum">     117 </span>                :            :         //setw(3)表示输出字段宽度为3，setfill('0')表示不够3位时用0填充</a>
+<a name="118"><span class="lineNum">     118 </span>                :            :         oss &lt;&lt; filePath &lt;&lt; &quot;.&quot; &lt;&lt; std::setw(3) &lt;&lt; std::setfill('0') &lt;&lt; (chunkNumber + 1);</a>
+<a name="119"><span class="lineNum">     119 </span>                :            :         return oss.str();</a>
+<a name="120"><span class="lineNum">     120 </span>                :            :     }</a>
+<a name="121"><span class="lineNum">     121 </span>                :            : };</a>
+<a name="122"><span class="lineNum">     122 </span>                :            : </a>
+<a name="123"><span class="lineNum">     123 </span>                :            : </a>
+<a name="124"><span class="lineNum">     124 </span>                :            : }</a>
+<a name="125"><span class="lineNum">     125 </span>                :            : </a>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.14</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

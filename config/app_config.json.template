@@ -1,0 +1,75 @@
+{
+  "version": "v1.1.2",
+  "dataStorage":{
+    "rollingDeleteThreshold": 10,
+    "rollInterval": 10,
+    "bagInterval": 10,
+    "storagePaths": {
+      "bagPath": "${AER_DATA_ROOT:-/data/aer}/bag",
+      "encPath": "${AER_DATA_ROOT:-/data/aer}/enc",
+      "MaskedPath": "${AER_DATA_ROOT:-/data/aer}/masked"
+    },
+    "capacityMb": 102400,
+    "requiredSpaceMb": 256,
+    "compressionFormat": "lz4"
+  },
+  "dataProto":{
+    "vin": "${AER_VIN:-}",
+    "software_version": "rc3.0",
+    "hardware_version": "rc3.0",
+    "device": "${AER_DEVICE:-device1}",
+    "device_id": "${AER_DEVICE_ID:-}",
+    "mqtt": {
+      "broker": "${AER_MQTT_BROKER:-}",
+      "broker_ssl": "${AER_MQTT_BROKER_SSL:-}",
+      "username": "${AER_MQTT_USERNAME:-}",
+      "password": "${AER_MQTT_PASSWORD:-}",
+      "upTopic": "${AER_MQTT_UP_TOPIC:-}",
+      "downTopic": "${AER_MQTT_DOWN_TOPIC:-}"
+    }
+  },
+  "dataUpload": {
+    "retryCount":3,
+    "retryIntervalSec": 10,
+    "uploadFileIntervalMs": 100,
+    "uploadFileSliceIntervalMs": 100,
+    "uploadFileSliceSizeMb": 50,
+    "clientCertPath": "${AER_PKI_PATH:-/data/aer/pki}/client_cc.pem",
+    "clientKeyPath": "${AER_PKI_PATH:-/data/aer/pki}/client_ck.pem",
+    "caCertPath": "${AER_PKI_PATH:-/data/aer/pki}/server_ca.pem",
+    "publicKeyPath": "${AER_PKI_PATH:-/data/aer/pki}/public_key.pem",
+    "gateway": "${AER_GATEWAY:-}",
+    "fileRecordPath": "${AER_DATA_ROOT:-/data/aer}/bag/upload_record.json",
+    "filenameRegex": ".*(\\.(db3|lz4|tar\\.gz)$)",
+    "uploadPaths": {
+      "bagPath": "${AER_DATA_ROOT:-/data/aer}/bag",
+      "encPath": "${AER_DATA_ROOT:-/data/aer}/enc",
+      "MaskedPath": "${AER_DATA_ROOT:-/data/aer}/masked"
+    },
+    "aws": {
+      "enabled": true,
+      "accessKeyId": "${AWS_ACCESS_KEY_ID:-}",
+      "secretAccessKey": "${AWS_SECRET_ACCESS_KEY:-}",
+      "region": "${AWS_DEFAULT_REGION:-US}",
+      "bucketName": "${AER_S3_BUCKET:-caic-dataset}",
+      "endpointUrl": "${AER_S3_ENDPOINT:-}"
+    }
+  },
+  "log":{
+    "LOG_level":"${AER_LOG_LEVEL:-info}",
+    "LOG_pattern":"%Y%m%d-%H%M%S",
+    "LOG_path":"${AER_LOG_DIR:-/tmp/dcp/log/}",
+    "LOG_basename":"dcp"
+  },
+  "debug":{
+    "closeMqttSsl":false,
+    "closeDataReporter":false,
+    "closeDataStorage":false,
+    "closeDataEnc":true,
+    "closeDataUpload":false,
+    "deleteFileAfterDataUpload":true,
+    "closeLogUpload":true,
+    "cloudtimeOutMs":1000
+  }
+
+}

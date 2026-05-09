@@ -17,9 +17,9 @@
       "desc":"otherLog",
       "apps":[
         {
-          "appId":"dcp",
+          "appId":"aer",
           "logRootPath":"/tmp",
-          "baseName":"dcp"
+          "baseName":"aer"
         },
         {
           "appId":"em",

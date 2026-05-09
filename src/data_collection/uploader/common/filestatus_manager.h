@@ -7,8 +7,7 @@
 
 #include "common/data.h"
 
-namespace dcp::uploader
-{
+namespace aurora::collector {
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
@@ -31,14 +30,14 @@ public:
 class FileStatusManager {
 public:
     explicit FileStatusManager(const std::string& json_path);
-    bool AddFileRecord(const std::string& file_path, const common::FileUploadRecord& record);
+    bool AddFileRecord(const std::string& file_path, const FileUploadRecord& record);
     bool DeleteFileRecord(const std::string& file_path);
     bool UpdateFileStartChunk(const std::string& file_path, int start_chunk);
-    std::optional<common::FileUploadRecord> GetFileRecord(const std::string& file_path);
+    std::optional<FileUploadRecord> GetFileRecord(const std::string& file_path);
 
 private:
     bool SaveToFile();
-    json ConvertFileRecordToJson(const common::FileUploadRecord& record);
+    json ConvertFileRecordToJson(const FileUploadRecord& record);
     void LoadWithRecovery();
     void CreateNewFile();
     void WriteToFile(const std::string& path, const json& j);

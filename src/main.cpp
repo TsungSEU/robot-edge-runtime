@@ -1,130 +1,68 @@
-// main.cpp - Main entry point for AD Data Closed Loop System
-#include "data_collection_planner.h"
+//
+// Created by Tsung Xu on 2026/4/2.
+// Refactored on 2026/4/24 — main.cpp 瘦身为 ~50 行入口。
+// Copyright (c) 2026 TsungX. All rights reserved.
+//
 
-#include "common/log/logger.h"
-#include "auth_manager/auth_manager.h"
-#include <iostream>
-#include <string>
-#include <termios.h>
-#include <unistd.h>
-#include <cstdio>
+#include "application_runner.h"
+#include "data_collection/common/runtime_config.h"
 
-using namespace dcp;
+#include <csignal>
+#include <cstring>
+#include <execinfo.h>
 
-// 安全获取密码输入
-std::string getPasswordInput(const std::string& prompt) {
-    std::cout << prompt;
+using namespace aurora;
 
-    std::string password;
-    char ch;
+// ===== Signal handling =====
+static ApplicationRunner* g_runner = nullptr;
 
-    struct termios old_termios;
-    tcgetattr(STDIN_FILENO, &old_termios);
-
-    struct termios new_termios = old_termios;
-    new_termios.c_lflag &= ~ECHO;
-
-    tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
-
-    while ((ch = getchar()) != '\n') {
-        if (ch == 127 || ch == 8) {
-            if (!password.empty()) {
-                password.pop_back();
-                std::cout << "\b \b";
-                std::cout.flush();
-            }
-        } else {
-            password += ch;
-            // std::cout << "*";
-            std::cout.flush();
-        }
+static void signalHandler(int signum) {
+    if (signum == SIGSEGV || signum == SIGABRT) {
+        void* buffer[32];
+        int nframes = backtrace(buffer, 32);
+        std::cerr << "\n[FATAL] Signal " << signum << " (" << strsignal(signum) << ")" << std::endl;
+        backtrace_symbols_fd(buffer, nframes, STDERR_FILENO);
+        _exit(signum);
     }
+    // SIGTERM/SIGINT: graceful shutdown
+    if (g_runner) {
+        g_runner->requestShutdown();
+    }
+}
 
-    tcsetattr(STDIN_FILENO, TCSANOW, &old_termios);
-
-    std::cout << std::endl;
-    return password;
+static void installSignalHandlers() {
+    struct sigaction sa;
+    std::memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = signalHandler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SIGINT, &sa, nullptr);
+    sigaction(SIGTERM, &sa, nullptr);
+    sigaction(SIGSEGV, &sa, nullptr);
+    sigaction(SIGABRT, &sa, nullptr);
 }
 
 int main(int argc, char** argv) {
-    try {
-        AuthManager& auth = AuthManager::getInstance();
+    // 解析命令行配置
+    auto config = config::RuntimeConfig::fromArgs(argc, argv);
+    if (config.model_path.empty() && argc > 1) {
+        // --help was printed by fromArgs
+        auto help_it = std::find(argv, argv + argc, std::string("--help"));
+        if (help_it != argv + argc) return 0;
+    }
 
-        std::cout << "EdgeInsight DCP Plus Service - Authorization Required" << std::endl;
-        std::cout << "Enter username: ";
-        std::string username;
-        std::getline(std::cin, username);
-        std::string password = getPasswordInput("Enter password: ");
+    installSignalHandlers();
 
-        std::string token = auth.login(username, password);
+    ApplicationRunner runner(config);
+    g_runner = &runner;
 
-        // 验证授权令牌
-        if (!auth.validateToken(token)) {
-            std::cout << "Invalid username or password. Access denied." << std::endl;
-            return -1;
-        }
-
-        // 检查用户权限
-        if (!auth.hasPermission(token, "data_collection")) {
-            std::cout << "User does not have permission for data collection. Access denied." << std::endl;
-            return -1;
-        }
-
-        std::cout << "Authorization successful!" << std::endl;
-
-        // Initialize logging
-        common::Logger::instance()->Init(dcp::common::LOG_TO_CONSOLE | dcp::common::LOG_TO_FILE, LOG_LEVEL_INFO,
-                               "/tmp/ad_data_closed_loop.log", "/tmp/ad_data_closed_loop.csv");
-
-        AD_INFO(Main, "Starting Data Collection as Planning (DCP) System");
-#if 1
-        rclcpp::init(argc, argv);
-        auto ct = std::make_shared<DataCollectionPlanner>();
-
-        // Initialize the system
-        if (!ct->initialize()) {
-            AD_ERROR(Main, "Failed to initialize Data Collection as Planning");
-            dcp::common::Logger::instance()->Uninit();
-            auth.logout(token); // 注销会话
-            return -1;
-        }
-
-        // Set mission area based on PRD: configurable 2D grid (default 20x20)
-        MissionArea mission(Point(50.0, 50.0), 10.0);
-        ct->setMissionArea(mission);
-
-        // Plan data collection mission
-        auto mission_path = ct->planDataCollectionMission();
-
-        if (mission_path.empty()) {
-            AD_WARN(Main, "No valid path planned for data collection");
-            dcp::common::Logger::instance()->Uninit();
-            auth.logout(token); // 注销会话
-            return -1;
-        }
-
-        // Execute data collection
-        ct->executeDataCollection(mission_path);
-
-        // Report coverage metrics
-        ct->reportCoverageMetrics();
-
-        // Upload collected data
-        ct->uploadCollectedData();
-
-        rclcpp::spin(ct);
-        rclcpp::shutdown();
-
-        AD_INFO(Main, "Data Collection Mission Completed");
-        auth.logout(token);
-        return 0;
-
-    } catch (const std::exception& e) {
-        AD_ERROR(Main, "Exception occurred: " + std::string(e.what()));
-        // dcp::common::Logger::instance()->Uninit();
+    if (!runner.initialize()) {
         return -1;
     }
 
-#endif
+    int result = runner.run();
+    runner.shutdown();
+    g_runner = nullptr;
 
+    return result;
 }

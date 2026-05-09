@@ -1,360 +1,494 @@
-// data_collection_planner.cpp
+//
+// Created by Tsung Xu on 2026/4/2.
+// Refactored on 2026/4/24 — decomposed God Class into thin coordinator.
+// Copyright (c) 2026 TsungX. All rights reserved.
+//
+
 #include "data_collection_planner.h"
+
 #include <iostream>
 #include <fstream>
 #include <random>
-#include <yaml-cpp/yaml.h>
-#include "data_collection/common/log/logger.h"
+#include <chrono>
+#include <cmath>
+#include <limits>
+#include <ctime>
 
-namespace dcp {
-DataCollectionPlanner::DataCollectionPlanner(const std::string& model_file, const std::string& config_file) : Node("DataCollectionPlanner") {
-    AD_INFO(DataCollectionPlanner, "Creating DataCollectionPlanner with model_file: %s, config_file: %s", 
-            model_file.c_str(), config_file.c_str());
-    // Create specific planner instance but store as base class pointer
-    rl_planner_ = std::make_unique<planner::RLPlanner>(model_file, config_file);
-    data_storage_ = std::make_unique<recorder::DataStorage>();
-    // data_uploader_ = std::make_unique<uploader::DataUploader>();
-    trigger_ = std::make_unique<trigger::TriggerManager>();
-    // strategy_parser_ = std::make_unique<trigger::StrategyParser>();
-    mission_area_ = MissionArea(Point(50.0, 50.0), 10.0); // Default mission area - based on PRD 20x20 grid
-    AD_INFO(DataCollectionPlanner, "DataCollectionPlanner constructor completed");
+#include "common/log/logger.h"
+#include "common/ros2/qos_profiles.h"
+
+namespace aurora {
+
+static std::string kStrategyConfigPath = "/config/robot_data_collection.json";
+
+// ============================================================================
+// Construction / Destruction
+// ============================================================================
+
+DataCollectionPlanner::DataCollectionPlanner(const config::RuntimeConfig& config)
+    : rclcpp::Node("aer")
+    , config_(config) {
+
+    // 创建规划器（通过工厂，消除 if-else 模式切换）
+    planner::PlannerCreateConfig pcfg;
+    pcfg.mode = (config_.action_type == "velocity_cmd")
+              ? planner::PlannerMode::HUMANOID   // 默认
+              : planner::PlannerMode::HUMANOID;   // TODO: 从 config 获取实际 mode
+    pcfg.model_path = config.model_path;
+    pcfg.config_path = config.config_path;
+
+    planner_ = planner::PlannerFactory::getInstance().create(pcfg);
+
+    // 创建位置跟踪器（替代内联的里程计逻辑）
+    position_tracker_ = std::make_unique<collector::RobotPositionTracker>(this);
+
+    // 创建反馈系统（使用配置的上传阈值）
+    feedback_ = std::make_unique<collector::CollectionFeedback>(config_.collection.upload_threshold);
+    feedback_->setReplanCallback([this](const collector::EnvironmentChange& change) {
+        onReplanTriggered(change);
+    });
+    feedback_->setUploadCallback([](const std::vector<collector::ExperienceMetadata>& batch) {
+        AD_INFO(DataCollectionPlanner, "Uploading %zu experiences to cloud S3", batch.size());
+        // TODO: metadata serialization and upload
+    });
+
+    // 创建上传器
+    uploader_ = std::make_unique<collector::AwsDataUploader>();
+
+    // 创建策略解析器（仍由 executor 管理）
+    AD_INFO(DataCollectionPlanner, "DataCollectionPlanner constructed (mode: %s)",
+            planner_ ? planner::plannerModeToString(pcfg.mode).c_str() : "null");
 }
 
+DataCollectionPlanner::~DataCollectionPlanner() {
+    visualizer_.reset();
+    config_watcher_.reset();
+}
+
+// ============================================================================
+// Initialization
+// ============================================================================
+
 bool DataCollectionPlanner::initialize() {
-    AD_INFO(DataCollectionPlanner, "Initializing Data Collection as Planning");
+    strategy_config_path_ = std::string(collector::getInstallRootPath()) + kStrategyConfigPath;
 
-    // Load strategy configuration
-    trigger::StrategyConfig config_;
-    if (!strategy_parser_->LoadConfigFromFile("/home/xucong/caicAD/01dataengine/Aurora/ad_edgeinsight/config/default_strategy_config.json", config_)) {
-        AD_ERROR(DataCollectionPlanner, "Failed to load strategy configuration, using defaults");
-    }
-
-    const auto& data_upload_config = common::AppConfig::getInstance().GetConfig().dataUpload;
-    
-    // Cast to concrete type for initialization
-    // auto* rl_planner = dynamic_cast<planner::RLPlanner*>(baseline_planner_.get());
-    if (!rl_planner_ || !rl_planner_->initialize()) {
-        AD_ERROR(DataCollectionPlanner, "Failed to initialize navigation planner");
+    // 1. 初始化规划器
+    if (!planner_ || !planner_->initialize()) {
+        AD_ERROR(DataCollectionPlanner, "Failed to initialize planner");
         return false;
     }
-    
-    // // Initialize data collection components
-    // if (!data_storage_->Init(node_, s_config_)) {
-    //     AD_ERROR(DataCollectionPlanner, "Failed to initialize data storage");
-    //     return false;
-    // }
-    
-    if (!data_uploader_->Init(data_upload_config)) {
+
+    // 2. 初始化数据采集执行器
+    executor_ = std::make_unique<collector::DataCollectionExecutor>(shared_from_this());
+    executor_->setDataCallback([this](const std::vector<DataPoint>& data) {
+        if (data_manager_) {
+            data_manager_->addDataPoints(data);
+        }
+    });
+    if (!executor_->initialize(strategy_config_path_)) {
+        AD_ERROR(DataCollectionPlanner, "Failed to initialize data collection executor");
+        return false;
+    }
+
+    // 3. 连接位置跟踪器回调到 TriggerManager
+    position_tracker_->setPositionCallback(
+        [this](const Point& pos) {
+            if (executor_ && executor_->getTriggerManager()) {
+                executor_->getTriggerManager()->updateRobotPosition(pos);
+            }
+        });
+
+    // 4. 初始化上传器
+    const auto& upload_config = collector::AppConfig::getInstance().GetConfig().dataUpload;
+    if (!uploader_->Init(upload_config)) {
         AD_ERROR(DataCollectionPlanner, "Failed to initialize data uploader");
         return false;
     }
-    
-    if (!trigger_->initialize()) {
-        AD_ERROR(DataCollectionPlanner, "Failed to initialize trigger manager");
-        return false;
-    }
-    
-    AD_INFO(DataCollectionPlanner, "Data Collection as Planning initialized successfully");
+
+    // 5. 初始化可视化（使用配置的轨迹发布间隔）
+    visualizer_ = std::make_unique<planner::PathVisualizer>(shared_from_this(), config_.trail_publish_interval_sec);
+    visualizer_->setFrameId(config_.visualization_frame);
+
+    // 6. 初始化机器人控制器（替代 3 个 execute 方法）
+    controller_ = std::make_unique<collector::RobotController>(
+        *position_tracker_, this, config_.velocity_control);
+
+    // 7. 配置文件监控
+    setupConfigWatcher();
+
+    // 8. TriggerRecording 服务客户端
+    trigger_client_ = this->create_client<aurora_edge_runtime::srv::TriggerRecording>(
+        "/robot/trigger");
+
+    AD_INFO(DataCollectionPlanner, "Data Collection Planner initialized successfully");
     return true;
 }
 
+// ============================================================================
+// Mission Area
+// ============================================================================
+
 void DataCollectionPlanner::setMissionArea(const MissionArea& area) {
-    AD_INFO(DataCollectionPlanner, "Setting mission area");
-    
     mission_area_ = area;
-    
-    // Cast to concrete type to access specific methods
-    // auto* rl_planner = dynamic_cast<planner::RLPlanner*>(baseline_planner_.get());
-    if (rl_planner_) {
-        rl_planner_->setGoalPosition(area.center);
+
+    // 从配置读取网格分辨率
+    double resolution = config_.collection.grid_resolution;
+    int map_size = static_cast<int>(area.radius * 2.0 / resolution);
+    data_manager_ = std::make_unique<collector::DataManager>(map_size, map_size, resolution);
+
+    if (planner_) {
+        planner_->setGoalPosition(area.center);
     }
 
-    AD_INFO(DataCollectionPlanner, "Mission area set to center: (%s, %s), radius: %s", 
-            std::to_string(area.center.x).c_str(), std::to_string(area.center.y).c_str(), 
-            std::to_string(area.radius).c_str());
+    AD_INFO(DataCollectionPlanner, "Mission area set: center=(%.2f, %.2f), radius=%.1f, grid_resolution=%.2f, map_size=%dx%d",
+            area.center.x, area.center.y, area.radius, resolution, map_size, map_size);
 }
 
-// 使用导航规划器(rl_planner_)规划从当前位置到目标位置的路径
-// 返回一个路径点集合(optimized_waypoints)
-std::vector<Point> DataCollectionPlanner::planDataCollectionMission() {
+// ============================================================================
+// Planning — 委托给 IPlanner，无 if-else
+// ============================================================================
+
+std::vector<Point> DataCollectionPlanner::planMission() {
     AD_INFO(DataCollectionPlanner, "Planning data collection mission");
-    
-    // Cast to concrete type to access specific methods
-    // auto* rl_planner = dynamic_cast<planner::RLPlanner*>(baseline_planner_.get());
-    if (!rl_planner_) {
-        AD_ERROR(DataCollectionPlanner, "Failed to cast planner to concrete type");
+
+    if (!planner_) {
+        AD_ERROR(DataCollectionPlanner, "No planner available");
         return {};
     }
-    
-    // Plan global path using navigation planner
-    // Plan using the PlannerBase interface
-    // Use current and goal positions, and get costmap from the concrete planner
-    planner::CostMap* costmap_ptr = nullptr; // We'll pass nullptr since costmap is managed internally by the planner
-    planner::PlannerInput input(rl_planner_->getCurrentPosition(), rl_planner_->getGoalPosition(), costmap_ptr);
-    auto trajectory = rl_planner_->plan(input);
-    std::vector<Point> collection_path = trajectory.states;
-    
-    AD_WARN(DataCollectionPlanner, "Received collection path with %s points from navigation planner",
-             std::to_string(collection_path.size()).c_str());
-    
-    // Apply data collection strategy to optimize waypoints
-    std::vector<Point> optimized_waypoints;
-    
-    if (!collection_path.empty()) {
-        // Use the planner's sampling optimizer to find optimal waypoints
-        Point current_pos = rl_planner_->getCurrentPosition();
-        
-        // For each segment of the path, find optimal data collection points
-        for (size_t i = 0; i < collection_path.size(); ++i) {
-            // Check if we should collect data at this point based on strategy
-            trigger::Point collection_point(collection_path[i].x, collection_path[i].y);
-            if (trigger_ && trigger_->shouldTrigger(collection_point)) {   //TODO
-                Point optimal_point = rl_planner_->optimizeNextWaypoint();
-                optimized_waypoints.push_back(optimal_point);
-                
-                // Update current position for next optimization
-                rl_planner_->setCurrentPosition(optimal_point);
+
+    // 使用实际 odom 位置作为起点（非内部状态）
+    Point start = position_tracker_->getCurrentPosition();
+    Point goal = mission_area_.center;
+
+    // 当 robot 在目标附近时，偏移 goal 到任务区域边缘
+    double dist_to_goal = calculateDistance(start, goal);
+    if (dist_to_goal < mission_area_.radius * 0.5) {
+        goal.x = mission_area_.center.x + mission_area_.radius * 0.8;
+        goal.y = mission_area_.center.y + mission_area_.radius * 0.8;
+        AD_INFO(DataCollectionPlanner, "Goal offset to (%.1f, %.1f) for coverage",
+                goal.x, goal.y);
+    }
+
+    // 同步 humanoid 状态到实际位置
+    humanoid_state_.x = start.x;
+    humanoid_state_.y = start.y;
+
+    // 通过 IPlanner 规划（使用 HumanoidPlanner 的 planWithState）
+    auto* hp = dynamic_cast<planner::HumanoidPlanner*>(planner_.get());
+    std::vector<Point> result;
+    if (hp) {
+        auto trajectory = hp->planWithState(start, goal, humanoid_state_);
+        result.reserve(trajectory.path.size());
+        for (const auto& pt : trajectory.path) {
+            result.push_back(pt);
+        }
+    } else {
+        result = planner_->planMission(mission_area_);
+    }
+
+    if (!result.empty()) {
+        if (visualizer_ && config_.visualization_enabled) {
+            visualizer_->publishPlanningPath(result);
+            visualizer_->publishTrajectory(result);
+            if (result.size() >= 2) {
+                visualizer_->publishStartGoalMarkers(result.front(), result.back());
             }
         }
-        
-        // Restore original position
-        rl_planner_->setCurrentPosition(current_pos);
     }
-    
-    AD_INFO(DataCollectionPlanner, "Data collection mission planned with %s waypoints", std::to_string(optimized_waypoints.size()).c_str());
-    
-    return optimized_waypoints;
+
+    AD_INFO(DataCollectionPlanner, "Mission planned with %zu waypoints", result.size());
+    return result;
 }
 
-// 遍历路径上的每个航路点, 在每个航路点执行数据采集，创建DataPoint对象
-// 将采集的数据点添加到collected_data_集合中
-void DataCollectionPlanner::executeDataCollection(const std::vector<Point>& path) {
-    AD_INFO(DataCollectionPlanner, "Executing data collection along path with %s waypoints", std::to_string(path.size()).c_str());
-    
-    if (path.empty()) {
-        AD_WARN(DataCollectionPlanner, "Empty path provided for data collection");
+// ============================================================================
+// Execution — 统一委托给 RobotController
+// ============================================================================
+
+void DataCollectionPlanner::executeMission(const std::vector<Point>& path) {
+    if (path.empty() || !executor_ || !data_manager_ || !feedback_) {
+        AD_ERROR(DataCollectionPlanner, "Cannot execute: path=%zu, executor=%d, data=%d, feedback=%d",
+                path.size(), !!executor_, !!data_manager_, !!feedback_);
         return;
     }
-    
-    // Cast to concrete type to access specific methods
-    // auto* rl_planner = dynamic_cast<planner::RLPlanner*>(baseline_planner_.get());
-    if (!rl_planner_) {
-        AD_ERROR(DataCollectionPlanner, "Failed to cast planner to concrete type");
-        return;
+
+    AD_INFO(DataCollectionPlanner, "Executing mission with %zu waypoints", path.size());
+
+    // 共享的采集状态（跨 waypoint 追踪）
+    Point last_collected_pos(9999.0, 9999.0);
+    auto last_collect_time = std::chrono::steady_clock::now() - std::chrono::seconds(10);
+
+    // 采集判断回调（被 RobotController 在每个 waypoint 调用）
+    auto checker = [this, &last_collected_pos, &last_collect_time](
+        const Point& wp, size_t idx) -> std::optional<DataPoint> {
+        auto result = tryCollect(wp, idx, last_collected_pos, last_collect_time);
+        if (result.has_value()) {
+            last_collected_pos = wp;
+            last_collect_time = std::chrono::steady_clock::now();
+        }
+        return result;
+    };
+
+    // waypoint 到达回调（可视化更新）
+    std::vector<Point> collected_positions;
+    auto on_reached = [this, &collected_positions](const Point& wp, size_t idx) {
+        collected_positions.push_back(wp);
+        if (visualizer_ && config_.visualization_enabled) {
+            visualizer_->updateRobotTrail(wp);
+            visualizer_->publishCollectionPoints(collected_positions);
+        }
+    };
+
+    // 清除上一轮可视化
+    if (visualizer_) {
+        visualizer_->clearTrailAndCollectionPoints();
     }
-    
-    // Execute data collection at each waypoint using real data collection modules
-    std::vector<DataPoint> new_data;
-    
-    for (size_t i = 0; i < path.size(); ++i) {
-        const Point& waypoint = path[i];
-        
-        // Update planner's current position
-        rl_planner_->setCurrentPosition(waypoint);
-        
-        // Trigger data collection based on strategy
-        trigger::Point collection_point(waypoint.x, waypoint.y);
-        if (trigger_ && trigger_->shouldTrigger(collection_point)) {
-            AD_INFO(DataCollectionPlanner, "Triggering data collection at waypoint %s", std::to_string(i).c_str());
 
-            // Create trigger context for data collection
-            auto trigger_context = std::make_shared<dcp::trigger::TriggerContext>();
-            trigger_context->pos.x = waypoint.x;
-            trigger_context->pos.y = waypoint.y;
-            trigger_context->triggerTimestamp = static_cast<uint64_t>(std::time(nullptr));
+    // 根据配置选择执行模式
+    collector::RobotController::ExecutionResult exec_result;
+    if (config_.action_type == "velocity_cmd") {
+        exec_result = controller_->executeVelocityCommands(path, checker, on_reached);
+    } else {
+        exec_result = controller_->executePathTracking(
+            path, checker, on_reached, config_.collection.waypoint_wait_timeout);
+    }
 
-            //TODO Trigger data collection using data storage module
-            data_storage_->AddTrigger(*trigger_context);
+    // 更新规划器位置
+    if (planner_ && !path.empty()) {
+        planner_->setCurrentPosition(path.back());
+    }
 
-            // Collect real sensor data using data collection modules
-            std::string sensor_data = "collected_data_at_" + std::to_string(waypoint.x) + "_" + std::to_string(waypoint.y);
+    // 更新 CostMap 和反馈
+    if (!exec_result.collected_data.empty()) {
+        planner::CostMap* costmap = planner_ ? planner_->getCostMap() : nullptr;
+        if (costmap && data_manager_->hasDataPoints()) {
+            data_manager_->updateCostmapWithStatistics(*costmap);
+            data_manager_->updateCoverageMetrics(*costmap);
+            updateReachabilityForPath(path, exec_result.collected_data);
+        }
 
-            // Create data point with real sensor data
-            DataPoint data_point(waypoint, sensor_data, static_cast<double>(std::time(nullptr)));
-            new_data.push_back(data_point);
+        auto collection_result = createCollectionResult(
+            path, exec_result.collected_data, exec_result.execution_time);
+        feedback_->submitCollectionResult(collection_result);
+    }
 
-            //TODO Store data locally
-            // data_storage_->storeData(data_point);
-
-            // Compute reward for this action
-            StateInfo current_state;
-            current_state.visited_new_sparse = trigger_->isInSparseArea(trigger::Point(waypoint.x, waypoint.y));
-            current_state.trigger_success = !sensor_data.empty();
-            current_state.collision = false; // Would be determined by real sensor data
-            current_state.reached_goal = false; // Check if waypoint is near goal
-            current_state.on_efficient_path = true; // Determine based on path efficiency
-            current_state.visited_before = false; // Track if location was previously visited
-            current_state.distance_to_sparse = trigger_->getDistanceToNearestSparseArea(trigger::Point(waypoint.x, waypoint.y));
-            current_state.distance_to_target = dcp::planner::PlannerUtils::euclideanDistance(waypoint, rl_planner_->getGoalPosition());
-            current_state.path_efficiency = 1.0; // Calculate based on actual path taken
-            current_state.steps_taken = i + 1; // Track number of steps taken
-            current_state.total_visited_count = 1; // Track total visits to this location
-
-            // In a real implementation, we would track previous state to compute reward
-            StateInfo prev_state;
-            double reward = rl_planner_->computeStateReward(prev_state, current_state);
-            AD_INFO(DataCollectionPlanner, "Waypoint %s reward: %s", std::to_string(i).c_str(), std::to_string(reward).c_str());
+    // 发布最终可视化
+    if (visualizer_ && config_.visualization_enabled) {
+        visualizer_->publishCollectedPath(path);
+        if (!collected_positions.empty()) {
+            visualizer_->publishCollectionPoints(collected_positions);
         }
     }
-    
-    // Update with new data
-    updateWithNewData(new_data);
-    
-    AD_INFO(DataCollectionPlanner, "Data collection completed with %s data points collected", std::to_string(new_data.size()).c_str());
+
+    AD_INFO(DataCollectionPlanner, "Mission executed: %zu/%zu waypoints, %zu points collected",
+            exec_result.waypoints_reached, path.size(), exec_result.collected_data.size());
 }
 
-// 将数据点添加到导航规划器的内部数据点集合中, 更新成本图和覆盖率指标
-void DataCollectionPlanner::updateWithNewData(const std::vector<DataPoint>& new_data) {
-    AD_INFO(DataCollectionPlanner, "Updating planner with %s new data points", std::to_string(new_data.size()).c_str());
-    
-    if (new_data.empty()) {
-        AD_WARN(DataCollectionPlanner, "No new data points to update");
-        return;
-    }
-    
-    // Cast to concrete type to access specific methods
-    // auto* rl_planner = dynamic_cast<planner::RLPlanner*>(baseline_planner_.get());
-    if (!rl_planner_) {
-        AD_ERROR(DataCollectionPlanner, "Failed to cast planner to concrete type");
-        return;
-    }
-    
-    // Add new data points to planner and local storage
-    for (const auto& data_point : new_data) {
-        // Use PlannerInput to add waypoint
-        // planner::PlannerInput input(data_point.position, data_point.position, nullptr);
-        // 数据采集点集不是添加到规划路径上，而是通过在已规划路径的每个点执行数据采集来构建的
-        rl_planner_->addDataPoint(data_point.position);
-        data_collection_points_.push_back(data_point);
-    }
-    
-    // Update costmap with new statistics
-    rl_planner_->updateCostmapWithStatistics();
-    
-    // Update coverage metrics based on actual visited cells
-    std::vector<std::pair<int, int>> visited_cells;
-    double resolution = 1.0; // Default resolution
-
-    for (const auto& data_point : new_data) {
-        auto grid_coords = dcp::planner::PlannerUtils::worldToGrid(data_point.position, resolution);
-        visited_cells.push_back(grid_coords);
-    }
-    rl_planner_->updateCoverageMetrics(visited_cells);
-    
-    AD_INFO(DataCollectionPlanner, "Planner updated with new data");
-}
+// ============================================================================
+// Upload & Metrics
+// ============================================================================
 
 void DataCollectionPlanner::uploadCollectedData() {
-    AD_INFO(DataCollectionPlanner, "Uploading collected data to cloud");
-    
-    // Upload data using data uploader
-    if (data_uploader_->Start()) {
+    if (uploader_->Start()) {
         AD_INFO(DataCollectionPlanner, "Data uploaded successfully");
-        // Clear local data after successful upload
-        data_collection_points_.clear();
+        if (data_manager_) {
+            data_manager_->clear();
+        }
     } else {
-        AD_INFO(DataCollectionPlanner, "Failed to upload data");
+        AD_ERROR(DataCollectionPlanner, "Failed to upload data");
     }
 }
 
 void DataCollectionPlanner::reportCoverageMetrics() {
-    AD_INFO(DataCollectionPlanner, "Reporting coverage metrics");
-    
-    // Cast to concrete type to access specific methods
-    // auto* rl_planner = dynamic_cast<planner::RLPlanner*>(baseline_planner_.get());
-    if (!rl_planner_) {
-        AD_ERROR(DataCollectionPlanner, "Failed to cast planner to concrete type");
-        return;
+    planner::CostMap* costmap = planner_ ? planner_->getCostMap() : nullptr;
+    if (costmap && data_manager_) {
+        data_manager_->updateCoverageMetrics(*costmap);
+        const auto& coverage = data_manager_->getCoverageMetrics();
+        AD_INFO(DataCollectionPlanner, "Coverage: %.2f%% (%d/%d cells)",
+                coverage.getCoverageRatio() * 100.0,
+                coverage.getVisitedCells(), coverage.getTotalCells());
     }
-    
-    const dcp::planner::CoverageMetric& coverage = rl_planner_->getCoverageMetric();
-    
-    AD_INFO(DataCollectionPlanner, "Total cells: %s", std::to_string(coverage.getTotalCells()).c_str());
-    AD_INFO(DataCollectionPlanner, "Visited cells: %s", std::to_string(coverage.getVisitedCells()).c_str());
-    AD_INFO(DataCollectionPlanner, "Coverage ratio: %s", std::to_string(coverage.getCoverageRatio()).c_str());
-    AD_INFO(DataCollectionPlanner, "Sparse coverage ratio: %s", std::to_string(coverage.getSparseCoverageRatio()).c_str());
 }
 
-// DataCollectionAnalyzer implementation
-DataCollectionAnalyzer::Heatmap DataCollectionAnalyzer::computeDensityMap(
-    const std::vector<DataPoint>& data_points, int grid_width, int grid_height, double resolution) {
-    
-    Heatmap heatmap(grid_width, grid_height, resolution);
-    
-    // Initialize density values
-    for (int y = 0; y < grid_height; y++) {
-        for (int x = 0; x < grid_width; x++) {
-            heatmap.density_values[y][x] = 0.0;
-        }
+DataCollectionPlanner::MissionStats DataCollectionPlanner::getStats() const {
+    MissionStats stats;
+    if (feedback_) {
+        auto reward_stats = feedback_->getRewardStats();
+        stats.average_reward = reward_stats.average_reward;
+        stats.min_reward = reward_stats.min_reward;
+        stats.max_reward = reward_stats.max_reward;
+        stats.count = reward_stats.count;
     }
-    
-    // Calculate density based on data points
-    for (const auto& point : data_points) {
-        int cell_x = static_cast<int>(point.position.x / resolution);
-        int cell_y = static_cast<int>(point.position.y / resolution);
-        
-        if (cell_x >= 0 && cell_x < grid_width && cell_y >= 0 && cell_y < grid_height) {
-            heatmap.density_values[cell_y][cell_x] += 1.0;
-        }
-    }
-    
-    // Normalize densities
-    double max_density = 0.0;
-    for (int y = 0; y < grid_height; y++) {
-        for (int x = 0; x < grid_width; x++) {
-            max_density = std::max(max_density, heatmap.density_values[y][x]);
-        }
-    }
-    
-    if (max_density > 0.0) {
-        for (int y = 0; y < grid_height; y++) {
-            for (int x = 0; x < grid_width; x++) {
-                heatmap.density_values[y][x] /= max_density;
-            }
-        }
-    }
-    
-    return heatmap;
+    return stats;
 }
 
-std::vector<DataCollectionAnalyzer::Region> DataCollectionAnalyzer::detectSparseRegions(
-    const Heatmap& heatmap, double sparse_threshold) {
-    
-    std::vector<Region> sparse_regions;
-    
-    for (int y = 0; y < heatmap.height; y++) {
-        for (int x = 0; x < heatmap.width; x++) {
-            if (heatmap.density_values[y][x] < sparse_threshold) {
-                Point center(x * heatmap.resolution, y * heatmap.resolution);
-                Region region(center, heatmap.resolution, true);
-                sparse_regions.push_back(region);
-            }
+// ============================================================================
+// Visualization
+// ============================================================================
+
+void DataCollectionPlanner::setVisualizationEnabled(bool enabled) {
+    config_.visualization_enabled = enabled;
+    if (visualizer_ && !enabled) {
+        visualizer_->clearMarkers();
+    }
+}
+
+void DataCollectionPlanner::setVisualizationFrame(const std::string& frame_id) {
+    config_.visualization_frame = frame_id;
+    if (visualizer_) {
+        visualizer_->setFrameId(frame_id);
+    }
+}
+
+// ============================================================================
+// Internal helpers
+// ============================================================================
+
+std::optional<DataPoint> DataCollectionPlanner::tryCollect(
+    const Point& waypoint, size_t index,
+    const Point& last_collected_pos,
+    const std::chrono::steady_clock::time_point& last_time) {
+
+    double distance = calculateDistance(waypoint, last_collected_pos);
+    auto now = std::chrono::steady_clock::now();
+    double time_since = std::chrono::duration<double>(now - last_time).count();
+
+    if (distance < config_.collection.min_step_distance ||
+        time_since < config_.collection.min_collection_interval) {
+        return std::nullopt;
+    }
+
+    if (executor_->isInCooldown() || !executor_->shouldCollectAt(waypoint)) {
+        return std::nullopt;
+    }
+
+    // 使用实际机器人位置
+    Point actual_pos = position_tracker_->getCurrentPosition();
+
+    // 通过 ROS2 服务触发录制
+    if (!trigger_client_ || !trigger_client_->service_is_ready()) {
+        AD_DEBUG(DataCollectionPlanner, "Trigger service not available at waypoint %zu", index);
+        return std::nullopt;
+    }
+
+    auto request = std::make_shared<aurora_edge_runtime::srv::TriggerRecording::Request>();
+    request->business_type = "humanoid_gait";
+    request->trigger_id = "waypoint_" + std::to_string(index);
+    request->trigger_timestamp = common::GetCurrentTimestamp();
+    request->trigger_desc = "";
+    request->pos.x = actual_pos.x;
+    request->pos.y = actual_pos.y;
+    request->pos.z = 0.0;
+
+    auto future = trigger_client_->async_send_request(request);
+    if (future.wait_for(std::chrono::seconds(10)) != std::future_status::ready) {
+        AD_ERROR(DataCollectionPlanner, "Service call timeout at waypoint %zu", index);
+        return std::nullopt;
+    }
+
+    auto response = future.get();
+    if (!response->success) {
+        return std::nullopt;
+    }
+
+    std::string sensor_data = "gait_data_" + std::to_string(actual_pos.x) +
+                              "_" + std::to_string(actual_pos.y);
+    return DataPoint(actual_pos, sensor_data, static_cast<double>(std::time(nullptr)));
+}
+
+void DataCollectionPlanner::updateReachabilityForPath(
+    const std::vector<Point>& path,
+    const std::vector<DataPoint>& collected_data) {
+
+    planner::CostMap* costmap = planner_ ? planner_->getCostMap() : nullptr;
+    if (!costmap || path.empty()) return;
+
+    size_t collected_idx = 0;
+    for (size_t i = 0; i < path.size() && collected_idx < collected_data.size(); ++i) {
+        const Point& planned = path[i];
+        const Point& collected = collected_data[collected_idx].position;
+        double dist = calculateDistance(planned, collected);
+
+        if (dist <= config_.collection.position_tolerance) {
+            double stability = std::max(0.1, 1.0 - (dist / config_.collection.position_tolerance));
+            costmap->updateReachability(planned, collected, true, stability);
+            collected_idx++;
+        } else {
+            costmap->updateReachability(planned, planned, false, 0.1);
         }
     }
-    
-    return sparse_regions;
 }
 
-DataCollectionAnalyzer::PlannerWeights DataCollectionAnalyzer::adjustCostWeights(
-    const std::vector<Region>& sparse_zones, const PlannerWeights& current_weights) {
-    
-    PlannerWeights adjusted_weights = current_weights;
-    
-    // If we have many sparse zones, increase exploration bonus
-    if (sparse_zones.size() > 100) {
-        adjusted_weights.exploration_bonus = std::min(1.0, current_weights.exploration_bonus * 1.2);
+collector::CollectionResult DataCollectionPlanner::createCollectionResult(
+    const std::vector<Point>& path,
+    const std::vector<DataPoint>& collected_data,
+    double execution_time) {
+
+    collector::CollectionResult result;
+    result.planned_path = path;
+    result.planned_goal = mission_area_.center;
+    result.collected_data = collected_data;
+    result.attempted_points = path.size();
+    result.successful_points = collected_data.size();
+    result.execution_time = execution_time;
+    result.timestamp = common::GetCurrentTimestamp();
+
+    for (const auto& dp : collected_data) {
+        result.executed_path.push_back(dp.position);
     }
-    // If we have few sparse zones, decrease exploration bonus
-    else if (sparse_zones.size() < 50) {
-        adjusted_weights.exploration_bonus = std::max(0.1, current_weights.exploration_bonus * 0.8);
+
+    if (!collected_data.empty()) {
+        size_t non_empty = 0;
+        for (const auto& dp : collected_data) {
+            if (!dp.sensor_data.empty()) non_empty++;
+        }
+        result.data_quality_score = static_cast<double>(non_empty) / collected_data.size();
+
+        if (data_manager_) {
+            const auto& coverage = data_manager_->getCoverageMetrics();
+            result.novelty_score = coverage.getCoverageRatio();
+            result.data_value = result.novelty_score * 2.0;
+        }
     }
-    
-    // Adjust redundancy penalty based on coverage
-    double coverage_ratio = static_cast<double>(sparse_zones.size()) / 
-                           (sparse_zones.size() > 0 ? sparse_zones.size() : 1);
-    adjusted_weights.redundancy_penalty = 0.3 + coverage_ratio * 0.3;
-    
-    return adjusted_weights;
+
+    result.actual_cost = 0.0;
+    for (size_t i = 1; i < result.executed_path.size(); ++i) {
+        result.actual_cost += calculateDistance(result.executed_path[i], result.executed_path[i-1]);
+    }
+
+    return result;
 }
 
-} //namespace dcp
+void DataCollectionPlanner::onReplanTriggered(const collector::EnvironmentChange& change) {
+    AD_WARN(DataCollectionPlanner, "Replan triggered: type=%d, severity=%.2f",
+            static_cast<int>(change.type), change.severity);
+
+    if (change.type == collector::EnvironmentChange::NEW_OBSTACLE) {
+        planner::CostMap* costmap = planner_ ? planner_->getCostMap() : nullptr;
+        if (costmap) {
+            costmap->addObstacle(change.location, 0.5);
+        }
+    }
+}
+
+void DataCollectionPlanner::onConfigChanged(const std::string& file_path) {
+    AD_INFO(DataCollectionPlanner, "Config changed: %s", file_path.c_str());
+    if (executor_ && executor_->reloadConfig(file_path)) {
+        AD_INFO(DataCollectionPlanner, "Config reloaded successfully");
+    }
+}
+
+void DataCollectionPlanner::setupConfigWatcher() {
+    if (strategy_config_path_.empty()) return;
+
+    config_watcher_ = std::make_unique<collector::ConfigWatcher>(strategy_config_path_, 500);
+    config_watcher_->setChangeCallback([this](const std::string& fp) { onConfigChanged(fp); });
+    config_watcher_->start();
+}
+
+double DataCollectionPlanner::calculateDistance(const Point& p1, const Point& p2) {
+    double dx = p1.x - p2.x;
+    double dy = p1.y - p2.y;
+    return std::sqrt(dx * dx + dy * dy);
+}
+
+} // namespace aurora

@@ -14,24 +14,17 @@
 #include <string>
 #include <functional>
 
-#if 1
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/serialization.hpp"
 #include "rclcpp/serialized_message.hpp"
 #include "rosbag2_cpp/rosbag2_cpp/writer.hpp"
-#else
-#include "ad_rscl/ad_rscl.h"
-using TRawMessagePtr = std::shared_ptr<ReceivedMsg<senseAD::rscl::comm::RawMessage>>;
-#endif
 
-namespace dcp::channel
-{
+namespace aurora::collector {
 
 class Observer {
 public:
     virtual ~Observer() = default;
 
-    // virtual void OnMessageReceived(const std::string& topic, const TRawMessagePtr& subject) = 0;
     virtual void OnMessageReceived(const std::string& topic, const rclcpp::SerializedMessage& subject) = 0;
 };
 
@@ -50,13 +43,6 @@ public:
             observers_.erase(iter);
         }
     }
-
-    // void notifyAll(const std::string& topic, const TRawMessagePtr& subject) {
-    //     for (const auto& observer : observers_) {
-    //         observer->OnMessageReceived(topic, subject);
-    //     }
-    //     // std::cout << "notify all observers, topic: " << topic << std::endl;
-    // }
 
     void notifyAll(const std::string& topic, const rclcpp::SerializedMessage& subject) const
     {

@@ -1,0 +1,142 @@
+{
+  "configId": "robot_data_collection_config_10000",
+  "strategyId": 1001,
+  "strategies": [
+    {
+      "businessType": "RobotDataCollection",
+      "trigger": {
+        "triggerId": "001",
+        "priority": 1,
+        "enabled": true,
+        "triggerCondition": "data_collection_requested",
+        "triggerDesc": "机器人传感器数据采集，由RLPlanner触发"
+      },
+      "mode": {
+        "triggerMode": 1,
+        "cacheMode": {
+          "forwardCaptureDurationSec": 45,
+          "backwardCaptureDurationSec": 15,
+          "cooldownDurationSec": 1
+        }
+      },
+      "enableMasking": false,
+      "channels": {
+        "cyclone": [
+          {
+            "topic": "/robot/odom",
+            "type": "nav_msgs/msg/Odometry",
+            "originalFrameRate": 50,
+            "capturedFrameRate": 50
+          },
+          {
+            "topic": "/robot/joint_states",
+            "type": "sensor_msgs/msg/JointState",
+            "originalFrameRate": 50,
+            "capturedFrameRate": 50
+          },
+          {
+            "topic": "/robot/imu",
+            "type": "sensor_msgs/msg/Imu",
+            "originalFrameRate": 50,
+            "capturedFrameRate": 50
+          }
+        ]
+      },
+      "upload": {
+        "enabled": "true",
+        "destination": "aws_s3",
+        "bucket": "robot-data-collection",
+        "priority": "medium",
+        "region": "us-east-1"
+      }
+    },
+    {
+      "businessType": "RobotVisionCollection",
+      "trigger": {
+        "triggerId": "002",
+        "priority": 2,
+        "enabled": false,
+        "triggerCondition": "vision_data_collection_requested",
+        "triggerDesc": "机器人视觉数据采集（可选，需要摄像头）"
+      },
+      "mode": {
+        "triggerMode": 1,
+        "cacheMode": {
+          "forwardCaptureDurationSec": 45,
+          "backwardCaptureDurationSec": 15,
+          "cooldownDurationSec": 2
+        }
+      },
+      "enableMasking": false,
+      "maskingConfig": {
+        "geospatialOffsetRadius": 10.0,
+        "imageBlurKernelSize": 25,
+        "imageDesensitizeDepth": false,
+        "imageDetectionMode": "full_frame"
+      },
+      "channels": {
+        "cyclone": [
+          {
+            "topic": "/robot/camera/rgb",
+            "type": "sensor_msgs/msg/Image",
+            "originalFrameRate": 30,
+            "capturedFrameRate": 30
+          },
+          {
+            "topic": "/robot/camera/depth",
+            "type": "sensor_msgs/msg/Image",
+            "originalFrameRate": 30,
+            "capturedFrameRate": 30
+          },
+          {
+            "topic": "/robot/lidar/points",
+            "type": "sensor_msgs/msg/PointCloud2",
+            "originalFrameRate": 10,
+            "capturedFrameRate": 10
+          }
+        ]
+      },
+      "upload": {
+        "enabled": "true",
+        "destination": "aws_s3",
+        "bucket": "robot-vision-data",
+        "priority": "low"
+      }
+    },
+    {
+      "businessType": "RobotLidarCollection",
+      "trigger": {
+        "triggerId": "003",
+        "priority": 3,
+        "enabled": false,
+        "triggerCondition": "lidar_data_collection_requested",
+        "triggerDesc": "机器人激光雷达数据采集（可选）"
+      },
+      "mode": {
+        "triggerMode": 1,
+        "cacheMode": {
+          "forwardCaptureDurationSec": 45,
+          "backwardCaptureDurationSec": 15,
+          "cooldownDurationSec": 5
+        }
+      },
+      "enableMasking": false,
+      "channels": {
+        "cyclone": [
+          {
+            "topic": "/robot/scan",
+            "type": "sensor_msgs/msg/LaserScan",
+            "originalFrameRate": 10,
+            "capturedFrameRate": 10
+          }
+        ]
+      },
+      "upload": {
+        "enabled": "true",
+        "destination": "aws_s3",
+        "bucket": "robot-lidar-data",
+        "priority": "low"
+      }
+    }
+  ]
+}

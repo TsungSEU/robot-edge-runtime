@@ -13,7 +13,7 @@
 #include <utility>
 
 
-namespace dcp::common{
+namespace aurora::collector {
 
 #define DEFINE_TYPE_TRAIT(name, func)                   \
 template <typename T>                                   \
@@ -72,7 +72,7 @@ constexpr bool name<T>::value;
   static void CleanUp() {                                                 \
     auto instance = Instance(false);                                      \
     if (instance != nullptr) {                                            \
-      dcp::common::CallShutdown(instance);                             \
+      aurora::common::CallShutdown(instance);                             \
     }                                                                     \
   }                                                                       \
                                                                           \

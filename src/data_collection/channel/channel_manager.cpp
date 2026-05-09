@@ -1,25 +1,24 @@
 #include "channel_manager.h"
 #include "common/log/logger.h"
+#include "common/ros2/qos_profiles.h"
 
-namespace dcp::channel{
+namespace aurora::collector {
 
 bool ChannelManager::Init(const std::shared_ptr<rclcpp::Node>& node,
-                          const dcp::trigger::StrategyConfig& config,
-                          const std::shared_ptr<dcp::trigger::TriggerManager>& trigger_manager)
+                          const StrategyConfig& config)
 {
 
     node_ = node;
     strategy_config_ = config;
-    trigger_manager_ = trigger_manager;
-    // rscl_recorder_ = rscl_recorder;
 
     message_subject_ = std::make_unique<Subject>();
 
+    // Create isolated callback group for channel subscriptions
+    channel_callback_group_ = node_->create_callback_group(
+        rclcpp::CallbackGroupType::MutuallyExclusive);
+
     bool ret = InitSubscribers();
     CHECK_AND_RETURN(ret, ChannelManager, "InitSubscribers failed", false);
-
-    ret = InitObservers();
-    CHECK_AND_RETURN(ret, ChannelManager, "InitObservers failed", false);
 
     return ret;
 }
@@ -27,54 +26,39 @@ bool ChannelManager::Init(const std::shared_ptr<rclcpp::Node>& node,
 bool ChannelManager::InitSubscribers() {
     for (const auto& strategy : strategy_config_.strategies) {
         if (!strategy.trigger.enabled)  continue;
-        for (const auto& channel : strategy.dds.channels) {
+        for (const auto& channel : strategy.cyclone.channels) {
             std::string topic = channel.topic;
             if (subscribers_.find(topic) != subscribers_.end()) {
                 continue;
             }
 
-            std::string message_type;
+            // 使用 channel 中配置的消息类型
+            std::string message_type = channel.type;
             auto callback = [this, topic](const std::shared_ptr<rclcpp::SerializedMessage>& msg) {
                 this->Notify(topic, *msg);
             };
 
+            rclcpp::SubscriptionOptions sub_options;
+            sub_options.callback_group = channel_callback_group_;
+
             auto subscriber = node_->create_generic_subscription(
                 topic,
                 message_type,
-                rclcpp::QoS(10),
-                callback
+                aurora::common::qos::channel_data(),
+                callback,
+                sub_options
             );
 
             if (!subscriber) {
                 AD_ERROR(ChannelManager, "Create subscriber failed for topic: %s", topic.c_str());
                 return false;
             }
-            AD_INFO(ChannelManager, "Init subscriber for topic: %s, node: %p, subscriber: %p", topic.c_str(), node_.get(), subscriber.get());
+            AD_DEBUG(ChannelManager, "Init subscriber for topic: %s, type: %s", topic.c_str(), message_type.c_str());
             subscribers_[topic] = subscriber;
         }
     }
     return true;
 
-}
-
-bool ChannelManager::InitObservers() {
-    // if (rscl_recorder_) {
-    //     AddObserver(rscl_recorder_);
-    //     AD_INFO(ChannelManager, "Added RsclRecorder as observer");
-    // }
-
-    if (trigger_manager_) {
-        for (const auto& strategy : strategy_config_.strategies) {
-            if (auto trigger = trigger_manager_->getTrigger(strategy.trigger.triggerId)) {
-                AddObserver(trigger);
-                AD_INFO(ChannelManager, "Added %s as observer", strategy.trigger.triggerId.c_str());
-            }
-
-        }
-    }
-
-    AD_INFO(ChannelManager, "InitObservers ok");
-    return true;
 }
 
 void ChannelManager::OnMessageReceived(const std::string& topic, const rclcpp::SerializedMessage& msg) {

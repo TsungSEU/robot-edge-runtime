@@ -13,7 +13,7 @@
 #include <map>
 
 
-namespace dcp::common{
+namespace aurora::collector {
 
 using json = nlohmann::json;
 

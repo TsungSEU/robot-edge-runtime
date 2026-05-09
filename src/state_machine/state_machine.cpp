@@ -1,48 +1,80 @@
 #include "state_machine.h"
 #include "common/log/logger.h"
+#include "common/log/structured_log.h"
+#include "common/audit/audit_logger.h"
 #include <iostream>
+#include <sstream>
 
-namespace dcp::state_machine {
-StateMachine::StateMachine() 
-    : current_state_(SystemState::INITIALIZING)
-    , current_waypoint_index_(0) {
+namespace aurora::state_machine {
+
+StateMachine& StateMachine::getInstance() {
+    static StateMachine instance;
+    return instance;
+}
+
+StateMachine::StateMachine()
+    : current_state_(SystemState::INITIALIZING) {
 }
 
 bool StateMachine::initialize() {
     AD_INFO(StateMachine, "Initializing state machine");
-    
-    if (!data_collection_planner_) {
-        AD_ERROR(StateMachine, "Data Collection as Planning not set");
-        return false;
-    }
-    
-    if (!rl_planner_) {
-        AD_ERROR(StateMachine, "Navigation planner not set");
-        return false;
-    }
-    
-    // if (!data_storage_) {
-    //     AD_ERROR(StateMachine, "Data storage not set");
-    //     return false;
-    // }
-    
-    // 初始化各组件
-    if (!data_collection_planner_->initialize()) {
-        AD_ERROR(StateMachine, "Failed to initialize Data Collection as Planning");
-        transitionToState(SystemState::ERROR, StateEvent::ERROR_OCCURRED);
-        return false;
-    }
-    
-    if (!rl_planner_->initialize()) {
-        AD_ERROR(StateMachine, "Failed to initialize navigation planner");
-        transitionToState(SystemState::ERROR, StateEvent::ERROR_OCCURRED);
-        return false;
-    }
-    
-    AD_INFO(StateMachine, "State machine initialized successfully");
     transitionToState(SystemState::IDLE, StateEvent::INIT_COMPLETE);
+    AD_INFO(StateMachine, "State machine initialized successfully");
     return true;
 }
+
+void StateMachine::setActionCallbacks(const ActionCallbacks& callbacks) {
+    actions_ = callbacks;
+}
+
+void StateMachine::setAuditLogCallback(AuditLogCallback callback) {
+    audit_callback_ = std::move(callback);
+}
+
+void StateMachine::setDegradeMode(bool degraded) {
+    degrade_mode_ = degraded;
+    if (degraded) {
+        AD_WARN(StateMachine, "Entering degrade mode: non-critical operations reduced");
+    } else {
+        AD_INFO(StateMachine, "Exiting degrade mode: normal operations restored");
+    }
+}
+
+// ===== 状态字符串转换 =====
+
+const char* StateMachine::stateToString(SystemState state) {
+    switch (state) {
+        case SystemState::INITIALIZING:    return "INITIALIZING";
+        case SystemState::IDLE:            return "IDLE";
+        case SystemState::PLANNING:        return "PLANNING";
+        case SystemState::NAVIGATING:      return "NAVIGATING";
+        case SystemState::DATA_COLLECTING: return "DATA_COLLECTING";
+        case SystemState::UPLOADING:       return "UPLOADING";
+        case SystemState::ERROR:           return "ERROR";
+        case SystemState::SHUTTING_DOWN:   return "SHUTTING_DOWN";
+    }
+    return "UNKNOWN";
+}
+
+const char* StateMachine::eventToString(StateEvent event) {
+    switch (event) {
+        case StateEvent::INIT_COMPLETE:     return "INIT_COMPLETE";
+        case StateEvent::PLAN_REQUEST:      return "PLAN_REQUEST";
+        case StateEvent::PLAN_COMPLETE:     return "PLAN_COMPLETE";
+        case StateEvent::NAVIGATION_START:  return "NAVIGATION_START";
+        case StateEvent::WAYPOINT_REACHED:  return "WAYPOINT_REACHED";
+        case StateEvent::TRIGGERED:         return "TRIGGERED";
+        case StateEvent::DATA_COLLECTED:    return "DATA_COLLECTED";
+        case StateEvent::UPLOAD_REQUEST:    return "UPLOAD_REQUEST";
+        case StateEvent::UPLOAD_COMPLETE:   return "UPLOAD_COMPLETE";
+        case StateEvent::ERROR_OCCURRED:    return "ERROR_OCCURRED";
+        case StateEvent::RECOVERY_REQUEST:  return "RECOVERY_REQUEST";
+        case StateEvent::SHUTDOWN_REQUEST:  return "SHUTDOWN_REQUEST";
+    }
+    return "UNKNOWN";
+}
+
+// ===== 事件分发 =====
 
 void StateMachine::handleEvent(StateEvent event) {
     switch (current_state_) {
@@ -58,7 +90,7 @@ void StateMachine::handleEvent(StateEvent event) {
         case SystemState::NAVIGATING:
             handleNavigating(event);
             break;
-        case SystemState::DATA_COLLECTION:
+        case SystemState::DATA_COLLECTING:
             handleDataCollection(event);
             break;
         case SystemState::UPLOADING:
@@ -70,17 +102,16 @@ void StateMachine::handleEvent(StateEvent event) {
         case SystemState::SHUTTING_DOWN:
             handleShuttingDown(event);
             break;
-        default:
-            AD_WARN(StateMachine, "Unexpected event in state");
     }
 }
 
+// ===== 状态处理函数 =====
+
 void StateMachine::handleInitializing(StateEvent event) {
-    // 初始化状态只处理初始化完成事件
     if (event == StateEvent::INIT_COMPLETE) {
         transitionToState(SystemState::IDLE, event);
     } else {
-        AD_WARN(StateMachine, "Unexpected event in INITIALIZING state");
+        AD_WARN(StateMachine, "Unexpected event %s in INITIALIZING state", eventToString(event));
     }
 }
 
@@ -99,7 +130,7 @@ void StateMachine::handleIdle(StateEvent event) {
             transitionToState(SystemState::SHUTTING_DOWN, event);
             break;
         default:
-            AD_WARN(StateMachine, "Unexpected event in IDLE state");
+            AD_WARN(StateMachine, "Unexpected event %s in IDLE state", eventToString(event));
             break;
     }
 }
@@ -115,7 +146,7 @@ void StateMachine::handlePlanning(StateEvent event) {
             transitionToState(SystemState::ERROR, event);
             break;
         default:
-            AD_WARN(StateMachine, "Unexpected event in PLANNING state");
+            AD_WARN(StateMachine, "Unexpected event %s in PLANNING state", eventToString(event));
             break;
     }
 }
@@ -123,29 +154,26 @@ void StateMachine::handlePlanning(StateEvent event) {
 void StateMachine::handleNavigating(StateEvent event) {
     switch (event) {
         case StateEvent::WAYPOINT_REACHED:
-            AD_INFO(StateMachine, "Waypoint reached");
-            // 检查是否需要采集数据
-            if (current_waypoint_index_ < current_path_.size()) {
-                const Point& waypoint = current_path_[current_waypoint_index_];
-                // 这里应该使用真实的触发管理器来判断是否需要采集数据
-                // 为简化，我们假设每5个点采集一次数据
-                if (current_waypoint_index_ % 5 == 0) {
-                    transitionToState(SystemState::DATA_COLLECTION, StateEvent::TRIGGERED);
-                } else {
-                    // 移动到下一个路径点
-                    current_waypoint_index_++;
-                }
-            } else {
-                // 路径完成，开始上传数据
+            // 使用真实触发判断（对接 TriggerManager），而非硬编码 % 5
+            if (actions_.should_collect && actions_.should_collect()) {
+                AD_INFO(StateMachine, "Trigger condition met at waypoint, starting collection");
+                transitionToState(SystemState::DATA_COLLECTING, StateEvent::TRIGGERED);
+            } else if (actions_.navigate_step && !actions_.navigate_step()) {
+                // navigate_step 返回 false 表示路径完成
+                AD_INFO(StateMachine, "Path completed, requesting upload");
                 transitionToState(SystemState::UPLOADING, StateEvent::UPLOAD_REQUEST);
             }
+            break;
+        case StateEvent::TRIGGERED:
+            AD_INFO(StateMachine, "External trigger received, starting collection");
+            transitionToState(SystemState::DATA_COLLECTING, event);
             break;
         case StateEvent::ERROR_OCCURRED:
             AD_ERROR(StateMachine, "Error occurred during navigation");
             transitionToState(SystemState::ERROR, event);
             break;
         default:
-            AD_WARN(StateMachine, "Unexpected event in NAVIGATING state");
+            AD_WARN(StateMachine, "Unexpected event %s in NAVIGATING state", eventToString(event));
             break;
     }
 }
@@ -153,9 +181,7 @@ void StateMachine::handleNavigating(StateEvent event) {
 void StateMachine::handleDataCollection(StateEvent event) {
     switch (event) {
         case StateEvent::DATA_COLLECTED:
-            AD_INFO(StateMachine, "Data collection completed");
-            // 数据采集完成后继续导航
-            current_waypoint_index_++;
+            AD_INFO(StateMachine, "Data collection completed, resuming navigation");
             transitionToState(SystemState::NAVIGATING, event);
             break;
         case StateEvent::ERROR_OCCURRED:
@@ -163,7 +189,7 @@ void StateMachine::handleDataCollection(StateEvent event) {
             transitionToState(SystemState::ERROR, event);
             break;
         default:
-            AD_WARN(StateMachine, "Unexpected event in DATA_COLLECTION state");
+            AD_WARN(StateMachine, "Unexpected event %s in DATA_COLLECTING state", eventToString(event));
             break;
     }
 }
@@ -176,10 +202,16 @@ void StateMachine::handleUploading(StateEvent event) {
             break;
         case StateEvent::ERROR_OCCURRED:
             AD_ERROR(StateMachine, "Error occurred during data upload");
-            transitionToState(SystemState::ERROR, event);
+            // 降级模式：上传失败不进 ERROR，回 IDLE 继续采集
+            if (degrade_mode_) {
+                AD_WARN(StateMachine, "Upload failed in degrade mode, returning to IDLE");
+                transitionToState(SystemState::IDLE, event);
+            } else {
+                transitionToState(SystemState::ERROR, event);
+            }
             break;
         default:
-            AD_WARN(StateMachine, "Unexpected event in UPLOADING state");
+            AD_WARN(StateMachine, "Unexpected event %s in UPLOADING state", eventToString(event));
             break;
     }
 }
@@ -188,7 +220,7 @@ void StateMachine::handleError(StateEvent event) {
     switch (event) {
         case StateEvent::RECOVERY_REQUEST:
             AD_INFO(StateMachine, "Attempting system recovery");
-            // 尝试恢复到空闲状态
+            setDegradeMode(true);
             transitionToState(SystemState::IDLE, event);
             break;
         case StateEvent::SHUTDOWN_REQUEST:
@@ -196,115 +228,69 @@ void StateMachine::handleError(StateEvent event) {
             transitionToState(SystemState::SHUTTING_DOWN, event);
             break;
         default:
-            AD_WARN(StateMachine, "Unexpected event in ERROR state");
+            AD_WARN(StateMachine, "Unexpected event %s in ERROR state", eventToString(event));
             break;
     }
 }
 
 void StateMachine::handleShuttingDown(StateEvent event) {
-    // 关闭状态下不处理任何事件
-    AD_WARN(StateMachine, "Event received during shutdown state, ignoring");
+    AD_INFO(StateMachine, "Event %s received during shutdown, ignoring", eventToString(event));
 }
+
+// ===== 状态转换 =====
 
 void StateMachine::transitionToState(SystemState new_state, StateEvent event) {
     SystemState old_state = current_state_;
     current_state_ = new_state;
-    logStateTransition(old_state, new_state, event);
-    
-    // 根据新状态执行相应的动作
+
+    // 审计日志
+    auto now = std::chrono::steady_clock::now();
+
+    // Structured log with JSON context
+    std::ostringstream audit_ctx;
+    audit_ctx << "{\"from\":\"" << stateToString(old_state)
+              << "\",\"to\":\"" << stateToString(new_state)
+              << "\",\"event\":\"" << eventToString(event) << "\"}";
+    AD_INFO_S(StateMachine, audit_ctx.str().c_str(),
+              "State transition: %s -> %s (event: %s)",
+              stateToString(old_state), stateToString(new_state), eventToString(event));
+
+    // Audit trail
+    AUDIT_LOG(STATE_TRANSITION, "StateMachine", audit_ctx.str());
+
+    if (audit_callback_) {
+        audit_callback_(old_state, new_state, event, now);
+    }
+
+    // 根据新状态执行相应动作
     switch (new_state) {
         case SystemState::PLANNING:
-            // 执行路径规划
-            if (data_collection_planner_) {
-                current_path_ = data_collection_planner_->planDataCollectionMission();
-                if (!current_path_.empty()) {
-                    current_waypoint_index_ = 0;
-                    handleEvent(StateEvent::PLAN_COMPLETE);
-                } else {
-                    handleEvent(StateEvent::ERROR_OCCURRED);
-                }
+            if (actions_.plan) {
+                bool success = actions_.plan();
+                handleEvent(success ? StateEvent::PLAN_COMPLETE : StateEvent::ERROR_OCCURRED);
             }
             break;
-        case SystemState::DATA_COLLECTION:
-            // 执行数据采集
-            if (data_collection_planner_ && current_waypoint_index_ < current_path_.size()) {
-                // 采集当前路径点的数据
-                std::vector<Point> single_point_path = {current_path_[current_waypoint_index_]};
-                data_collection_planner_->executeDataCollection(single_point_path);
-                handleEvent(StateEvent::DATA_COLLECTED);
+        case SystemState::DATA_COLLECTING:
+            if (actions_.collect) {
+                bool success = actions_.collect();
+                handleEvent(success ? StateEvent::DATA_COLLECTED : StateEvent::ERROR_OCCURRED);
             }
             break;
         case SystemState::UPLOADING:
-            // 执行数据上传
-            if (data_collection_planner_) {
-                data_collection_planner_->uploadCollectedData();
-                handleEvent(StateEvent::UPLOAD_COMPLETE);
+            if (actions_.upload) {
+                bool success = actions_.upload();
+                handleEvent(success ? StateEvent::UPLOAD_COMPLETE : StateEvent::ERROR_OCCURRED);
             }
             break;
         case SystemState::SHUTTING_DOWN:
+            if (actions_.on_shutdown) {
+                actions_.on_shutdown();
+            }
             AD_INFO(StateMachine, "System shutdown complete");
             break;
         default:
-            // 其他状态不需要特殊处理
             break;
     }
 }
 
-void StateMachine::logStateTransition(SystemState from, SystemState to, StateEvent event) {
-    std::string from_str, to_str, event_str;
-    
-    // 状态字符串映射
-    switch (from) {
-        case SystemState::INITIALIZING: from_str = "INITIALIZING"; break;
-        case SystemState::IDLE: from_str = "IDLE"; break;
-        case SystemState::PLANNING: from_str = "PLANNING"; break;
-        case SystemState::NAVIGATING: from_str = "NAVIGATING"; break;
-        case SystemState::DATA_COLLECTION: from_str = "DATA_COLLECTION"; break;
-        case SystemState::UPLOADING: from_str = "UPLOADING"; break;
-        case SystemState::ERROR: from_str = "ERROR"; break;
-        case SystemState::SHUTTING_DOWN: from_str = "SHUTTING_DOWN"; break;
-    }
-    
-    switch (to) {
-        case SystemState::INITIALIZING: to_str = "INITIALIZING"; break;
-        case SystemState::IDLE: to_str = "IDLE"; break;
-        case SystemState::PLANNING: to_str = "PLANNING"; break;
-        case SystemState::NAVIGATING: to_str = "NAVIGATING"; break;
-        case SystemState::DATA_COLLECTION: to_str = "DATA_COLLECTION"; break;
-        case SystemState::UPLOADING: to_str = "UPLOADING"; break;
-        case SystemState::ERROR: to_str = "ERROR"; break;
-        case SystemState::SHUTTING_DOWN: to_str = "SHUTTING_DOWN"; break;
-    }
-    
-    // 事件字符串映射
-    switch (event) {
-        case StateEvent::INIT_COMPLETE: event_str = "INIT_COMPLETE"; break;
-        case StateEvent::PLAN_REQUEST: event_str = "PLAN_REQUEST"; break;
-        case StateEvent::PLAN_COMPLETE: event_str = "PLAN_COMPLETE"; break;
-        case StateEvent::NAVIGATION_START: event_str = "NAVIGATION_START"; break;
-        case StateEvent::WAYPOINT_REACHED: event_str = "WAYPOINT_REACHED"; break;
-        case StateEvent::TRIGGERED: event_str = "TRIGGERED"; break;
-        case StateEvent::DATA_COLLECTED: event_str = "DATA_COLLECTED"; break;
-        case StateEvent::UPLOAD_REQUEST: event_str = "UPLOAD_REQUEST"; break;
-        case StateEvent::UPLOAD_COMPLETE: event_str = "UPLOAD_COMPLETE"; break;
-        case StateEvent::ERROR_OCCURRED: event_str = "ERROR_OCCURRED"; break;
-        case StateEvent::RECOVERY_REQUEST: event_str = "RECOVERY_REQUEST"; break;
-        case StateEvent::SHUTDOWN_REQUEST: event_str = "SHUTDOWN_REQUEST"; break;
-    }
-    
-    AD_INFO(StateMachine, "State transition: %s -> %s (event: %s)", from_str.c_str(), to_str.c_str(), event_str.c_str()); 
-}
-
-void StateMachine::setDataCollectionPlanner(std::shared_ptr<DataCollectionPlanner> planner) {
-    data_collection_planner_ = planner;
-}
-
-void StateMachine::setNavPlanner(std::shared_ptr<NavPlannerNode> nav_planner) {
-    nav_planner_ = nav_planner;
-}
-
-void StateMachine::setDataStorage(std::shared_ptr<DataStorage> data_storage) {
-    data_storage_ = data_storage;
-}
-
-} // namespace dcp::state_machine
+} // namespace aurora::state_machine

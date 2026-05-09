@@ -1,1 +1,11 @@
-/build/
+/cmake-build-debug/
+/build
+/install
+/log
+/.vscode/
+/.idea/
+/.claude
+CLAUDE.md
+
+# Sensitive configuration files (use .template versions instead)
+config/app_config.json

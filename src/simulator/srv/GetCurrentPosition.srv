@@ -1,0 +1,9 @@
+# GetCurrentPosition.srv
+# Service to get the current robot position
+
+---
+# Response
+bool success                     # True if position retrieved successfully
+geometry_msgs/Point position    # Current robot position
+float64 yaw                      # Current robot yaw angle (radians)
+string message                   # Status message

@@ -1,0 +1,438 @@
+# locomotion_config.yaml - Zhiyuan Robot Integration Configuration
+# 配置文件用于控制Zhiyuan机器人参考实现集成到Aurora-Edge-Runtime
+#
+# 核心功能：
+# 1. Ruckig轨迹规划 - 实时平滑轨迹 (<1ms)
+# 2. 速度控制 - 简单的速度命令接口
+# 3. 运动模式 - 多种控制模式 (PASSIVE, DAMPING, JOINT, STAND, LOCOMOTION)
+# 4. 安全系统 - 急停、关节限位、输入超时
+# 5. 自适应步态 - 根据速度、地形动态调整
+# 6. 预设动作 - 50+预定义动作
+
+# ==============================================================================
+# 功能开关 - 用于渐进式部署
+# ==============================================================================
+features:
+  # 启用Ruckig轨迹生成器（推荐：true）
+  # 如果为false，将使用现有COMBO轨迹作为后备
+  use_ruckig: true
+
+  # 启用速度控制接口（默认：true，速度命令模式）
+  # 如果为false，使用现有的waypoint路径跟踪控制
+  use_velocity_control: true
+
+  # 启用运动模式系统（推荐：false，初期可选）
+  # 如果为false，默认使用LOCOMOTION模式
+  use_motion_modes: false
+
+  # 启用安全系统（推荐：true，始终启用）
+  use_safety_system: true
+
+  # 启用自适应步态（推荐：false，初期可选）
+  use_adaptive_gait: false
+
+  # 启用预设动作库（推荐：false，初期可选）
+  use_preset_motions: false
+
+  # 迁移模式（compatibility | hybrid | full）
+  # compatibility: 保持完全向后兼容，所有新功能默认关闭
+  # hybrid: 部分功能启用，测试新特性
+  # full: 所有功能启用，完全使用新系统
+  migration_mode: "compatibility"
+
+# ==============================================================================
+# Ruckig轨迹配置
+# ==============================================================================
+trajectory:
+  # 使用Ruckig作为轨迹生成器
+  use_ruckig: true
+
+  # 当Ruckig不可用时的后备轨迹样式
+  fallback_style: "COMBO"  # SINUSOID | CUBIC_SPLINE | QUINTIC | CYCLOID | COMBO
+
+  # 速度约束（米/秒）
+  max_velocity: 1.0
+  max_velocity_x: 1.0
+  max_velocity_y: 0.5
+  max_velocity_z: 0.5
+
+  # 加速度约束（米/秒²）
+  max_acceleration: 5.0
+  max_acceleration_x: 5.0
+  max_acceleration_y: 3.0
+  max_acceleration_z: 10.0
+
+  # 加加速度约束（米/秒³）
+  max_jerk: 100.0
+  max_jerk_x: 100.0
+  max_jerk_y: 50.0
+  max_jerk_z: 150.0
+
+  # 最小轨迹持续时间（秒）
+  minimum_duration: 0.1
+
+  # 轨迹计算时间步长（秒）
+  time_step: 0.001  # 1kHz
+
+  # 同步所有维度的轨迹
+  enable_synchronization: true
+
+  # 控制模式（POSITION | VELOCITY | POSITION_VELOCITY）
+  control_mode: "POSITION"
+
+# ==============================================================================
+# 速度控制配置
+# ==============================================================================
+velocity:
+  # 启用速度控制接口
+  enabled: true
+
+  # 速度命令限制（米/秒）
+  max_forward: 1.0
+  max_lateral: 1.0
+  max_angular: 1.0
+
+  # 最小速度命令（米/秒）
+  min_forward: 0.2
+  min_lateral: 0.2
+  min_angular: 0.1
+
+  # 速度缩放因子
+  velocity_scale: 1.0
+
+  # 速度到步态参数的转换
+  velocity_to_gait:
+    # 步频范围（Hz）
+    min_frequency: 0.8
+    max_frequency: 2.0
+
+    # 最大步长（米）
+    max_step_length: 0.4
+
+    # 侧向运动对步高的影响系数
+    lateral_height_factor: 0.02
+
+    # 转向对占空比的影响系数
+    turn_duty_factor: 0.1
+
+  # 速度平滑
+  smoothing:
+    enabled: true
+    # 使用Ruckig进行速度平滑
+    use_ruckig: true
+    max_velocity_acceleration: 5.0
+    max_velocity_jerk: 20.0
+
+# ==============================================================================
+# 安全系统配置
+# ==============================================================================
+safety:
+  # 紧急停止
+  emergency_stop:
+    enabled: true
+    # 紧急停止响应时间（秒）
+    response_time: 0.01
+
+  # 关节限位
+  joint_limits:
+    # 左腿髋关节偏航
+    - joint: "left_hip_yaw"
+      min_position: -1.57
+      max_position: 1.57
+      max_velocity: 5.0
+      max_effort: 50.0
+
+    # 左腿髋关节俯仰
+    - joint: "left_hip_pitch"
+      min_position: -1.05
+      max_position: 1.05
+      max_velocity: 5.0
+      max_effort: 50.0
+
+    # 左腿髋关节滚转
+    - joint: "left_hip_roll"
+      min_position: -0.52
+      max_position: 0.52
+      max_velocity: 5.0
+      max_effort: 50.0
+
+    # 左腿膝关节
+    - joint: "left_knee"
+      min_position: -0.01
+      max_position: 2.18
+      max_velocity: 5.0
+      max_effort: 50.0
+
+    # 左腿踝关节俯仰
+    - joint: "left_ankle_pitch"
+      min_position: -1.05
+      max_position: 1.05
+      max_velocity: 5.0
+      max_effort: 50.0
+
+    # 左腿踝关节滚转
+    - joint: "left_ankle_roll"
+      min_position: -0.52
+      max_position: 0.52
+      max_velocity: 5.0
+      max_effort: 50.0
+
+    # 右腿髋关节偏航
+    - joint: "right_hip_yaw"
+      min_position: -1.57
+      max_position: 1.57
+      max_velocity: 5.0
+      max_effort: 50.0
+
+    # 右腿髋关节俯仰
+    - joint: "right_hip_pitch"
+      min_position: -1.05
+      max_position: 1.05
+      max_velocity: 5.0
+      max_effort: 50.0
+
+    # 右腿髋关节滚转
+    - joint: "right_hip_roll"
+      min_position: -0.52
+      max_position: 0.52
+      max_velocity: 5.0
+      max_effort: 50.0
+
+    # 右腿膝关节
+    - joint: "right_knee"
+      min_position: -0.01
+      max_position: 2.18
+      max_velocity: 5.0
+      max_effort: 50.0
+
+    # 右腿踝关节俯仰
+    - joint: "right_ankle_pitch"
+      min_position: -1.05
+      max_position: 1.05
+      max_velocity: 5.0
+      max_effort: 50.0
+
+    # 右腿踝关节滚转
+    - joint: "right_ankle_roll"
+      min_position: -0.52
+      max_position: 0.52
+      max_velocity: 5.0
+      max_effort: 50.0
+
+  # 输入超时检测
+  input_timeout:
+    enabled: true
+    timeout_seconds: 1.0
+
+  # 看门狗定时器
+  watchdog:
+    enabled: true
+    timeout_seconds: 0.5
+    feed_interval: 0.1
+
+# ==============================================================================
+# 自适应步态配置
+# ==============================================================================
+adaptive_gait:
+  enabled: false
+
+  # 速度自适应
+  velocity:
+    enabled: true
+    # 速度因子范围 [0, 1]
+    min_factor: 0.0
+    max_factor: 1.0
+    # 步频调整
+    frequency_adjustment:
+      min: 0.8  # Hz
+      max: 2.0  # Hz
+      factor: 0.5  # frequency = base + velocity * factor
+    # 步长调整
+    step_length_adjustment:
+      max: 0.4  # meters
+
+  # 转向自适应
+  turn:
+    enabled: true
+    # 转向因子范围 [0, 1]
+    min_factor: 0.0
+    max_factor: 1.0
+    # 占空比调整（转向时减少占空比提高稳定性）
+    duty_factor_adjustment:
+      factor: 0.1
+      min_duty: 0.5
+
+  # 坡度自适应
+  slope:
+    enabled: true
+    # 坡度因子范围 [-1, 1]（负值下坡，正值上坡）
+    min_factor: -1.0
+    max_factor: 1.0
+    # 占空比调整（上坡增加占空比）
+    duty_factor_adjustment:
+      factor: 0.15
+      max_duty: 0.75
+      min_duty: 0.5
+    # 步高调整
+    step_height_adjustment:
+      factor: 0.03
+
+  # 地形自适应
+  terrain:
+    enabled: true
+    # 地形粗糙度 [0, 1]（0平坦，1非常粗糙）
+    min_roughness: 0.0
+    max_roughness: 1.0
+    # 步高调整
+    step_height_adjustment:
+      min: 0.05  # meters
+      max: 0.15  # meters
+      factor: 0.1
+    # 步频调整（粗糙地形降低步频）
+    frequency_adjustment:
+      factor: -0.3
+
+# ==============================================================================
+# 运动模式配置
+# ==============================================================================
+motion_modes:
+  enabled: false
+
+  # 可用的运动模式
+  available_modes:
+    - PASSIVE      # 零扭矩，顺应模式
+    - DAMPING      # 阻尼模式，逐渐停止
+    - JOINT        # 关节位置控制
+    - STAND        # 站立姿态，带平衡
+    - LOCOMOTION   # 行走模式
+
+  # 默认模式
+  default_mode: "LOCOMOTION"
+
+  # 模式转换矩阵（允许的转换）
+  # 格式: FROM_MODE -> [TO_MODES]
+  transitions:
+    PASSIVE: [DAMPING, JOINT, STAND]
+    DAMPING: [PASSIVE, JOINT, STAND]
+    JOINT: [PASSIVE, DAMPING, STAND, LOCOMOTION]
+    STAND: [PASSIVE, JOINT, LOCOMOTION]
+    LOCOMOTION: [JOINT, STAND]
+
+  # 模式特定参数
+  mode_params:
+    PASSIVE:
+      torque_enabled: false
+      damping_ratio: 0.0
+
+    DAMPING:
+      torque_enabled: true
+      damping_ratio: 0.5
+      target_velocity: 0.0
+
+    JOINT:
+      torque_enabled: true
+      position_tolerance: 0.01
+      velocity_tolerance: 0.1
+
+    STAND:
+      torque_enabled: true
+      balance_enabled: true
+      stiffness: 1000.0
+      damping: 50.0
+
+    LOCOMOTION:
+      torque_enabled: true
+      gait_mode: "BIPED_WALK"
+      step_frequency: 1.25
+
+# ==============================================================================
+# 预设动作配置
+# ==============================================================================
+preset_motions:
+  enabled: false
+
+  # 预设动作文件路径
+  library_path: "config/preset_motions.yaml"
+
+  # 动作执行参数
+  execution:
+    interpolation_method: "CUBIC_SPLINE"  # LINEAR | CUBIC_SPLINE | QUINTIC
+    default_duration: 2.0
+    allow_interruption: true
+    transition_duration: 0.5
+
+  # 可用动作类别
+  categories:
+    - basic      # 基本动作（站立、坐下等）
+    - locomotion # 移动动作（行走、转向等）
+    - expressive # 表达动作（挥手、点头等）
+    - recovery   # 恢复动作（起立、复位等）
+    - dance      # 舞蹈动作
+    - sport      # 运动动作（踢球等）
+
+# ==============================================================================
+# ROS2主题配置（新增主题，现有主题保持不变）
+# ==============================================================================
+ros2_topics:
+  # 现有主题（保持不变）
+  existing:
+    odom: "/robot/odom"
+    joint_states: "/robot/joint_states"
+    imu: "/robot/imu"
+    tf: "/tf"
+
+  # 新增主题（可选）
+  new:
+    # 速度命令主题
+    velocity_command: "/robot/velocity_cmd"
+    velocity_command_type: "geometry_msgs/Twist"
+
+    # 运动模式主题
+    motion_mode: "/robot/motion_mode"
+    motion_mode_type: "std_msgs/UInt8"
+
+    # 安全状态主题
+    safety_status: "/robot/safety_status"
+    safety_status_type: "aurora_msgs/SafetyStatus"
+
+    # 预设动作主题
+    preset_motion: "/robot/preset_motion"
+    preset_motion_type: "aurora_msgs/PresetMotion"
+
+# ==============================================================================
+# 调试和日志配置
+# ==============================================================================
+debug:
+  # 启用性能日志
+  performance_logging: false
+
+  # 启用轨迹可视化
+  trajectory_visualization: false
+
+  # 日志级别（0=VERBOSE, 1=DEBUG, 2=INFO, 3=WARN, 4=ERROR, 5=FATAL）
+  log_level: 2
+
+  # 性能计时
+  timing:
+    enable_ruckig_benchmark: false
+    benchmark_iterations: 1000
+    log_threshold_ms: 1.0  # 超过此阈值的操作将被记录
+
+# ==============================================================================
+# 向后兼容性配置
+# ==============================================================================
+compatibility:
+  # 保持现有RL Planner的行为
+  preserve_rl_behavior: true
+
+  # 默认动作类型（JOINT_OFFSET | VELOCITY_CMD）
+  default_action_type: "VELOCITY_CMD"
+
+  # 观测空间维度（74或77）
+  observation_dim: 74
+
+  # GaitTrigger模式（FOOTSTRIKE | VELOCITY | HYBRID）
+  gait_trigger_mode: "FOOTSTRIKE"
+
+  # 保持现有轨迹生成作为后备
+  fallback_to_legacy: true

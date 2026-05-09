@@ -9,8 +9,7 @@
 #include <nlohmann/json.hpp>
 #include "common/data.h"
 
-namespace dcp::uploader
-{
+namespace aurora::collector {
 
 ErrorCode CurlErrorMapping(CURLcode code) {
     switch (code) {
@@ -33,14 +32,14 @@ bool DataProto::Init(const std::string& gateway,
                         const std::string& ca_cert_path) {
     gateway_ = gateway;
     // 初始化MqttWrapper
-    mqtt_wrapper_ = std::make_unique<MqttWrapper>();
+    // mqtt_wrapper_ = std::make_unique<MqttWrapper>();
 
     // curl_wrapper_初始化保持不变
     auto ret = curl_wrapper_.Init(client_cert_path, client_key_path, ca_cert_path);
     return ret == CURLE_OK && mqtt_wrapper_ != nullptr;
 }
 
-ErrorCode DataProto::GetQueryTask(const std::string& vin, common::QueryTaskResp& resp) {
+ErrorCode DataProto::GetQueryTask(const std::string& vin, QueryTaskResp& resp) {
     url_ = "https://" + gateway_ + "/feedback/driving/queryTask?vin=" + vin;
     std::string resp_str;
     auto ret = curl_wrapper_.HttpGet(url_, resp_str, {"Accept: application/json"});
@@ -54,7 +53,7 @@ ErrorCode DataProto::GetQueryTask(const std::string& vin, common::QueryTaskResp&
 
 ErrorCode DataProto::SendUploadMqttCmd(std::atomic<bool>& stop_flag) {
     // 读取mqtt配置文件
-    const auto& app_config = common::AppConfig::getInstance().GetConfig();
+    const auto& app_config = AppConfig::getInstance().GetConfig();
 
     // mqtt
     std::string mqtt_broker_ssl = app_config.dataProto.mqtt.broker_ssl;
@@ -74,10 +73,10 @@ ErrorCode DataProto::SendUploadMqttCmd(std::atomic<bool>& stop_flag) {
     mqtt_wrapper_->SetMessageCallback([this](const std::string& topic, const std::string& payload) {
         AD_INFO(DataProto, "Message arrived: %s", payload.c_str());
         // common::MqttCmd mqtt_cmd;
-        common::QueryTaskResp::Object mqtt_task;
+        QueryTaskResp::Object mqtt_task;
         // auto success = common::response_parser(payload, mqtt_cmd);
-        auto& pq = common::TaskQueue::GetInstance();
-        auto log_task = common::GetLogTaskInfo(mqtt_task, common::UploadType::InstructionDelivery);
+        auto& pq = TaskQueue::GetInstance();
+        auto log_task = GetLogTaskInfo(mqtt_task, UploadType::InstructionDelivery);
         pq.Push(2, log_task);
         AD_INFO(DataProto, "Add mqtt task to TaskQueue.");
     });
@@ -105,7 +104,7 @@ ErrorCode DataProto::SendUploadMqttCmd(std::atomic<bool>& stop_flag) {
     return ErrorCode::SUCCESS;
 }
 
-ErrorCode DataProto::GetUploadUrl(const common::UploadUrlReq& req, common::UploadUrlResp& resp) {
+ErrorCode DataProto::GetUploadUrl(const UploadUrlReq& req, UploadUrlResp& resp) {
     // json j = req;
     json j = json{
         {"type", static_cast<int>(req.type)},
@@ -149,7 +148,7 @@ ErrorCode DataProto::UploadFileChunk(const std::vector<char>& buffer, const std:
     return resp.empty() ? ErrorCode::INVALID_RESPONSE : ErrorCode::SUCCESS;
 }
 
-ErrorCode DataProto::CompleteUpload(const common::CompleteUploadReq& req, common::CompleteUploadResp& resp) {
+ErrorCode DataProto::CompleteUpload(const CompleteUploadReq& req, CompleteUploadResp& resp) {
     url_ = "https://" + gateway_ + "/msinfofeedback/common/file/completeupload";
     // json j = req;
     json j = json{
@@ -173,7 +172,7 @@ ErrorCode DataProto::CompleteUpload(const common::CompleteUploadReq& req, common
     return CurlErrorMapping(ret);
 }
 
-ErrorCode DataProto::GetUploadStatus(const std::string& file_uuid, common::UploadStatusResp& resp) {
+ErrorCode DataProto::GetUploadStatus(const std::string& file_uuid, UploadStatusResp& resp) {
     std::string resp_str;
     url_ = "https://" + gateway_ + "/msinfofeedback/common/file/uploadstatus";
     json j = json{{"fileUuid", file_uuid}};

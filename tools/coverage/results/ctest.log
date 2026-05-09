@@ -1,0 +1,930 @@
+UpdateCTestConfiguration  from :/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/CTestConfiguration.ini
+Parse Config file:/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/CTestConfiguration.ini
+Test project /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+      Start  1: DCPIntegrationTest
+
+1: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_dcp_integration
+1: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests
+1: Test timeout computed to be: 10000000
+1: 
+1: ========================================
+1:   DCP Full System Integration Test
+1: ========================================
+1: 
+1: Test Configuration:
+1:   Max cycles: 3
+1:   Model path: /home/xucong/caicAD/01datainfra/Aurora/aurora-planning-engine/models/humanoid_ppo.onnx
+1:   Config path: ../../config/planner_weights.yaml
+1:   Waypoint tolerance: 0.5m
+1: 
+1: [Phase 1] Initialization...
+1:   Creating RobotSimulatorV2...
+1: the environment variable 'INSTALL_ROOT_PATH' has not been set. Please refer to the environment variable setting document on the relevant platform.
+ 1/13 Test  #1: DCPIntegrationTest ...............***Failed    0.19 sec
+
+========================================
+  DCP Full System Integration Test
+========================================
+
+Test Configuration:
+  Max cycles: 3
+  Model path: /home/xucong/caicAD/01datainfra/Aurora/aurora-planning-engine/models/humanoid_ppo.onnx
+  Config path: ../../config/planner_weights.yaml
+  Waypoint tolerance: 0.5m
+
+[Phase 1] Initialization...
+  Creating RobotSimulatorV2...
+the environment variable 'INSTALL_ROOT_PATH' has not been set. Please refer to the environment variable setting document on the relevant platform.
+
+test 2
+      Start  2: test_state_machine
+
+2: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_state_machine
+2: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/unit
+2: Test timeout computed to be: 10000000
+2: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+2: 
+2: [WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+2: [==========] Running 13 tests from 1 test suite.
+2: [----------] Global test environment set-up.
+2: [----------] 13 tests from StateMachineTest
+2: [ RUN      ] StateMachineTest.StateToStringAllStates
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.StateToStringAllStates (0 ms)
+2: [ RUN      ] StateMachineTest.EventToStringAllEvents
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.EventToStringAllEvents (0 ms)
+2: [ RUN      ] StateMachineTest.InitializeTransitionsToIdle
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.InitializeTransitionsToIdle (0 ms)
+2: [ RUN      ] StateMachineTest.InitCompleteTransitionsToIdle
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.InitCompleteTransitionsToIdle (0 ms)
+2: [ RUN      ] StateMachineTest.PlanRequestTransitionsToPlanning
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.PlanRequestTransitionsToPlanning (0 ms)
+2: [ RUN      ] StateMachineTest.PlanCompleteTransitionsToNavigating
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.PlanCompleteTransitionsToNavigating (0 ms)
+2: [ RUN      ] StateMachineTest.ShutdownFromAnyState
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.ShutdownFromAnyState (0 ms)
+2: [ RUN      ] StateMachineTest.ErrorFromAnyState
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.ErrorFromAnyState (1 ms)
+2: [ RUN      ] StateMachineTest.RecoveryFromError
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.RecoveryFromError (0 ms)
+2: [ RUN      ] StateMachineTest.AuditCallbackReceivesTransitions
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.AuditCallbackReceivesTransitions (0 ms)
+2: [ RUN      ] StateMachineTest.DegradeModeControl
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.DegradeModeControl (0 ms)
+2: [ RUN      ] StateMachineTest.SingletonIdentity
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.SingletonIdentity (0 ms)
+2: [ RUN      ] StateMachineTest.ActionCallbacksExecuted
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: Log is not inited, return
+2: [       OK ] StateMachineTest.ActionCallbacksExecuted (0 ms)
+2: [----------] 13 tests from StateMachineTest (1 ms total)
+2: 
+2: [----------] Global test environment tear-down
+2: [==========] 13 tests from 1 test suite ran. (1 ms total)
+2: [  PASSED  ] 13 tests.
+ 2/13 Test  #2: test_state_machine ...............   Passed    0.05 sec
+test 3
+      Start  3: test_error_handler
+
+3: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_error_handler
+3: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/unit
+3: Test timeout computed to be: 10000000
+3: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+3: 
+3: [WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+3: [==========] Running 12 tests from 1 test suite.
+3: [----------] Global test environment set-up.
+3: [----------] 12 tests from ErrorHandlerTest
+3: [ RUN      ] ErrorHandlerTest.RetrySucceedsOnFirstAttempt
+3: [       OK ] ErrorHandlerTest.RetrySucceedsOnFirstAttempt (0 ms)
+3: [ RUN      ] ErrorHandlerTest.RetrySucceedsAfterFailures
+3: Log is not inited, return
+3: Log is not inited, return
+3: [       OK ] ErrorHandlerTest.RetrySucceedsAfterFailures (3 ms)
+3: [ RUN      ] ErrorHandlerTest.RetryExhaustedThrows
+3: Log is not inited, return
+3: Log is not inited, return
+3: Log is not inited, return
+3: [       OK ] ErrorHandlerTest.RetryExhaustedThrows (3 ms)
+3: [ RUN      ] ErrorHandlerTest.FallbackNotCalledOnSuccess
+3: [       OK ] ErrorHandlerTest.FallbackNotCalledOnSuccess (0 ms)
+3: [ RUN      ] ErrorHandlerTest.FallbackCalledAfterThreshold
+3: Log is not inited, return
+3: Log is not inited, return
+3: [       OK ] ErrorHandlerTest.FallbackCalledAfterThreshold (0 ms)
+3: [ RUN      ] ErrorHandlerTest.ValidateRangeNormal
+3: [       OK ] ErrorHandlerTest.ValidateRangeNormal (0 ms)
+3: [ RUN      ] ErrorHandlerTest.ValidateRangeOutOfBounds
+3: Log is not inited, return
+3: Log is not inited, return
+3: [       OK ] ErrorHandlerTest.ValidateRangeOutOfBounds (0 ms)
+3: [ RUN      ] ErrorHandlerTest.ValidateRangeNaNInf
+3: Log is not inited, return
+3: Log is not inited, return
+3: Log is not inited, return
+3: [       OK ] ErrorHandlerTest.ValidateRangeNaNInf (0 ms)
+3: [ RUN      ] ErrorHandlerTest.ValidateNotEmptyNormal
+3: [       OK ] ErrorHandlerTest.ValidateNotEmptyNormal (0 ms)
+3: [ RUN      ] ErrorHandlerTest.ValidateNotEmptyEmpty
+3: Log is not inited, return
+3: [       OK ] ErrorHandlerTest.ValidateNotEmptyEmpty (0 ms)
+3: [ RUN      ] ErrorHandlerTest.DiskSafeWriteSuccess
+3: [       OK ] ErrorHandlerTest.DiskSafeWriteSuccess (0 ms)
+3: [ RUN      ] ErrorHandlerTest.DiskSafeWriteException
+3: Log is not inited, return
+3: [       OK ] ErrorHandlerTest.DiskSafeWriteException (0 ms)
+3: [----------] 12 tests from ErrorHandlerTest (6 ms total)
+3: 
+3: [----------] Global test environment tear-down
+3: [==========] 12 tests from 1 test suite ran. (6 ms total)
+3: [  PASSED  ] 12 tests.
+ 3/13 Test  #3: test_error_handler ...............   Passed    0.05 sec
+test 4
+      Start  4: test_ring_buffer
+
+4: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_ring_buffer
+4: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/unit
+4: Test timeout computed to be: 10000000
+4: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+4: 
+4: [WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+4: [==========] Running 9 tests from 1 test suite.
+4: [----------] Global test environment set-up.
+4: [----------] 9 tests from RingBufferTest
+4: [ RUN      ] RingBufferTest.PushAndPop
+4: [       OK ] RingBufferTest.PushAndPop (0 ms)
+4: [ RUN      ] RingBufferTest.EmptyBuffer
+4: [       OK ] RingBufferTest.EmptyBuffer (0 ms)
+4: [ RUN      ] RingBufferTest.SizeTracking
+4: [       OK ] RingBufferTest.SizeTracking (0 ms)
+4: [ RUN      ] RingBufferTest.FullBufferRejectsPush
+4: [       OK ] RingBufferTest.FullBufferRejectsPush (0 ms)
+4: [ RUN      ] RingBufferTest.FIFOOrder
+4: [       OK ] RingBufferTest.FIFOOrder (0 ms)
+4: [ RUN      ] RingBufferTest.WrapAround
+4: [       OK ] RingBufferTest.WrapAround (0 ms)
+4: [ RUN      ] RingBufferTest.ConcurrentProducerConsumer
+4: [       OK ] RingBufferTest.ConcurrentProducerConsumer (1 ms)
+4: [ RUN      ] RingBufferTest.DoubleValues
+4: [       OK ] RingBufferTest.DoubleValues (0 ms)
+4: [ RUN      ] RingBufferTest.StructType
+4: [       OK ] RingBufferTest.StructType (0 ms)
+4: [----------] 9 tests from RingBufferTest (1 ms total)
+4: 
+4: [----------] Global test environment tear-down
+4: [==========] 9 tests from 1 test suite ran. (1 ms total)
+4: [  PASSED  ] 9 tests.
+ 4/13 Test  #4: test_ring_buffer .................   Passed    0.01 sec
+test 5
+      Start  5: test_safety_system
+
+5: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_safety_system
+5: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/unit
+5: Test timeout computed to be: 10000000
+5: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+5: 
+5: [WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+5: [==========] Running 10 tests from 1 test suite.
+5: [----------] Global test environment set-up.
+5: [----------] 10 tests from SafetySystemTest
+5: [ RUN      ] SafetySystemTest.EmergencyStopNotActiveInitially
+5: [       OK ] SafetySystemTest.EmergencyStopNotActiveInitially (0 ms)
+5: [ RUN      ] SafetySystemTest.TriggerEmergencyStop
+5: [       OK ] SafetySystemTest.TriggerEmergencyStop (0 ms)
+5: [ RUN      ] SafetySystemTest.ClearEmergencyStop
+5: [       OK ] SafetySystemTest.ClearEmergencyStop (0 ms)
+5: [ RUN      ] SafetySystemTest.EmergencyStopStaysActive
+5: [       OK ] SafetySystemTest.EmergencyStopStaysActive (0 ms)
+5: [ RUN      ] SafetySystemTest.SetAndGetConfig
+5: [       OK ] SafetySystemTest.SetAndGetConfig (0 ms)
+5: [ RUN      ] SafetySystemTest.EventCallbackOnEmergencyStop
+5: [       OK ] SafetySystemTest.EventCallbackOnEmergencyStop (0 ms)
+5: [ RUN      ] SafetySystemTest.ResetClearsEmergencyStop
+5: [       OK ] SafetySystemTest.ResetClearsEmergencyStop (0 ms)
+5: [ RUN      ] SafetySystemTest.GetEventDescription
+5: [       OK ] SafetySystemTest.GetEventDescription (0 ms)
+5: [ RUN      ] SafetySystemTest.StatusAvailable
+5: [       OK ] SafetySystemTest.StatusAvailable (0 ms)
+5: [ RUN      ] SafetySystemTest.SetJointLimitsVector
+5: [       OK ] SafetySystemTest.SetJointLimitsVector (0 ms)
+5: [----------] 10 tests from SafetySystemTest (0 ms total)
+5: 
+5: [----------] Global test environment tear-down
+5: [==========] 10 tests from 1 test suite ran. (0 ms total)
+5: [  PASSED  ] 10 tests.
+ 5/13 Test  #5: test_safety_system ...............   Passed    0.06 sec
+test 6
+      Start  6: test_foot_trajectory
+
+6: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_foot_trajectory
+6: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/unit
+6: Test timeout computed to be: 10000000
+6: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+6: 
+6: [WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+6: [==========] Running 9 tests from 1 test suite.
+6: [----------] Global test environment set-up.
+6: [----------] 9 tests from FootTrajectoryTest
+6: [ RUN      ] FootTrajectoryTest.GenerateSwingTrajectoryReturnsPoints
+6: [       OK ] FootTrajectoryTest.GenerateSwingTrajectoryReturnsPoints (0 ms)
+6: [ RUN      ] FootTrajectoryTest.SwingStartMatchesParams
+6: [       OK ] FootTrajectoryTest.SwingStartMatchesParams (0 ms)
+6: [ RUN      ] FootTrajectoryTest.SwingEndMatchesParams
+6: [       OK ] FootTrajectoryTest.SwingEndMatchesParams (1 ms)
+6: [ RUN      ] FootTrajectoryTest.SwingReachesHeight
+6: [       OK ] FootTrajectoryTest.SwingReachesHeight (0 ms)
+6: [ RUN      ] FootTrajectoryTest.GenerateStanceTrajectoryReturnsPoints
+6: [       OK ] FootTrajectoryTest.GenerateStanceTrajectoryReturnsPoints (0 ms)
+6: [ RUN      ] FootTrajectoryTest.ComputeSwingPointAtStart
+6: [       OK ] FootTrajectoryTest.ComputeSwingPointAtStart (0 ms)
+6: [ RUN      ] FootTrajectoryTest.ComputeSwingPointAtEnd
+6: [       OK ] FootTrajectoryTest.ComputeSwingPointAtEnd (0 ms)
+6: [ RUN      ] FootTrajectoryTest.ComputeTrajectoryLength
+6: [       OK ] FootTrajectoryTest.ComputeTrajectoryLength (0 ms)
+6: [ RUN      ] FootTrajectoryTest.SetConfig
+6: [       OK ] FootTrajectoryTest.SetConfig (0 ms)
+6: [----------] 9 tests from FootTrajectoryTest (1 ms total)
+6: 
+6: [----------] Global test environment tear-down
+6: [==========] 9 tests from 1 test suite ran. (1 ms total)
+6: [  PASSED  ] 9 tests.
+ 6/13 Test  #6: test_foot_trajectory .............   Passed    0.05 sec
+test 7
+      Start  7: test_kinematics
+
+7: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_kinematics
+7: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/unit
+7: Test timeout computed to be: 10000000
+7: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+7: 
+7: [WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+7: [==========] Running 9 tests from 2 test suites.
+7: [----------] Global test environment set-up.
+7: [----------] 2 tests from KinematicsControlLayerStaticTest
+7: [ RUN      ] KinematicsControlLayerStaticTest.JointNameIsValid
+7: [       OK ] KinematicsControlLayerStaticTest.JointNameIsValid (0 ms)
+7: [ RUN      ] KinematicsControlLayerStaticTest.NumJoints
+7: [       OK ] KinematicsControlLayerStaticTest.NumJoints (0 ms)
+7: [----------] 2 tests from KinematicsControlLayerStaticTest (0 ms total)
+7: 
+7: [----------] 7 tests from IKSolverTest
+7: [ RUN      ] IKSolverTest.IdentityPositionReachable
+7: [       OK ] IKSolverTest.IdentityPositionReachable (1 ms)
+7: [ RUN      ] IKSolverTest.IKSolveReturnsSuccess
+7: [       OK ] IKSolverTest.IKSolveReturnsSuccess (0 ms)
+7: [ RUN      ] IKSolverTest.IKResultHasJointStates
+7: [       OK ] IKSolverTest.IKResultHasJointStates (0 ms)
+7: [ RUN      ] IKSolverTest.ForwardKinematicsRunsSuccessfully
+7: [       OK ] IKSolverTest.ForwardKinematicsRunsSuccessfully (0 ms)
+7: [ RUN      ] IKSolverTest.PositionTooFarUnreachable
+7: [       OK ] IKSolverTest.PositionTooFarUnreachable (0 ms)
+7: [ RUN      ] IKSolverTest.WorkspaceBoundsCheck
+7: [       OK ] IKSolverTest.WorkspaceBoundsCheck (0 ms)
+7: [ RUN      ] IKSolverTest.SetAndGetGeometry
+7: [       OK ] IKSolverTest.SetAndGetGeometry (0 ms)
+7: [----------] 7 tests from IKSolverTest (1 ms total)
+7: 
+7: [----------] Global test environment tear-down
+7: [==========] 9 tests from 2 test suites ran. (1 ms total)
+7: [  PASSED  ] 9 tests.
+ 7/13 Test  #7: test_kinematics ..................   Passed    0.05 sec
+test 8
+      Start  8: test_data_collection_executor
+
+8: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_data_collection_executor
+8: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/unit
+8: Test timeout computed to be: 10000000
+8: 
+8: [WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+8: [==========] Running 9 tests from 1 test suite.
+8: [----------] Global test environment set-up.
+8: [----------] 9 tests from DataCollectionExecutorTest
+8: [ RUN      ] DataCollectionExecutorTest.Constructor_CreatesValidInstance
+8: [       OK ] DataCollectionExecutorTest.Constructor_CreatesValidInstance (1 ms)
+8: [ RUN      ] DataCollectionExecutorTest.Initialize_WithValidConfig_ReturnsTrue
+8: [       OK ] DataCollectionExecutorTest.Initialize_WithValidConfig_ReturnsTrue (0 ms)
+8: [ RUN      ] DataCollectionExecutorTest.Initialize_WithInvalidPath_ReturnsFalse
+8: [       OK ] DataCollectionExecutorTest.Initialize_WithInvalidPath_ReturnsFalse (1 ms)
+8: [ RUN      ] DataCollectionExecutorTest.Execute_WithEmptyPath_ReturnsEmpty
+8: [       OK ] DataCollectionExecutorTest.Execute_WithEmptyPath_ReturnsEmpty (0 ms)
+8: [ RUN      ] DataCollectionExecutorTest.Execute_WithValidPath_CollectsData
+8: [       OK ] DataCollectionExecutorTest.Execute_WithValidPath_CollectsData (0 ms)
+8: [ RUN      ] DataCollectionExecutorTest.Recording_StartAndStop_WorksCorrectly
+8: [       OK ] DataCollectionExecutorTest.Recording_StartAndStop_WorksCorrectly (0 ms)
+8: [ RUN      ] DataCollectionExecutorTest.HandleRecordingError_LogsAndRecovers
+8: [       OK ] DataCollectionExecutorTest.HandleRecordingError_LogsAndRecovers (1 ms)
+8: [ RUN      ] DataCollectionExecutorTest.HandleInvalidTopic_DoesNotCrash
+8: [       OK ] DataCollectionExecutorTest.HandleInvalidTopic_DoesNotCrash (0 ms)
+8: [ RUN      ] DataCollectionExecutorTest.GetRecordingMetadata_ReturnsValidData
+8: [       OK ] DataCollectionExecutorTest.GetRecordingMetadata_ReturnsValidData (0 ms)
+8: [----------] 9 tests from DataCollectionExecutorTest (3 ms total)
+8: 
+8: [----------] Global test environment tear-down
+8: [==========] 9 tests from 1 test suite ran. (3 ms total)
+8: [  PASSED  ] 9 tests.
+ 8/13 Test  #8: test_data_collection_executor ....   Passed    0.01 sec
+test 9
+      Start  9: test_ros2bag_recorder
+
+9: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_ros2bag_recorder
+9: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/unit
+9: Test timeout computed to be: 10000000
+9: 
+9: [WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+9: [==========] Running 14 tests from 1 test suite.
+9: [----------] Global test environment set-up.
+9: [----------] 14 tests from Ros2bagRecorderTest
+9: [ RUN      ] Ros2bagRecorderTest.OptMode_ValuesAreCorrect
+9: [       OK ] Ros2bagRecorderTest.OptMode_ValuesAreCorrect (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.TopicMetadata_DefaultInitialization
+9: [       OK ] Ros2bagRecorderTest.TopicMetadata_DefaultInitialization (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.TopicMetadata_CanSetFields
+9: [       OK ] Ros2bagRecorderTest.TopicMetadata_CanSetFields (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.TBagInfo_DefaultInitialization
+9: [       OK ] Ros2bagRecorderTest.TBagInfo_DefaultInitialization (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.Recorder_CanCreateInstance
+9: [       OK ] Ros2bagRecorderTest.Recorder_CanCreateInstance (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.RecordMessage_IncrementsCounter
+9: [       OK ] Ros2bagRecorderTest.RecordMessage_IncrementsCounter (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.RecordMessage_UpdatesMetadata
+9: [       OK ] Ros2bagRecorderTest.RecordMessage_UpdatesMetadata (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.RingBuffer_StoresMessagesCorrectly
+9: [       OK ] Ros2bagRecorderTest.RingBuffer_StoresMessagesCorrectly (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.RingBuffer_OverwritesOldMessages
+9: [       OK ] Ros2bagRecorderTest.RingBuffer_OverwritesOldMessages (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.WriteToFile_CreatesValidBagFile
+9: [       OK ] Ros2bagRecorderTest.WriteToFile_CreatesValidBagFile (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.WriteToFile_HandlesInvalidPath
+9: [       OK ] Ros2bagRecorderTest.WriteToFile_HandlesInvalidPath (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.TrackMetadata_AccumulatesCorrectly
+9: [       OK ] Ros2bagRecorderTest.TrackMetadata_AccumulatesCorrectly (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.GetMetadata_ReturnsAccurateStats
+9: [       OK ] Ros2bagRecorderTest.GetMetadata_ReturnsAccurateStats (0 ms)
+9: [ RUN      ] Ros2bagRecorderTest.HandleRecordingError_LogsError
+9: [       OK ] Ros2bagRecorderTest.HandleRecordingError_LogsError (0 ms)
+9: [----------] 14 tests from Ros2bagRecorderTest (0 ms total)
+9: 
+9: [----------] Global test environment tear-down
+9: [==========] 14 tests from 1 test suite ran. (0 ms total)
+9: [  PASSED  ] 14 tests.
+ 9/13 Test  #9: test_ros2bag_recorder ............   Passed    0.00 sec
+test 10
+      Start 10: test_file_compress
+
+10: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_file_compress
+10: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/unit
+10: Test timeout computed to be: 10000000
+10: 
+10: [WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+10: [==========] Running 11 tests from 1 test suite.
+10: [----------] Global test environment set-up.
+10: [----------] 11 tests from FileCompressTest
+10: [ RUN      ] FileCompressTest.ErrorCode_ValuesAreCorrect
+10: [       OK ] FileCompressTest.ErrorCode_ValuesAreCorrect (0 ms)
+10: [ RUN      ] FileCompressTest.CompressSingleFile_ValidInput_ReturnsSuccess
+10: [       OK ] FileCompressTest.CompressSingleFile_ValidInput_ReturnsSuccess (5 ms)
+10: [ RUN      ] FileCompressTest.CompressSingleFile_NonExistentInput_ReturnsError
+10: Error: /nonexistent/file.txt is not a regular file.
+10: [       OK ] FileCompressTest.CompressSingleFile_NonExistentInput_ReturnsError (1 ms)
+10: [ RUN      ] FileCompressTest.CompressSingleFile_EmptyFile_ReturnsSuccess
+10: [       OK ] FileCompressTest.CompressSingleFile_EmptyFile_ReturnsSuccess (0 ms)
+10: [ RUN      ] FileCompressTest.CompressSingleFile_ReducesSize
+10: [       OK ] FileCompressTest.CompressSingleFile_ReducesSize (50 ms)
+10: [ RUN      ] FileCompressTest.CompressFiles_MultipleFiles_ReturnsSuccess
+10: [       OK ] FileCompressTest.CompressFiles_MultipleFiles_ReturnsSuccess (3 ms)
+10: [ RUN      ] FileCompressTest.CompressFiles_EmptyList_ReturnsError
+10: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_file_compress.cpp:143: Failure
+10: Expected: (result) != (FileCompress::ErrorCode::Success), actual: 4-byte object <00-00 00-00> vs 4-byte object <00-00 00-00>
+10: [  FAILED  ] FileCompressTest.CompressFiles_EmptyList_ReturnsError (1 ms)
+10: [ RUN      ] FileCompressTest.CompressFiles_ContainsNonExistentFile_ReturnsError
+10: Warning: Invalid path: /nonexistent/file.txt
+10: [       OK ] FileCompressTest.CompressFiles_ContainsNonExistentFile_ReturnsError (0 ms)
+10: [ RUN      ] FileCompressTest.GetFilesInDirectory_ExistingDirectory_ReturnsFiles
+10: [       OK ] FileCompressTest.GetFilesInDirectory_ExistingDirectory_ReturnsFiles (0 ms)
+10: [ RUN      ] FileCompressTest.HandleInvalidOutputPath_DoesNotCreateFile
+10: Error: Failed to create output file: /nonexistent/directory/compressed.lz4
+10: [       OK ] FileCompressTest.HandleInvalidOutputPath_DoesNotCreateFile (0 ms)
+10: [ RUN      ] FileCompressTest.HandleLargeFile_CompressesSuccessfully
+10: [       OK ] FileCompressTest.HandleLargeFile_CompressesSuccessfully (509 ms)
+10: [----------] 11 tests from FileCompressTest (569 ms total)
+10: 
+10: [----------] Global test environment tear-down
+10: [==========] 11 tests from 1 test suite ran. (569 ms total)
+10: [  PASSED  ] 10 tests.
+10: [  FAILED  ] 1 test, listed below:
+10: [  FAILED  ] FileCompressTest.CompressFiles_EmptyList_ReturnsError
+10: 
+10:  1 FAILED TEST
+10/13 Test #10: test_file_compress ...............***Failed    0.63 sec
+
+[WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+[==========] Running 11 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 11 tests from FileCompressTest
+[ RUN      ] FileCompressTest.ErrorCode_ValuesAreCorrect
+[       OK ] FileCompressTest.ErrorCode_ValuesAreCorrect (0 ms)
+[ RUN      ] FileCompressTest.CompressSingleFile_ValidInput_ReturnsSuccess
+[       OK ] FileCompressTest.CompressSingleFile_ValidInput_ReturnsSuccess (5 ms)
+[ RUN      ] FileCompressTest.CompressSingleFile_NonExistentInput_ReturnsError
+Error: /nonexistent/file.txt is not a regular file.
+[       OK ] FileCompressTest.CompressSingleFile_NonExistentInput_ReturnsError (1 ms)
+[ RUN      ] FileCompressTest.CompressSingleFile_EmptyFile_ReturnsSuccess
+[       OK ] FileCompressTest.CompressSingleFile_EmptyFile_ReturnsSuccess (0 ms)
+[ RUN      ] FileCompressTest.CompressSingleFile_ReducesSize
+[       OK ] FileCompressTest.CompressSingleFile_ReducesSize (50 ms)
+[ RUN      ] FileCompressTest.CompressFiles_MultipleFiles_ReturnsSuccess
+[       OK ] FileCompressTest.CompressFiles_MultipleFiles_ReturnsSuccess (3 ms)
+[ RUN      ] FileCompressTest.CompressFiles_EmptyList_ReturnsError
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_file_compress.cpp:143: Failure
+Expected: (result) != (FileCompress::ErrorCode::Success), actual: 4-byte object <00-00 00-00> vs 4-byte object <00-00 00-00>
+[  FAILED  ] FileCompressTest.CompressFiles_EmptyList_ReturnsError (1 ms)
+[ RUN      ] FileCompressTest.CompressFiles_ContainsNonExistentFile_ReturnsError
+Warning: Invalid path: /nonexistent/file.txt
+[       OK ] FileCompressTest.CompressFiles_ContainsNonExistentFile_ReturnsError (0 ms)
+[ RUN      ] FileCompressTest.GetFilesInDirectory_ExistingDirectory_ReturnsFiles
+[       OK ] FileCompressTest.GetFilesInDirectory_ExistingDirectory_ReturnsFiles (0 ms)
+[ RUN      ] FileCompressTest.HandleInvalidOutputPath_DoesNotCreateFile
+Error: Failed to create output file: /nonexistent/directory/compressed.lz4
+[       OK ] FileCompressTest.HandleInvalidOutputPath_DoesNotCreateFile (0 ms)
+[ RUN      ] FileCompressTest.HandleLargeFile_CompressesSuccessfully
+[       OK ] FileCompressTest.HandleLargeFile_CompressesSuccessfully (509 ms)
+[----------] 11 tests from FileCompressTest (569 ms total)
+
+[----------] Global test environment tear-down
+[==========] 11 tests from 1 test suite ran. (569 ms total)
+[  PASSED  ] 10 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] FileCompressTest.CompressFiles_EmptyList_ReturnsError
+
+ 1 FAILED TEST
+
+test 11
+      Start 11: test_data_encryption
+
+11: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_data_encryption
+11: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/unit
+11: Test timeout computed to be: 10000000
+11: 
+11: [WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+11: [==========] Running 11 tests from 1 test suite.
+11: [----------] Global test environment set-up.
+11: [----------] 11 tests from DataEncryptionTest
+11: [ RUN      ] DataEncryptionTest.Encrypt_ValidData_ReturnsNonEmpty
+11: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:41: Failure
+11: Value of: ciphertext.empty()
+11:   Actual: true
+11: Expected: false
+11: [  FAILED  ] DataEncryptionTest.Encrypt_ValidData_ReturnsNonEmpty (0 ms)
+11: [ RUN      ] DataEncryptionTest.Decrypt_ValidData_ReturnsTrue
+11: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:50: Failure
+11: Value of: ciphertext.empty()
+11:   Actual: true
+11: Expected: false
+11: [  FAILED  ] DataEncryptionTest.Decrypt_ValidData_ReturnsTrue (0 ms)
+11: [ RUN      ] DataEncryptionTest.EncryptDecrypt_RoundTrip_PreservesData
+11: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:62: Failure
+11: Value of: ciphertext.empty()
+11:   Actual: true
+11: Expected: false
+11: [  FAILED  ] DataEncryptionTest.EncryptDecrypt_RoundTrip_PreservesData (0 ms)
+11: [ RUN      ] DataEncryptionTest.Encrypt_EmptyData_ReturnsEmpty
+11: [       OK ] DataEncryptionTest.Encrypt_EmptyData_ReturnsEmpty (0 ms)
+11: [ RUN      ] DataEncryptionTest.Encrypt_LargeData_ReturnsNonEmpty
+11: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:86: Failure
+11: Value of: ciphertext.empty()
+11:   Actual: true
+11: Expected: false
+11: [  FAILED  ] DataEncryptionTest.Encrypt_LargeData_ReturnsNonEmpty (22 ms)
+11: [ RUN      ] DataEncryptionTest.Encrypt_SingleByte_WorksCorrectly
+11: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:96: Failure
+11: Value of: ciphertext.empty()
+11:   Actual: true
+11: Expected: false
+11: [  FAILED  ] DataEncryptionTest.Encrypt_SingleByte_WorksCorrectly (0 ms)
+11: [ RUN      ] DataEncryptionTest.TamperingDetection
+11: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:105: Failure
+11: Value of: ciphertext.empty()
+11:   Actual: true
+11: Expected: false
+11: [  FAILED  ] DataEncryptionTest.TamperingDetection (0 ms)
+11: [ RUN      ] DataEncryptionTest.Encrypt_BinaryData_WorksCorrectly
+11: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:126: Failure
+11: Value of: ciphertext.empty()
+11:   Actual: true
+11: Expected: false
+11: [  FAILED  ] DataEncryptionTest.Encrypt_BinaryData_WorksCorrectly (0 ms)
+11: [ RUN      ] DataEncryptionTest.Encrypt_StringData_WorksCorrectly
+11: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:135: Failure
+11: Value of: ciphertext.empty()
+11:   Actual: true
+11: Expected: false
+11: [  FAILED  ] DataEncryptionTest.Encrypt_StringData_WorksCorrectly (0 ms)
+11: [ RUN      ] DataEncryptionTest.Encrypt_UnicodeData_WorksCorrectly
+11: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:144: Failure
+11: Value of: ciphertext.empty()
+11:   Actual: true
+11: Expected: false
+11: [  FAILED  ] DataEncryptionTest.Encrypt_UnicodeData_WorksCorrectly (0 ms)
+11: [ RUN      ] DataEncryptionTest.Encrypt_OutputsDifferentSize
+11: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:153: Failure
+11: Expected: (ciphertext.size()) >= (plaintext.size()), actual: 0 vs 100
+11: [  FAILED  ] DataEncryptionTest.Encrypt_OutputsDifferentSize (0 ms)
+11: [----------] 11 tests from DataEncryptionTest (22 ms total)
+11: 
+11: [----------] Global test environment tear-down
+11: [==========] 11 tests from 1 test suite ran. (22 ms total)
+11: [  PASSED  ] 1 test.
+11: [  FAILED  ] 10 tests, listed below:
+11: [  FAILED  ] DataEncryptionTest.Encrypt_ValidData_ReturnsNonEmpty
+11: [  FAILED  ] DataEncryptionTest.Decrypt_ValidData_ReturnsTrue
+11: [  FAILED  ] DataEncryptionTest.EncryptDecrypt_RoundTrip_PreservesData
+11: [  FAILED  ] DataEncryptionTest.Encrypt_LargeData_ReturnsNonEmpty
+11: [  FAILED  ] DataEncryptionTest.Encrypt_SingleByte_WorksCorrectly
+11: [  FAILED  ] DataEncryptionTest.TamperingDetection
+11: [  FAILED  ] DataEncryptionTest.Encrypt_BinaryData_WorksCorrectly
+11: [  FAILED  ] DataEncryptionTest.Encrypt_StringData_WorksCorrectly
+11: [  FAILED  ] DataEncryptionTest.Encrypt_UnicodeData_WorksCorrectly
+11: [  FAILED  ] DataEncryptionTest.Encrypt_OutputsDifferentSize
+11: 
+11: 10 FAILED TESTS
+11/13 Test #11: test_data_encryption .............***Failed    0.08 sec
+
+[WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+[==========] Running 11 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 11 tests from DataEncryptionTest
+[ RUN      ] DataEncryptionTest.Encrypt_ValidData_ReturnsNonEmpty
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:41: Failure
+Value of: ciphertext.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataEncryptionTest.Encrypt_ValidData_ReturnsNonEmpty (0 ms)
+[ RUN      ] DataEncryptionTest.Decrypt_ValidData_ReturnsTrue
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:50: Failure
+Value of: ciphertext.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataEncryptionTest.Decrypt_ValidData_ReturnsTrue (0 ms)
+[ RUN      ] DataEncryptionTest.EncryptDecrypt_RoundTrip_PreservesData
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:62: Failure
+Value of: ciphertext.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataEncryptionTest.EncryptDecrypt_RoundTrip_PreservesData (0 ms)
+[ RUN      ] DataEncryptionTest.Encrypt_EmptyData_ReturnsEmpty
+[       OK ] DataEncryptionTest.Encrypt_EmptyData_ReturnsEmpty (0 ms)
+[ RUN      ] DataEncryptionTest.Encrypt_LargeData_ReturnsNonEmpty
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:86: Failure
+Value of: ciphertext.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataEncryptionTest.Encrypt_LargeData_ReturnsNonEmpty (22 ms)
+[ RUN      ] DataEncryptionTest.Encrypt_SingleByte_WorksCorrectly
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:96: Failure
+Value of: ciphertext.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataEncryptionTest.Encrypt_SingleByte_WorksCorrectly (0 ms)
+[ RUN      ] DataEncryptionTest.TamperingDetection
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:105: Failure
+Value of: ciphertext.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataEncryptionTest.TamperingDetection (0 ms)
+[ RUN      ] DataEncryptionTest.Encrypt_BinaryData_WorksCorrectly
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:126: Failure
+Value of: ciphertext.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataEncryptionTest.Encrypt_BinaryData_WorksCorrectly (0 ms)
+[ RUN      ] DataEncryptionTest.Encrypt_StringData_WorksCorrectly
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:135: Failure
+Value of: ciphertext.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataEncryptionTest.Encrypt_StringData_WorksCorrectly (0 ms)
+[ RUN      ] DataEncryptionTest.Encrypt_UnicodeData_WorksCorrectly
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:144: Failure
+Value of: ciphertext.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataEncryptionTest.Encrypt_UnicodeData_WorksCorrectly (0 ms)
+[ RUN      ] DataEncryptionTest.Encrypt_OutputsDifferentSize
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/unit/test_data_encryption.cpp:153: Failure
+Expected: (ciphertext.size()) >= (plaintext.size()), actual: 0 vs 100
+[  FAILED  ] DataEncryptionTest.Encrypt_OutputsDifferentSize (0 ms)
+[----------] 11 tests from DataEncryptionTest (22 ms total)
+
+[----------] Global test environment tear-down
+[==========] 11 tests from 1 test suite ran. (22 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 10 tests, listed below:
+[  FAILED  ] DataEncryptionTest.Encrypt_ValidData_ReturnsNonEmpty
+[  FAILED  ] DataEncryptionTest.Decrypt_ValidData_ReturnsTrue
+[  FAILED  ] DataEncryptionTest.EncryptDecrypt_RoundTrip_PreservesData
+[  FAILED  ] DataEncryptionTest.Encrypt_LargeData_ReturnsNonEmpty
+[  FAILED  ] DataEncryptionTest.Encrypt_SingleByte_WorksCorrectly
+[  FAILED  ] DataEncryptionTest.TamperingDetection
+[  FAILED  ] DataEncryptionTest.Encrypt_BinaryData_WorksCorrectly
+[  FAILED  ] DataEncryptionTest.Encrypt_StringData_WorksCorrectly
+[  FAILED  ] DataEncryptionTest.Encrypt_UnicodeData_WorksCorrectly
+[  FAILED  ] DataEncryptionTest.Encrypt_OutputsDifferentSize
+
+10 FAILED TESTS
+
+test 12
+      Start 12: test_gait_trigger_chain
+
+12: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_gait_trigger_chain
+12: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/integration
+12: Test timeout computed to be: 10000000
+12: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+12: 
+12: [WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+12: [==========] Running 14 tests from 2 test suites.
+12: [----------] Global test environment set-up.
+12: [----------] 10 tests from GaitTriggerLogicTest
+12: [ RUN      ] GaitTriggerLogicTest.TriggerForLargeDistance
+12: [       OK ] GaitTriggerLogicTest.TriggerForLargeDistance (0 ms)
+12: [ RUN      ] GaitTriggerLogicTest.NoTriggerForSamePosition
+12: [       OK ] GaitTriggerLogicTest.NoTriggerForSamePosition (0 ms)
+12: [ RUN      ] GaitTriggerLogicTest.NoTriggerForSmallDistance
+12: [       OK ] GaitTriggerLogicTest.NoTriggerForSmallDistance (0 ms)
+12: [ RUN      ] GaitTriggerLogicTest.TriggerAtExactThreshold
+12: [       OK ] GaitTriggerLogicTest.TriggerAtExactThreshold (0 ms)
+12: [ RUN      ] GaitTriggerLogicTest.NoTriggerTooFrequent
+12: [       OK ] GaitTriggerLogicTest.NoTriggerTooFrequent (0 ms)
+12: [ RUN      ] GaitTriggerLogicTest.TriggerAfterInterval
+12: [       OK ] GaitTriggerLogicTest.TriggerAfterInterval (0 ms)
+12: [ RUN      ] GaitTriggerLogicTest.TriggerForDiagonalMovement
+12: [       OK ] GaitTriggerLogicTest.TriggerForDiagonalMovement (0 ms)
+12: [ RUN      ] GaitTriggerLogicTest.NoTriggerForSmallDiagonal
+12: [       OK ] GaitTriggerLogicTest.NoTriggerForSmallDiagonal (0 ms)
+12: [ RUN      ] GaitTriggerLogicTest.IncreasedMinDistanceRejectsMore
+12: [       OK ] GaitTriggerLogicTest.IncreasedMinDistanceRejectsMore (0 ms)
+12: [ RUN      ] GaitTriggerLogicTest.IncreasedIntervalRejectsMore
+12: [       OK ] GaitTriggerLogicTest.IncreasedIntervalRejectsMore (0 ms)
+12: [----------] 10 tests from GaitTriggerLogicTest (0 ms total)
+12: 
+12: [----------] 4 tests from StateMachineChainTest
+12: [ RUN      ] StateMachineChainTest.FullCycleInitToIdle
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: [       OK ] StateMachineChainTest.FullCycleInitToIdle (0 ms)
+12: [ RUN      ] StateMachineChainTest.FullCyclePlanToNavigate
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: [       OK ] StateMachineChainTest.FullCyclePlanToNavigate (0 ms)
+12: [ RUN      ] StateMachineChainTest.ShutdownFromIdle
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: [       OK ] StateMachineChainTest.ShutdownFromIdle (0 ms)
+12: [ RUN      ] StateMachineChainTest.ErrorAndRecovery
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: Log is not inited, return
+12: [       OK ] StateMachineChainTest.ErrorAndRecovery (0 ms)
+12: [----------] 4 tests from StateMachineChainTest (0 ms total)
+12: 
+12: [----------] Global test environment tear-down
+12: [==========] 14 tests from 2 test suites ran. (0 ms total)
+12: [  PASSED  ] 14 tests.
+12/13 Test #12: test_gait_trigger_chain ..........   Passed    0.05 sec
+test 13
+      Start 13: test_data_upload_chain
+
+13: Test command: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/test_data_upload_chain
+13: Working Directory: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/build_coverage/tests/integration
+13: Test timeout computed to be: 10000000
+13: 
+13: [WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+13: [==========] Running 10 tests from 1 test suite.
+13: [----------] Global test environment set-up.
+13: [----------] 10 tests from DataUploadChainTest
+13: [ RUN      ] DataUploadChainTest.Ros2bagRecorder_CanCreateInstance
+13: [       OK ] DataUploadChainTest.Ros2bagRecorder_CanCreateInstance (1 ms)
+13: [ RUN      ] DataUploadChainTest.FileCompress_CompressSingleFile
+13: [       OK ] DataUploadChainTest.FileCompress_CompressSingleFile (7 ms)
+13: [ RUN      ] DataUploadChainTest.FileCompress_CompressMultipleFiles
+13: [       OK ] DataUploadChainTest.FileCompress_CompressMultipleFiles (11 ms)
+13: [ RUN      ] DataUploadChainTest.FileCompress_HandleInvalidInput
+13: Error: /nonexistent/file.bag is not a regular file.
+13: [       OK ] DataUploadChainTest.FileCompress_HandleInvalidInput (0 ms)
+13: [ RUN      ] DataUploadChainTest.DataEncryption_EncryptDecryptRoundtrip
+13: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/integration/test_data_upload_chain.cpp:137: Failure
+13: Value of: ciphertext.empty()
+13:   Actual: true
+13: Expected: false
+13: [  FAILED  ] DataUploadChainTest.DataEncryption_EncryptDecryptRoundtrip (0 ms)
+13: [ RUN      ] DataUploadChainTest.DataEncryption_EncryptFile
+13: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/integration/test_data_upload_chain.cpp:164: Failure
+13: Value of: encrypted_data.empty()
+13:   Actual: true
+13: Expected: false
+13: [  FAILED  ] DataUploadChainTest.DataEncryption_EncryptFile (0 ms)
+13: [ RUN      ] DataUploadChainTest.DataEncryption_HandleTamperedData
+13: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/integration/test_data_upload_chain.cpp:182: Failure
+13: Value of: ciphertext.empty()
+13:   Actual: true
+13: Expected: false
+13: [  FAILED  ] DataUploadChainTest.DataEncryption_HandleTamperedData (0 ms)
+13: [ RUN      ] DataUploadChainTest.EndToEnd_CompleteDataPipeline
+13: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/integration/test_data_upload_chain.cpp:212: Failure
+13: Expected: (compressed_size) > (0), actual: 0 vs 0
+13: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/integration/test_data_upload_chain.cpp:229: Failure
+13: Value of: encrypted_data.empty()
+13:   Actual: true
+13: Expected: false
+13: [  FAILED  ] DataUploadChainTest.EndToEnd_CompleteDataPipeline (13 ms)
+13: [ RUN      ] DataUploadChainTest.ErrorHandling_MissingIntermediateFiles
+13: /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/integration/test_data_upload_chain.cpp:254: Failure
+13: Value of: encrypted.empty()
+13:   Actual: true
+13: Expected: false
+13: [  FAILED  ] DataUploadChainTest.ErrorHandling_MissingIntermediateFiles (0 ms)
+13: [ RUN      ] DataUploadChainTest.ErrorHandling_EmptyFileCompression
+13: [       OK ] DataUploadChainTest.ErrorHandling_EmptyFileCompression (0 ms)
+13: [----------] 10 tests from DataUploadChainTest (34 ms total)
+13: 
+13: [----------] Global test environment tear-down
+13: [==========] 10 tests from 1 test suite ran. (34 ms total)
+13: [  PASSED  ] 5 tests.
+13: [  FAILED  ] 5 tests, listed below:
+13: [  FAILED  ] DataUploadChainTest.DataEncryption_EncryptDecryptRoundtrip
+13: [  FAILED  ] DataUploadChainTest.DataEncryption_EncryptFile
+13: [  FAILED  ] DataUploadChainTest.DataEncryption_HandleTamperedData
+13: [  FAILED  ] DataUploadChainTest.EndToEnd_CompleteDataPipeline
+13: [  FAILED  ] DataUploadChainTest.ErrorHandling_MissingIntermediateFiles
+13: 
+13:  5 FAILED TESTS
+13/13 Test #13: test_data_upload_chain ...........***Failed    0.09 sec
+
+[WARNING] /opt/ros/humble/src/gtest_vendor/src/gtest.cc:5080:: WARNING: unrecognized output format "test" ignored.
+[==========] Running 10 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 10 tests from DataUploadChainTest
+[ RUN      ] DataUploadChainTest.Ros2bagRecorder_CanCreateInstance
+[       OK ] DataUploadChainTest.Ros2bagRecorder_CanCreateInstance (1 ms)
+[ RUN      ] DataUploadChainTest.FileCompress_CompressSingleFile
+[       OK ] DataUploadChainTest.FileCompress_CompressSingleFile (7 ms)
+[ RUN      ] DataUploadChainTest.FileCompress_CompressMultipleFiles
+[       OK ] DataUploadChainTest.FileCompress_CompressMultipleFiles (11 ms)
+[ RUN      ] DataUploadChainTest.FileCompress_HandleInvalidInput
+Error: /nonexistent/file.bag is not a regular file.
+[       OK ] DataUploadChainTest.FileCompress_HandleInvalidInput (0 ms)
+[ RUN      ] DataUploadChainTest.DataEncryption_EncryptDecryptRoundtrip
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/integration/test_data_upload_chain.cpp:137: Failure
+Value of: ciphertext.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataUploadChainTest.DataEncryption_EncryptDecryptRoundtrip (0 ms)
+[ RUN      ] DataUploadChainTest.DataEncryption_EncryptFile
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/integration/test_data_upload_chain.cpp:164: Failure
+Value of: encrypted_data.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataUploadChainTest.DataEncryption_EncryptFile (0 ms)
+[ RUN      ] DataUploadChainTest.DataEncryption_HandleTamperedData
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/integration/test_data_upload_chain.cpp:182: Failure
+Value of: ciphertext.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataUploadChainTest.DataEncryption_HandleTamperedData (0 ms)
+[ RUN      ] DataUploadChainTest.EndToEnd_CompleteDataPipeline
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/integration/test_data_upload_chain.cpp:212: Failure
+Expected: (compressed_size) > (0), actual: 0 vs 0
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/integration/test_data_upload_chain.cpp:229: Failure
+Value of: encrypted_data.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataUploadChainTest.EndToEnd_CompleteDataPipeline (13 ms)
+[ RUN      ] DataUploadChainTest.ErrorHandling_MissingIntermediateFiles
+/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/tests/integration/test_data_upload_chain.cpp:254: Failure
+Value of: encrypted.empty()
+  Actual: true
+Expected: false
+[  FAILED  ] DataUploadChainTest.ErrorHandling_MissingIntermediateFiles (0 ms)
+[ RUN      ] DataUploadChainTest.ErrorHandling_EmptyFileCompression
+[       OK ] DataUploadChainTest.ErrorHandling_EmptyFileCompression (0 ms)
+[----------] 10 tests from DataUploadChainTest (34 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 1 test suite ran. (34 ms total)
+[  PASSED  ] 5 tests.
+[  FAILED  ] 5 tests, listed below:
+[  FAILED  ] DataUploadChainTest.DataEncryption_EncryptDecryptRoundtrip
+[  FAILED  ] DataUploadChainTest.DataEncryption_EncryptFile
+[  FAILED  ] DataUploadChainTest.DataEncryption_HandleTamperedData
+[  FAILED  ] DataUploadChainTest.EndToEnd_CompleteDataPipeline
+[  FAILED  ] DataUploadChainTest.ErrorHandling_MissingIntermediateFiles
+
+ 5 FAILED TESTS
+
+
+69% tests passed, 4 tests failed out of 13
+
+Total Test time (real) =   1.34 sec
+
+The following tests FAILED:
+	  1 - DCPIntegrationTest (Failed)
+	 10 - test_file_compress (Failed)
+	 11 - test_data_encryption (Failed)
+	 13 - test_data_upload_chain (Failed)
+Errors while running CTest

@@ -3,8 +3,7 @@
 #include "common/log/logger.h"
 #include "common/utils/utils.h"
 
-namespace dcp::uploader
-{
+namespace aurora::collector {
 
 FileStatusManager::FileStatusManager(const std::string& json_path)
     : main_path_(json_path), backup_path_(json_path + ".bak"), tmp_path_(json_path + ".tmp") {
@@ -12,7 +11,7 @@ FileStatusManager::FileStatusManager(const std::string& json_path)
     LoadWithRecovery();
 }
 
-bool FileStatusManager::AddFileRecord(const std::string& file_path, const common::FileUploadRecord& record) {
+bool FileStatusManager::AddFileRecord(const std::string& file_path, const FileUploadRecord& record) {
     std::lock_guard<std::mutex> lock(mutex_);
     data_[file_path] = ConvertFileRecordToJson(record);
     return SaveToFile();
@@ -38,13 +37,13 @@ bool FileStatusManager::UpdateFileStartChunk(const std::string& file_path, int s
     return SaveToFile();
 }
 
-std::optional<common::FileUploadRecord> FileStatusManager::GetFileRecord(const std::string& file_path) {
+std::optional<FileUploadRecord> FileStatusManager::GetFileRecord(const std::string& file_path) {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!data_.contains(file_path)) {
         AD_INFO(FileStatusManager, "File %s has no record.", file_path.c_str());
         return std::nullopt;
     }
-    common::FileUploadRecord record;
+    FileUploadRecord record;
     try {
         record.chunk_count = data_[file_path]["chunk_count"];
         record.start_chunk = data_[file_path]["start_chunk"];
@@ -80,7 +79,7 @@ bool FileStatusManager::SaveToFile() {
 }
 
 //将一个文件上传记录对象转化为适合存储或传输的 JSON 格式
-json FileStatusManager::ConvertFileRecordToJson(const common::FileUploadRecord& record) {
+json FileStatusManager::ConvertFileRecordToJson(const FileUploadRecord& record) {
     json j = json::object();
     j["chunk_count"] = record.chunk_count;
     j["start_chunk"] = record.start_chunk;

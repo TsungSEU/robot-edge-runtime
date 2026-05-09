@@ -1,16 +1,17 @@
 {
-  "version": "v3.0",
+  "version": "v1.1.2",
   "dataStorage":{
     "rollingDeleteThreshold": 10,
     "rollInterval": 10,
     "bagInterval": 10,
     "storagePaths": {
-      "bagPath": "/data/dcp/data/bag/shadow/",
-      "encPath": "/data/dcp/data/enc",
-      "MaskedPath": "/data/dcp/data/masked"
+      "bagPath": "/home/xucong/caicAD/01datainfra/Aurora/data/bag",
+      "encPath": "/home/xucong/caicAD/01datainfra/Aurora/data/enc",
+      "MaskedPath": "/home/xucong/caicAD/01datainfra/Aurora/data/masked"
     },
     "capacityMb": 102400,
-    "requiredSpaceMb": 256
+    "requiredSpaceMb": 256,
+    "compressionFormat": "gzip"
   },
   "dataProto":{
     "vin": "LFBGEV070LJD45885",
@@ -33,30 +34,38 @@
     "uploadFileIntervalMs": 100,
     "uploadFileSliceIntervalMs": 100,
     "uploadFileSliceSizeMb": 50,
-    "clientCertPath": "/data/dcp/caic/resource/pki/client_cc.pem",
-    "clientKeyPath": "/data/dcp/caic/resource/pki/client_ck.pem",
-    "caCertPath": "/data/dcp/caic/resource/pki/server_ca.pem",
-    "publicKeyPath": "/data/dcp/caic/resource/pki/public_key.pem",
+    "clientCertPath": "/home/xucong/caicAD/01datainfra/Aurora/data/pki/client_cc.pem",
+    "clientKeyPath": "/home/xucong/caicAD/01datainfra/Aurora/data/pki/client_ck.pem",
+    "caCertPath": "/home/xucong/caicAD/01datainfra/Aurora/data/pki/server_ca.pem",
+    "publicKeyPath": "/home/xucong/caicAD/01datainfra/Aurora/data/pki/public_key.pem",
     "gateway": "dnaivigw-perfs.dfiov.com.cn",
-    "fileRecordPath": "/data/dcp/data/bag/shadow/file_record.json",
-    "filenameRegex": "(\\.(record|lz4|zip)$)",
+    "fileRecordPath": "/home/xucong/caicAD/01datainfra/Aurora/data/bag/upload_record.json",
+    "filenameRegex": ".*(\\.(db3|lz4|tar\\.gz)$)",
     "uploadPaths": {
-      "bagPath": "/data/dcp/data/bag/shadow",
-      "encPath": "/data/dcp/data/enc",
-      "MaskedPath": "/data/dcp/data/masked"
+      "bagPath": "/home/xucong/caicAD/01datainfra/Aurora/data/bag",
+      "encPath": "/home/xucong/caicAD/01datainfra/Aurora/dcp/data/enc",
+      "MaskedPath": "/home/xucong/caicAD/01datainfra/Aurora/data/masked"
+    },
+    "aws": {
+      "enabled": true,
+      "accessKeyId": "fbqscciqspfketquhzxi",
+      "secretAccessKey": "kosjohkhud5udvairjq5zct3mvk7hrzxj62q3jgb",
+      "region": "US",
+      "bucketName": "caic-dataset/robot_dev/",
+      "endpointUrl": "caic-obs.t3caic.com"
     }
   },
   "log":{
     "LOG_level":"info",
     "LOG_pattern":"%Y%m%d-%H%M%S",
-    "LOG_path":"/tmp/shadow_mode/log/",
-    "LOG_basename":"shadow_mode"
+    "LOG_path":"/tmp/aer/log/",
+    "LOG_basename":"aer"
   },
   "debug":{
     "closeMqttSsl":false,
     "closeDataReporter":false,
     "closeDataStorage":false,
-    "closeDataEnc":false,
+    "closeDataEnc":true,
     "closeDataUpload":false,
     "deleteFileAfterDataUpload":true,
     "closeLogUpload":true,

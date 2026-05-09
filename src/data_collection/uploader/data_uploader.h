@@ -15,13 +15,12 @@
 #include "protocol/data_protocol.h"
 #include "common/filestatus_manager.h"
 #include "common/data.h"
-#include "common/config/app_config.h"
+#include "../common/app_config.h"
 #include "data_encryption.h"
 #include "common/upload_queue.hpp"
 
 
-namespace dcp::uploader
-{
+namespace aurora::collector {
 
 namespace fs = std::filesystem;
 
@@ -30,20 +29,20 @@ public:
   DataUploader() = default;
   ~DataUploader();
 
-  bool Init(const common::AppConfigData::DataUpload& config);
+  bool Init(const AppConfigData::DataUpload& config);
   bool Start();
   bool Stop();
-  ErrorCode UploadFile(const std::string& full_path, common::UploadType upload_type);
+  ErrorCode UploadFile(const std::string& full_path, UploadType upload_type);
 
 private:
-  ErrorCode GetUploadInfo(const std::string& full_path, common::UploadType upload_type, int chunk_count, common::FileUploadRecord& record);
+  ErrorCode GetUploadInfo(const std::string& full_path, UploadType upload_type, int chunk_count, FileUploadRecord& record);
   void Run();
   void LoadFileList();
   void ProcessQueue();
-  void GetUploadBagInfo(dcp::common::FileUploadProgress& upload_progress);
+  void GetUploadBagInfo(FileUploadProgress& upload_progress);
 
   std::unique_ptr<FileStatusManager> file_status_manager_;
-  common::AppConfigData::DataUpload config_;
+  AppConfigData::DataUpload config_;
   // std::queue<std::string> upload_queue_;
   std::thread worker_thread_;
   std::mutex mutex_;

@@ -1,5 +1,5 @@
 {
-  "MODULE_VERSION": "1.20260123-081026-fcb77.aurora_robot-x86-64-dev-dirty",
+  "MODULE_VERSION": "1.20260422-103604-85aa9.aurora_robot-x86-64-dev-new",
   "BUILDTOOLS_TARGET_PLATFORM": "x86-64",
   "PROJECT_NAME": "aurora_robot",
   "AD_CROSS_COMPILE": "ON",

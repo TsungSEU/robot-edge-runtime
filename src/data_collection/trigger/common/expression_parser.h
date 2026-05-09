@@ -13,8 +13,7 @@
 #include <memory>
 #include <functional>
 
-namespace dcp::trigger
-{
+namespace aurora::collector {
 
 class ExpressionParser {
 public:

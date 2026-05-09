@@ -1,16 +1,18 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(aurora_edge)
+# Project version
+set(MODULE_VERSION "1.10.3")
+
+project(aurora_edge_runtime VERSION ${MODULE_VERSION})
 
 # 编译器标志
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -fext-numeric-literals -pipe -O2 -Wall -Wextra -fopenmp -fPIC -pthread")
-add_compile_options(-w)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -fext-numeric-literals -pipe -O2 -fopenmp -fPIC -pthread -g")
+add_compile_options(-Wall -Wextra -Wpedantic)
 
-option(ENABLE_RSCL "Enable RSCL support" OFF)
 option(ENABLE_ROS2 "Enable ROS2 support" ON)
 option(DOWNLOAD_ONNXRUNTIME "Download ONNX Runtime if not found" ON)
 
-find_package(Boost REQUIRED COMPONENTS filesystem system iostreams thread regex)
+find_package(Boost CONFIG REQUIRED COMPONENTS filesystem system iostreams thread regex)
 include_directories(${Boost_INCLUDE_DIRS})
 
 include(cmake/Find3rdparty.cmake)
@@ -31,11 +33,11 @@ if(NOT EXISTS "${ONNXRUNTIME_PATH}" AND DOWNLOAD_ONNXRUNTIME)
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-            set(ONNXRUNTIME_URL "https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-linux-x64-1.10.0.tgz")
-            set(ONNXRUNTIME_DIR "onnxruntime-linux-x64-1.10.0")
+            set(ONNXRUNTIME_URL "https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-linux-x64-1.16.3.tgz")
+            set(ONNXRUNTIME_DIR "onnxruntime-linux-x64-1.16.3")
         elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
-            set(ONNXRUNTIME_URL "https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-linux-aarch64-1.10.0.tgz")
-            set(ONNXRUNTIME_DIR "onnxruntime-linux-aarch64-1.10.0")
+            set(ONNXRUNTIME_URL "https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-linux-aarch64-1.16.3.tgz")
+            set(ONNXRUNTIME_DIR "onnxruntime-linux-aarch64-1.16.3")
         endif()
     endif()
 
@@ -57,35 +59,6 @@ if(EXISTS "${ONNXRUNTIME_PATH}")
     message(STATUS "Found ONNX Runtime: ${ONNXRUNTIME_PATH}")
 endif()
 
-if(ENABLE_ROS2)
-    include_directories(
-        /opt/ros/humble/include
-        /opt/ros/humble/include/rclcpp
-        /opt/ros/humble/include/rosbag2_cpp
-        /opt/ros/humble/include/rosbag2_storage
-        /opt/ros/humble/include/rosidl_typesupport_introspection_cpp
-        /opt/ros/humble/include/libstatistics_collector
-        /opt/ros/humble/include/rcl
-        /opt/ros/humble/include/rcutils
-        /opt/ros/humble/include/rcl_yaml_param_parser
-        /opt/ros/humble/include/rosidl_runtime_c
-        /opt/ros/humble/include/rosidl_typesupport_interface
-        /opt/ros/humble/include/rcpputils
-        /opt/ros/humble/include/builtin_interfaces
-        /opt/ros/humble/include/rmw
-        /opt/ros/humble/include/rosidl_runtime_cpp
-        /opt/ros/humble/include/tracetools
-        /opt/ros/humble/include/rcl_interfaces
-        /opt/ros/humble/include/statistics_msgs
-        /opt/ros/humble/include/std_msgs
-    )
-
-    link_directories(/opt/ros/humble/lib/)
-
-    include_directories(./install/data_collection/include/data_collection/)
-    link_directories(./install/data_collection/lib/)
-
-endif()
 
 # 获取所有链接目录
 get_property(link_dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY LINK_DIRECTORIES)
@@ -95,8 +68,50 @@ foreach(dir IN LISTS link_dirs)
     message(STATUS "Link directory: ${dir}")
 endforeach()
 
+# 获取Git commit hash用于启动日志
+find_package(Git)
+if(GIT_FOUND)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --short=8 HEAD
+        OUTPUT_VARIABLE GIT_COMMIT_HASH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    if(NOT GIT_COMMIT_HASH)
+        set(GIT_COMMIT_HASH "unknown")
+    endif()
+else()
+    set(GIT_COMMIT_HASH "unknown")
+endif()
+
+# 构建时间戳
+string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
+
+# 添加编译定义
+add_compile_definitions(MODULE_VERSION="${MODULE_VERSION}")
+add_compile_definitions(GIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
+add_compile_definitions(BUILD_TIMESTAMP="${BUILD_TIMESTAMP}")
+
+message(STATUS "Build version: ${MODULE_VERSION}")
+message(STATUS "Git commit: ${GIT_COMMIT_HASH}")
+message(STATUS "Build timestamp: ${BUILD_TIMESTAMP}")
+
+# Coverage support (must be before add_subdirectory)
+option(ENABLE_COVERAGE "Enable code coverage reporting" OFF)
+if(ENABLE_COVERAGE)
+    add_compile_options(--coverage -O0 -g)
+    add_link_options(--coverage)
+endif()
+
 # 添加子目录
 add_subdirectory(src)
+
+# 添加测试（可选）
+option(BUILD_TESTS "Build unit tests" ON)
+if(BUILD_TESTS)
+    add_subdirectory(tests)
+    enable_testing()
+endif()
 
 #############
 ##  CPack  ##

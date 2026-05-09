@@ -9,9 +9,9 @@
 #include <string>
 #include <vector>
 #include <optional>
-#include "common/config/app_config.h"
+#include "../common/app_config.h"
 
-namespace dcp::recorder {
+namespace aurora::collector {
 
 class FileRoller {
 public:

@@ -73,7 +73,6 @@ tgz_x86: $(RELEASE_CONF)
 	@echo "###################################################"
 	@echo "# Make tgz_x86"
 	@echo "###################################################"
-	@echo ""
 	@mkdir -p build
 	@cd build && cmake .. \
 		-DCMAKE_TOOLCHAIN_FILE=./cmake/cross_toolchains/x86-toolchain.cmake \

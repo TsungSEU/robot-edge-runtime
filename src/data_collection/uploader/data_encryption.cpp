@@ -13,8 +13,7 @@
 #include "common/utils/utils.h"
 #include "common/utils/sRegex.h"
 
-namespace dcp::uploader
-{
+namespace aurora::collector {
 
 DataEncryption::~DataEncryption() {
     free_keys();
@@ -488,8 +487,8 @@ int DataEncryption::EncryptChunkFileWithEnvelope(const std::string &plainfile, c
         error_msg = "RSA encryption failed";
         return -1;
     }
-    // print_hex("aes_key:", aes_key.data(), aes_key.size());
-    // print_hex("encrypted_key:", encrypted_key.data(), encrypted_key.size());
+    print_hex("aes_key:", aes_key.data(), aes_key.size());
+    print_hex("encrypted_key:", encrypted_key.data(), encrypted_key.size());
 
     // 添加加密密钥长度（网络字节序）
     uint32_t key_len = htonl(static_cast<uint32_t>(encrypted_key.size()));
@@ -499,16 +498,6 @@ int DataEncryption::EncryptChunkFileWithEnvelope(const std::string &plainfile, c
     out_file.write(reinterpret_cast<const char*>(encrypted_key.data()), encrypted_key.size());
     // 添加IV
     // out_file.write(reinterpret_cast<const char*>(iv.data()), 16);
-
-
-    // // 添加加密密钥长度（网络字节序）
-    // uint32_t key_len = htonl(static_cast<uint32_t>(aes_key.size()));
-    // // 将加密密钥长度写入输出文件
-    // out_file.write(reinterpret_cast<const char*>(&key_len), sizeof(key_len));
-    // // 添加加密密钥
-    // out_file.write(reinterpret_cast<const char*>(aes_key.data()), aes_key.size());
-    // // 添加IV
-    // // out_file.write(reinterpret_cast<const char*>(iv.data()), 16);
 
     //2.3. Encrypt the data with AES-256-CBC
     if(rsa_chunk_encrypt(in_file, out_file) != 0) { return -1;}

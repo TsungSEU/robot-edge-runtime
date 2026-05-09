@@ -1,0 +1,7 @@
+# ClearErrors.srv
+# Service to clear the error tracking history
+
+---
+# Response
+bool success                     # True if errors were cleared successfully
+string message                   # Status message

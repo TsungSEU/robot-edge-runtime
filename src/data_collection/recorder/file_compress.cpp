@@ -2,23 +2,38 @@
 #include <iostream>
 #include <fstream>
 #include <lz4frame.h>
+#include <zlib.h>
 #include <cstdio>
 #include <filesystem>
 #include "microtar/microtar.h"
 
 namespace fs = std::filesystem;
 
-namespace dcp::recorder {
+namespace aurora::collector {
 
 // 压缩多个目录和文件
 FileCompress::ErrorCode FileCompress::CompressFiles(
     const std::vector<std::string>& inputFiles,
-    const std::string& outputFile) {
+    const std::string& outputFile,
+    CompressionFormat format) {
     std::vector<std::string> allFiles;
 
     for (const auto& path : inputFiles) {
         if (fs::is_regular_file(path)) {
             allFiles.push_back(path);
+        } else if (fs::is_directory(path)) {
+            // 如果是目录，获取目录中的所有文件
+            std::vector<std::string> dirFiles;
+            ErrorCode result = GetFilesInDirectory(path, dirFiles);
+            if (result != ErrorCode::Success) {
+                std::cerr << "Error: Failed to get files from directory: " << path << std::endl;
+                return result;
+            }
+            
+            // 将目录中的文件添加到allFiles列表中
+            for (const auto& file : dirFiles) {
+                allFiles.push_back(file);
+            }
         } else {
             std::cerr << "Warning: Invalid path: " << path << std::endl;
             return ErrorCode::InvalidInputPath;
@@ -48,7 +63,18 @@ FileCompress::ErrorCode FileCompress::CompressFiles(
         inFile.read(buffer.data(), fileSize);
         inFile.close();
 
-        std::string archiveName = fs::path(path).filename().string();
+        std::string archiveName = path;
+        for (const auto& inputPath : inputFiles) {
+            if (fs::is_directory(inputPath) && path.substr(0, inputPath.length() + 1) == inputPath + "/") {
+                archiveName = path.substr(inputPath.length() + 1); // +1 for the "/"
+                break;
+            }
+        }
+        
+        size_t lastSlashPos = archiveName.find_last_of("/\\");
+        if (lastSlashPos != std::string::npos) {
+            archiveName = archiveName.substr(lastSlashPos + 1);
+        }
 
         if (mtar_write_file_header(&tar, archiveName.c_str(), fileSize) != 0) {
             std::cerr << "Error: Failed to write tar header for " << archiveName << std::endl;
@@ -75,9 +101,14 @@ FileCompress::ErrorCode FileCompress::CompressFiles(
     tarFile.close();
 
     std::vector<char> compressedData;
-    ErrorCode compressError = CompressData(tarData, compressedData);
+    ErrorCode compressError;
+    if (format == CompressionFormat::Gzip) {
+        compressError = CompressDataGzip(tarData, compressedData);
+    } else {
+        compressError = CompressDataLz4(tarData, compressedData);
+    }
     if (compressError != ErrorCode::Success) {
-        std::cerr << "Error: LZ4 compression failed" << std::endl;
+        std::cerr << "Error: compression failed" << std::endl;
         std::remove(tempTarFile.c_str());
         return compressError;
     }
@@ -93,12 +124,12 @@ FileCompress::ErrorCode FileCompress::CompressFiles(
 
     std::remove(tempTarFile.c_str());
 
-    std::cout << "Compression completed (standard tar.lz4): " << outputFile << std::endl;
     return ErrorCode::Success;
 }
 
 FileCompress::ErrorCode FileCompress::CompressSingleFileToLz4(
-    const std::string& inputFile, const std::string& outputFile) {
+    const std::string& inputFile, const std::string& outputFile,
+    CompressionFormat format) {
     if (!fs::is_regular_file(inputFile)) {
         std::cerr << "Error: " << inputFile << " is not a regular file." << std::endl;
         return ErrorCode::InvalidInputPath;
@@ -119,7 +150,12 @@ FileCompress::ErrorCode FileCompress::CompressSingleFileToLz4(
     );
 
     std::vector<char> compressedData;
-    ErrorCode error = CompressData(fileData, compressedData);
+    ErrorCode error;
+    if (format == CompressionFormat::Gzip) {
+        error = CompressDataGzip(fileData, compressedData);
+    } else {
+        error = CompressDataLz4(fileData, compressedData);
+    }
     if (error != ErrorCode::Success) {
         return error;
     }
@@ -128,7 +164,7 @@ FileCompress::ErrorCode FileCompress::CompressSingleFileToLz4(
 }
 
 
-FileCompress::ErrorCode FileCompress::CompressData(const std::vector<char>& input, std::vector<char>& compressedData) {
+FileCompress::ErrorCode FileCompress::CompressDataLz4(const std::vector<char>& input, std::vector<char>& compressedData) {
     size_t srcSize = input.size();
 
     LZ4F_cctx* cctx;
@@ -162,6 +198,36 @@ FileCompress::ErrorCode FileCompress::CompressData(const std::vector<char>& inpu
     LZ4F_freeCompressionContext(cctx);
     return ErrorCode::Success;
 
+}
+
+FileCompress::ErrorCode FileCompress::CompressDataGzip(const std::vector<char>& input, std::vector<char>& compressedData) {
+    z_stream strm = {};
+    // windowBits = 15 + 16 for gzip format
+    int ret = deflateInit2(&strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
+                           15 + 16, MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY);
+    if (ret != Z_OK) {
+        std::cerr << "Error: deflateInit2 failed: " << ret << std::endl;
+        return ErrorCode::CompressionFailed;
+    }
+
+    size_t bound = deflateBound(&strm, input.size());
+    compressedData.resize(bound);
+
+    strm.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(input.data()));
+    strm.avail_in = static_cast<uInt>(input.size());
+    strm.next_out = reinterpret_cast<Bytef*>(compressedData.data());
+    strm.avail_out = static_cast<uInt>(bound);
+
+    ret = deflate(&strm, Z_FINISH);
+    if (ret != Z_STREAM_END) {
+        std::cerr << "Error: deflate failed: " << ret << std::endl;
+        deflateEnd(&strm);
+        return ErrorCode::CompressionFailed;
+    }
+
+    compressedData.resize(strm.total_out);
+    deflateEnd(&strm);
+    return ErrorCode::Success;
 }
 
 // 递归获取目录中的所有文件

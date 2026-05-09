@@ -12,8 +12,7 @@
 #include <map>
 #include <stdexcept>
 
-namespace dcp::trigger
-{
+namespace aurora::collector {
 
 struct ExpressionParser::Impl {
     using symbol_table_t = exprtk::symbol_table<double>;

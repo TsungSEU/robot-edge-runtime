@@ -15,11 +15,12 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rosbag2_cpp/writer.hpp>
 
+#include "state_machine/state_machine.h"
 #include "channel/observer.h"
 #include "common/ringBuffer.h"
-#include "trigger/strategy_parser/strategy_config.h"
+#include "trigger/strategy/strategy_config.h"
 
-namespace dcp::recorder {
+namespace aurora::collector {
 
 /**
  * Generic Bag Recorder
@@ -91,6 +92,15 @@ struct ReadedMessage {
 };
 
 /**
+ * @struct TimestampedData
+ * @brief A serialized message with its timestamp, used by ring buffers
+ */
+struct TimestampedData {
+  std::vector<uint8_t> buffer;  ///< Raw serialized message data (deep-copy safe)
+  uint64_t timestamp;           ///< Timestamp in microseconds
+};
+
+/**
  * @class Ros2BagRecorder
  * @brief Professional bag recorder supporting arbitrary message types
  * 
@@ -104,7 +114,7 @@ struct ReadedMessage {
  * 
  * Implements the Observer pattern to receive messages from ChannelManager
  */
-class Ros2BagRecorder : public channel::Observer {  // 继承自Observer
+class Ros2BagRecorder : public Observer {  // 继承自Observer
  public:
   /**
    * @brief Constructor
@@ -129,6 +139,22 @@ class Ros2BagRecorder : public channel::Observer {  // 继承自Observer
    * @return true if initialization successful, false otherwise
    */
   bool InitRingBuffers();
+
+  /**
+   * @brief Set strategy configuration (for channel info)
+   * @param strategy Strategy configuration from JSON
+   */
+  void setStrategy(const std::shared_ptr<Strategy>& strategy) {
+    strategy_ = strategy;
+  }
+
+  /**
+   * @brief Set cache mode configuration
+   * @param cache_mode Cache mode from JSON config
+   */
+  void setCacheMode(const CacheMode& cache_mode) {
+    cache_mode_ = cache_mode;
+  }
 
   /**
    * @brief Open a bag file in specified mode
@@ -187,15 +213,34 @@ class Ros2BagRecorder : public channel::Observer {  // 继承自Observer
   bool HasDataWritten() const;
 
   /**
-   * @brief Trigger recording output for circular buffer mode
-   * Saves accumulated data to a new file with timestamp
-   * 
-   * @param trigger_timestamp Timestamp when trigger occurred (for logging)
+   * @brief Snapshot forward ring buffers immediately at trigger time
+   * Called on executor thread to capture data before ring buffer rotates.
+   * @param trigger_timestamp Timestamp when trigger occurred
+   * @param out_buffers [out] Map of topic -> extracted forward data
+   */
+  void snapshotForwardBuffers(
+      uint64_t trigger_timestamp,
+      std::unordered_map<std::string, std::vector<TimestampedData>>& out_buffers);
+
+  /**
+   * @brief Trigger recording with pre-saved forward buffers
+   * Used by async background worker — forward data already snapshotted.
+   * @param trigger_timestamp Timestamp when trigger occurred
    * @param output_file_path Path where to save the triggered data
+   * @param saved_forward_buffers Pre-extracted forward data (moved in)
    * @return true if trigger successful, false otherwise
    */
   bool TriggerRecord(uint64_t trigger_timestamp,
+                     const std::string& output_file_path,
+                     std::unordered_map<std::string, std::vector<TimestampedData>> saved_forward_buffers);
+
+  /**
+   * @brief Trigger recording (synchronous path — extracts forward buffers internally)
+   */
+  bool TriggerRecord(uint64_t trigger_timestamp,
                      const std::string& output_file_path);
+
+  void BreakOffRecord();
 
   /**
    * @brief Set maximum bag file size (for auto-rotation)
@@ -203,6 +248,18 @@ class Ros2BagRecorder : public channel::Observer {  // 继承自Observer
    * @return true if set successfully, false otherwise
    */
   bool SetMaxBagSize(size_t max_size_mb);
+
+  /**
+   * @brief Enable continuous recording mode (bypasses ring buffers)
+   * @param continuous true for continuous mode, false for trigger-based mode
+   */
+  void SetContinuousMode(bool continuous);
+
+  /**
+   * @brief Check if continuous mode is enabled
+   * @return true if continuous mode is enabled
+   */
+  bool IsContinuousMode() const;
 
   /**
    * @brief Get current recording statistics
@@ -249,21 +306,24 @@ class Ros2BagRecorder : public channel::Observer {  // 继承自Observer
   size_t messages_since_last_log_;
 
   // Circular buffer
-  std::shared_ptr<trigger::Strategy> strategy_{nullptr};
-  trigger::CacheMode cache_mode_;
-  struct TimestampedData {
-    rclcpp::SerializedMessage msg;
-    uint64_t timestamp;
-  };
-  using BufferType = common::RingBuffer<TimestampedData>;
+  std::shared_ptr<Strategy> strategy_{nullptr};
+  CacheMode cache_mode_;
+  using BufferType = RingBuffer<TimestampedData>;
   std::unordered_map<std::string, std::unique_ptr<BufferType>> forward_ringbuffers_;
   std::unordered_map<std::string, std::unique_ptr<BufferType>> backward_ringbuffers_;
   std::unordered_map<std::string, std::vector<TimestampedData>> triggered_forward_buffers_;
   uint64_t forward_capture_duration_us_{0};
 
-  std::atomic<bool> is_triggered_{false};
+  // std::atomic<BusinessState> business_state_{BusinessState::IDLE};
+  // std::atomic<bool> is_triggered_{false};
+  std::atomic<bool> is_cancelled_{false};  // 添加取消标志
+  std::mutex cancel_mutex_;
+  std::condition_variable cv_cancel_;
   uint64_t trigger_timestamp_{0};
   std::mutex buffer_mutex_;
+
+  // Continuous recording mode (bypasses ring buffers)
+  bool continuous_mode_{false};
 };
 
 }

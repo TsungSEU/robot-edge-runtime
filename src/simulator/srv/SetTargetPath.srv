@@ -1,0 +1,10 @@
+# SetTargetPath.srv
+# Service to set the target path for the robot simulator to follow
+
+# Request
+geometry_msgs/Point[] waypoints  # Array of waypoints to follow
+
+---
+# Response
+bool success                     # True if path was set successfully
+string message                   # Status message

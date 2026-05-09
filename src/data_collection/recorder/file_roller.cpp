@@ -9,12 +9,12 @@
 #include "common/utils/sRegex.h"
 #include "common/utils/utils.h"
 
-namespace dcp::recorder {
+namespace aurora::collector {
 
 namespace fs = std::filesystem;
 
 FileRoller::FileRoller(){
-    auto appconfig = common::AppConfig::getInstance().GetConfig();
+    auto appconfig = AppConfig::getInstance().GetConfig();
     auto it  = appconfig.dataStorage.storagePaths.find("bagPath");
     if (it != appconfig.dataStorage.storagePaths.end()) {
         bagPath = it->second;
@@ -30,7 +30,7 @@ FileRoller::FileRoller(){
 }
 
 std::vector<std::string> FileRoller::getSortedCompressedFiles() const {
-    auto appconfig = common::AppConfig::getInstance().GetConfig();
+    auto appconfig = AppConfig::getInstance().GetConfig();
     std::vector<std::string> files;
 
     try {
@@ -60,7 +60,7 @@ std::vector<std::string> FileRoller::getSortedCompressedFiles() const {
 }
 
 int FileRoller::rollFiles() {
-    auto appconfig = common::AppConfig::getInstance().GetConfig();
+    auto appconfig = AppConfig::getInstance().GetConfig();
     auto files = getSortedCompressedFiles();
     int deletedCount = 0;
 

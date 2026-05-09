@@ -13,8 +13,7 @@
 #include <mqtt/async_client.h>
 #include <nlohmann/json.hpp>
 
-namespace dcp::uploader
-{
+namespace aurora::collector {
 
 class MqttWrapper {
 public:

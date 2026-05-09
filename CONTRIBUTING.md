@@ -1,4 +1,4 @@
-# Contributing to Aurora Edge Insight
+# Contributing to Aurora Edge Runtime
 
 We welcome contributions to this project! This document provides guidelines for contributing.
 

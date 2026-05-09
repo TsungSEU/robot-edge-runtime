@@ -5,7 +5,7 @@
 #include <cmath>
 #include <iostream>
 
-namespace dcp::common {
+namespace aurora::collector {
 class SignalSmoother {
 public:
     /**

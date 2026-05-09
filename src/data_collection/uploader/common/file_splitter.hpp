@@ -8,8 +8,7 @@
 #include <iomanip>
 #include "common/log/logger.h"
 
-namespace dcp::uploader
-{
+namespace aurora::collector {
 
 
 //读取指定路径文件并对文件进行切片
@@ -38,7 +37,7 @@ public:
         fileSize = file.tellg();//返回当前文件流的读写位置，配合ate标志，当前读写位置为文件总大小
         file.close();//关闭文件流，释放资源
         chunkCount = (fileSize + chunkSize - 1) / chunkSize; // 计算分片总数，向上取整
-        AD_INFO(FileSplitter,"fileSize:%d chunkSize:%d chunkCount:%d", (int)fileSize , (int)chunkSize,(int)chunkCount);
+        AD_INFO(FileSplitter,"fileSize: %d chunkSize: %d chunkCount: %d", fileSize , chunkSize, chunkCount);
         errorCode = SUCCESS; // 初始化成功
     }
 

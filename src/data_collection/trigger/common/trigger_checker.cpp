@@ -9,8 +9,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-namespace dcp::trigger
-{
+namespace aurora::collector {
 
 using namespace std;
 

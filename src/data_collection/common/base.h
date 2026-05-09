@@ -12,7 +12,7 @@
 #include <filesystem>
 #include <optional>
 #include <any>
-namespace dcp::common {
+namespace aurora::collector {
 
 namespace fs = std::filesystem;
 template <typename T>
@@ -51,7 +51,7 @@ inline char* getInstallRootPath() {
 #include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 #include <boost/any.hpp>
-namespace dcp::common {
+namespace aurora::collector {
     namespace fs = boost::filesystem;
     template <typename T>
     using optional = boost::optional<T>;

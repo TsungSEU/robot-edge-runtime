@@ -1,0 +1,552 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - Aurora Edge Runtime - Code Coverage Report - src/navigation_planner/rl_policy/humanoid_reward.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../../index.html">top level</a> - <a href="index.html">src/navigation_planner/rl_policy</a> - humanoid_reward.cpp<span style="font-size: 80%;"> (source / <a href="humanoid_reward.cpp.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">Aurora Edge Runtime - Code Coverage Report</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">221</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2026-04-13 15:57:36</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">25</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Legend:</td>
+            <td class="headerValueLeg">            Lines:
+            <span class="coverLegendCov">hit</span>
+            <span class="coverLegendNoCov">not hit</span>
+            | Branches:
+            <span class="coverLegendCov">+</span> taken
+            <span class="coverLegendNoCov">-</span> not taken
+            <span class="coverLegendNoCov">#</span> not executed
+</td>
+            <td></td>
+            <td class="headerItem">Branches:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">146</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">           Branch data     Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>                :            : // humanoid_reward.cpp</a>
+<a name="2"><span class="lineNum">       2 </span>                :            : #include &quot;humanoid_reward.h&quot;</a>
+<a name="3"><span class="lineNum">       3 </span>                :            : #include &lt;cmath&gt;</a>
+<a name="4"><span class="lineNum">       4 </span>                :            : #include &lt;sstream&gt;</a>
+<a name="5"><span class="lineNum">       5 </span>                :            : #include &lt;iomanip&gt;</a>
+<a name="6"><span class="lineNum">       6 </span>                :            : #include &lt;algorithm&gt;</a>
+<a name="7"><span class="lineNum">       7 </span>                :            : </a>
+<a name="8"><span class="lineNum">       8 </span>                :            : namespace aurora::planner {</a>
+<a name="9"><span class="lineNum">       9 </span>                :            : </a>
+<a name="10"><span class="lineNum">      10 </span>                :            : // ===== HumanoidRewardCalculator 实现 =====</a>
+<a name="11"><span class="lineNum">      11 </span>                :            : </a>
+<a name="12"><span class="lineNum">      12 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeReward(const HumanoidRewardState&amp; state,</span></a>
+<a name="13"><span class="lineNum">      13 </span>                :            :                                               const HumanoidRewardConfig&amp; config) {</a>
+<a name="14"><span class="lineNum">      14 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     RewardBreakdown breakdown = computeRewardBreakdown(state, config);</span></a>
+<a name="15"><span class="lineNum">      15 </span>                :<span class="lineNoCov">          0 :     return breakdown.total_reward;</span></a>
+<a name="16"><span class="lineNum">      16 </span>                :            : }</a>
+<a name="17"><span class="lineNum">      17 </span>                :            : </a>
+<a name="18"><span class="lineNum">      18 </span>                :            : HumanoidRewardCalculator::RewardBreakdown</a>
+<a name="19"><span class="lineNum">      19 </span>                :<span class="lineNoCov">          0 : HumanoidRewardCalculator::computeRewardBreakdown(const HumanoidRewardState&amp; state,</span></a>
+<a name="20"><span class="lineNum">      20 </span>                :            :                                                const HumanoidRewardConfig&amp; config) {</a>
+<a name="21"><span class="lineNum">      21 </span>                :<span class="lineNoCov">          0 :     RewardBreakdown breakdown;</span></a>
+<a name="22"><span class="lineNum">      22 </span>                :            : </a>
+<a name="23"><span class="lineNum">      23 </span>                :            :     // 计算各分量</a>
+<a name="24"><span class="lineNum">      24 </span>                :<span class="lineNoCov">          0 :     breakdown.data_reward = config.w_data * computeDataReward(state, config);</span></a>
+<a name="25"><span class="lineNum">      25 </span>                :<span class="lineNoCov">          0 :     breakdown.navigation_reward = config.w_navigation * computeNavigationReward(state, config);</span></a>
+<a name="26"><span class="lineNum">      26 </span>                :<span class="lineNoCov">          0 :     breakdown.stability_reward = config.w_stability * computeStabilityReward(state, config);</span></a>
+<a name="27"><span class="lineNum">      27 </span>                :<span class="lineNoCov">          0 :     breakdown.energy_reward = config.w_energy * computeEnergyReward(state, config);</span></a>
+<a name="28"><span class="lineNum">      28 </span>                :<span class="lineNoCov">          0 :     breakdown.smoothness_reward = computeSmoothnessReward(state, config);</span></a>
+<a name="29"><span class="lineNum">      29 </span>                :<span class="lineNoCov">          0 :     breakdown.gait_reward = computeGaitReward(state, config);</span></a>
+<a name="30"><span class="lineNum">      30 </span>                :<span class="lineNoCov">          0 :     breakdown.safety_reward = config.w_safety * computeSafetyReward(state, config);</span></a>
+<a name="31"><span class="lineNum">      31 </span>                :<span class="lineNoCov">          0 :     breakdown.time_penalty = computeTimePenalty(state, config);</span></a>
+<a name="32"><span class="lineNum">      32 </span>                :<span class="lineNoCov">          0 :     breakdown.reachability_reward = config.w_reachability * computeReachabilityReward(state, config);</span></a>
+<a name="33"><span class="lineNum">      33 </span>                :            : </a>
+<a name="34"><span class="lineNum">      34 </span>                :            :     // 总奖励</a>
+<a name="35"><span class="lineNum">      35 </span>                :<span class="lineNoCov">          0 :     breakdown.total_reward = breakdown.data_reward +</span></a>
+<a name="36"><span class="lineNum">      36 </span>                :<span class="lineNoCov">          0 :                            breakdown.navigation_reward +</span></a>
+<a name="37"><span class="lineNum">      37 </span>                :<span class="lineNoCov">          0 :                            breakdown.stability_reward +</span></a>
+<a name="38"><span class="lineNum">      38 </span>                :<span class="lineNoCov">          0 :                            breakdown.energy_reward +</span></a>
+<a name="39"><span class="lineNum">      39 </span>                :<span class="lineNoCov">          0 :                            breakdown.smoothness_reward +</span></a>
+<a name="40"><span class="lineNum">      40 </span>                :<span class="lineNoCov">          0 :                            breakdown.gait_reward +</span></a>
+<a name="41"><span class="lineNum">      41 </span>                :<span class="lineNoCov">          0 :                            breakdown.safety_reward +</span></a>
+<a name="42"><span class="lineNum">      42 </span>                :<span class="lineNoCov">          0 :                            breakdown.time_penalty +</span></a>
+<a name="43"><span class="lineNum">      43 </span>                :<span class="lineNoCov">          0 :                            breakdown.reachability_reward;</span></a>
+<a name="44"><span class="lineNum">      44 </span>                :            : </a>
+<a name="45"><span class="lineNum">      45 </span>                :<span class="lineNoCov">          0 :     return breakdown;</span></a>
+<a name="46"><span class="lineNum">      46 </span>                :            : }</a>
+<a name="47"><span class="lineNum">      47 </span>                :            : </a>
+<a name="48"><span class="lineNum">      48 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeDataReward(const HumanoidRewardState&amp; state,</span></a>
+<a name="49"><span class="lineNum">      49 </span>                :            :                                                    const HumanoidRewardConfig&amp; config) {</a>
+<a name="50"><span class="lineNum">      50 </span>                :<span class="lineNoCov">          0 :     double reward = 0.0;</span></a>
+<a name="51"><span class="lineNum">      51 </span>                :            : </a>
+<a name="52"><span class="lineNum">      52 </span>                :            :     // 访问新稀疏区域奖励</a>
+<a name="53"><span class="lineNum">      53 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.visited_new_sparse) {</span></a>
+<a name="54"><span class="lineNum">      54 </span>                :<span class="lineNoCov">          0 :         reward += config.new_sparse_reward;</span></a>
+<a name="55"><span class="lineNum">      55 </span>                :            :     }</a>
+<a name="56"><span class="lineNum">      56 </span>                :            : </a>
+<a name="57"><span class="lineNum">      57 </span>                :            :     // 高质量数据奖励</a>
+<a name="58"><span class="lineNum">      58 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.data_quality_score &gt; 0.7) {</span></a>
+<a name="59"><span class="lineNum">      59 </span>                :<span class="lineNoCov">          0 :         reward += config.data_quality_bonus * state.data_quality_score;</span></a>
+<a name="60"><span class="lineNum">      60 </span>                :            :     }</a>
+<a name="61"><span class="lineNum">      61 </span>                :            : </a>
+<a name="62"><span class="lineNum">      62 </span>                :            :     // 场景多样性奖励</a>
+<a name="63"><span class="lineNum">      63 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.scene_diversity_score &gt; 0.5) {</span></a>
+<a name="64"><span class="lineNum">      64 </span>                :<span class="lineNoCov">          0 :         reward += config.scene_diversity_bonus * state.scene_diversity_score;</span></a>
+<a name="65"><span class="lineNum">      65 </span>                :            :     }</a>
+<a name="66"><span class="lineNum">      66 </span>                :            : </a>
+<a name="67"><span class="lineNum">      67 </span>                :            :     // 数据采集触发成功奖励</a>
+<a name="68"><span class="lineNum">      68 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.trigger_success) {</span></a>
+<a name="69"><span class="lineNum">      69 </span>                :<span class="lineNoCov">          0 :         reward += config.trigger_success_reward;</span></a>
+<a name="70"><span class="lineNum">      70 </span>                :            :     }</a>
+<a name="71"><span class="lineNum">      71 </span>                :            : </a>
+<a name="72"><span class="lineNum">      72 </span>                :            :     // 重复访问惩罚</a>
+<a name="73"><span class="lineNum">      73 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.visit_count &gt; config.repeat_visit_threshold) {</span></a>
+<a name="74"><span class="lineNum">      74 </span>                :<span class="lineNoCov">          0 :         reward += config.repeat_visit_penalty * (state.visit_count - config.repeat_visit_threshold);</span></a>
+<a name="75"><span class="lineNum">      75 </span>                :            :     }</a>
+<a name="76"><span class="lineNum">      76 </span>                :            : </a>
+<a name="77"><span class="lineNum">      77 </span>                :<span class="lineNoCov">          0 :     return reward;</span></a>
+<a name="78"><span class="lineNum">      78 </span>                :            : }</a>
+<a name="79"><span class="lineNum">      79 </span>                :            : </a>
+<a name="80"><span class="lineNum">      80 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeNavigationReward(const HumanoidRewardState&amp; state,</span></a>
+<a name="81"><span class="lineNum">      81 </span>                :            :                                                         const HumanoidRewardConfig&amp; config) {</a>
+<a name="82"><span class="lineNum">      82 </span>                :<span class="lineNoCov">          0 :     double reward = 0.0;</span></a>
+<a name="83"><span class="lineNum">      83 </span>                :            : </a>
+<a name="84"><span class="lineNum">      84 </span>                :            :     // 距离改进奖励</a>
+<a name="85"><span class="lineNum">      85 </span>                :<span class="lineNoCov">          0 :     double distance_improvement = state.previous_distance_to_goal - state.distance_to_goal;</span></a>
+<a name="86"><span class="lineNum">      86 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (distance_improvement &gt; 0) {</span></a>
+<a name="87"><span class="lineNum">      87 </span>                :<span class="lineNoCov">          0 :         reward += config.distance_reward_scale * distance_improvement;</span></a>
+<a name="88"><span class="lineNum">      88 </span>                :            :     }</a>
+<a name="89"><span class="lineNum">      89 </span>                :            : </a>
+<a name="90"><span class="lineNum">      90 </span>                :            :     // 到达目标奖励</a>
+<a name="91"><span class="lineNum">      91 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.distance_to_goal &lt; 0.5) {</span></a>
+<a name="92"><span class="lineNum">      92 </span>                :<span class="lineNoCov">          0 :         reward += config.goal_reward;</span></a>
+<a name="93"><span class="lineNum">      93 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     } else if (state.distance_to_goal &lt; 2.0) {</span></a>
+<a name="94"><span class="lineNum">      94 </span>                :            :         // 接近目标时的进度奖励</a>
+<a name="95"><span class="lineNum">      95 </span>                :<span class="lineNoCov">          0 :         reward += config.progress_reward;</span></a>
+<a name="96"><span class="lineNum">      96 </span>                :            :     }</a>
+<a name="97"><span class="lineNum">      97 </span>                :            : </a>
+<a name="98"><span class="lineNum">      98 </span>                :            :     // 特殊地形奖励</a>
+<a name="99"><span class="lineNum">      99 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.on_stairs) {</span></a>
+<a name="100"><span class="lineNum">     100 </span>                :<span class="lineNoCov">          0 :         reward += config.stair_reward;</span></a>
+<a name="101"><span class="lineNum">     101 </span>                :            :     }</a>
+<a name="102"><span class="lineNum">     102 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.on_slope) {</span></a>
+<a name="103"><span class="lineNum">     103 </span>                :<span class="lineNoCov">          0 :         reward += config.slope_reward;</span></a>
+<a name="104"><span class="lineNum">     104 </span>                :            :     }</a>
+<a name="105"><span class="lineNum">     105 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.terrain_difficulty &gt; 0.5) {</span></a>
+<a name="106"><span class="lineNum">     106 </span>                :<span class="lineNoCov">          0 :         reward += config.rough_terrain_reward * state.terrain_difficulty;</span></a>
+<a name="107"><span class="lineNum">     107 </span>                :            :     }</a>
+<a name="108"><span class="lineNum">     108 </span>                :            : </a>
+<a name="109"><span class="lineNum">     109 </span>                :<span class="lineNoCov">          0 :     return reward;</span></a>
+<a name="110"><span class="lineNum">     110 </span>                :            : }</a>
+<a name="111"><span class="lineNum">     111 </span>                :            : </a>
+<a name="112"><span class="lineNum">     112 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeStabilityReward(const HumanoidRewardState&amp; state,</span></a>
+<a name="113"><span class="lineNum">     113 </span>                :            :                                                        const HumanoidRewardConfig&amp; config) {</a>
+<a name="114"><span class="lineNum">     114 </span>                :<span class="lineNoCov">          0 :     double reward = 0.0;</span></a>
+<a name="115"><span class="lineNum">     115 </span>                :            : </a>
+<a name="116"><span class="lineNum">     116 </span>                :            :     // 检测跌倒 - 最严重惩罚</a>
+<a name="117"><span class="lineNum">     117 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.fall_detected) {</span></a>
+<a name="118"><span class="lineNum">     118 </span>                :<span class="lineNoCov">          0 :         return config.fall_penalty;</span></a>
+<a name="119"><span class="lineNum">     119 </span>                :            :     }</a>
+<a name="120"><span class="lineNum">     120 </span>                :            : </a>
+<a name="121"><span class="lineNum">     121 </span>                :            :     // 质心偏移惩罚/奖励</a>
+<a name="122"><span class="lineNum">     122 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.com_offset &lt; config.stability_threshold) {</span></a>
+<a name="123"><span class="lineNum">     123 </span>                :            :         // 稳定状态</a>
+<a name="124"><span class="lineNum">     124 </span>                :<span class="lineNoCov">          0 :         reward += config.stability_reward * (1.0 - state.com_offset / config.stability_threshold);</span></a>
+<a name="125"><span class="lineNum">     125 </span>                :            :     } else {</a>
+<a name="126"><span class="lineNum">     126 </span>                :            :         // 不稳定状态</a>
+<a name="127"><span class="lineNum">     127 </span>                :<span class="lineNoCov">          0 :         double instability = (state.com_offset - config.stability_threshold) / 0.1;  // 归一化</span></a>
+<a name="128"><span class="lineNum">     128 </span>                :<span class="lineNoCov">          0 :         reward += config.stability_penalty * std::min(1.0, instability);</span></a>
+<a name="129"><span class="lineNum">     129 </span>                :            :     }</a>
+<a name="130"><span class="lineNum">     130 </span>                :            : </a>
+<a name="131"><span class="lineNum">     131 </span>                :            :     // ZMP违反惩罚</a>
+<a name="132"><span class="lineNum">     132 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.zmp_margin &lt; 0.01) {</span></a>
+<a name="133"><span class="lineNum">     133 </span>                :<span class="lineNoCov">          0 :         reward += config.zmp_violation_penalty * (1.0 - state.zmp_margin / 0.01);</span></a>
+<a name="134"><span class="lineNum">     134 </span>                :            :     }</a>
+<a name="135"><span class="lineNum">     135 </span>                :            : </a>
+<a name="136"><span class="lineNum">     136 </span>                :            :     // 稳定性评分奖励</a>
+<a name="137"><span class="lineNum">     137 </span>                :<span class="lineNoCov">          0 :     reward += config.stability_reward * state.stability_score;</span></a>
+<a name="138"><span class="lineNum">     138 </span>                :            : </a>
+<a name="139"><span class="lineNum">     139 </span>                :<span class="lineNoCov">          0 :     return reward;</span></a>
+<a name="140"><span class="lineNum">     140 </span>                :            : }</a>
+<a name="141"><span class="lineNum">     141 </span>                :            : </a>
+<a name="142"><span class="lineNum">     142 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeEnergyReward(const HumanoidRewardState&amp; state,</span></a>
+<a name="143"><span class="lineNum">     143 </span>                :            :                                                     const HumanoidRewardConfig&amp; config) {</a>
+<a name="144"><span class="lineNum">     144 </span>                :<span class="lineNoCov">          0 :     double reward = 0.0;</span></a>
+<a name="145"><span class="lineNum">     145 </span>                :            : </a>
+<a name="146"><span class="lineNum">     146 </span>                :            :     // 相对于基准的能耗奖励/惩罚</a>
+<a name="147"><span class="lineNum">     147 </span>                :<span class="lineNoCov">          0 :     double energy_diff = state.instant_power - config.energy_baseline;</span></a>
+<a name="148"><span class="lineNum">     148 </span>                :<span class="lineNoCov">          0 :     reward += config.energy_reward_scale * energy_diff;</span></a>
+<a name="149"><span class="lineNum">     149 </span>                :            : </a>
+<a name="150"><span class="lineNum">     150 </span>                :            :     // 高功耗惩罚</a>
+<a name="151"><span class="lineNum">     151 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.instant_power &gt; config.energy_penalty_threshold) {</span></a>
+<a name="152"><span class="lineNum">     152 </span>                :<span class="lineNoCov">          0 :         double excess = (state.instant_power - config.energy_penalty_threshold) /</span></a>
+<a name="153"><span class="lineNum">     153 </span>                :<span class="lineNoCov">          0 :                        config.energy_penalty_threshold;</span></a>
+<a name="154"><span class="lineNum">     154 </span>                :<span class="lineNoCov">          0 :         reward += config.high_energy_penalty * std::min(1.0, excess);</span></a>
+<a name="155"><span class="lineNum">     155 </span>                :            :     }</a>
+<a name="156"><span class="lineNum">     156 </span>                :            : </a>
+<a name="157"><span class="lineNum">     157 </span>                :            :     // 电池电量低时额外惩罚</a>
+<a name="158"><span class="lineNum">     158 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.current.battery_level &lt; 0.2) {</span></a>
+<a name="159"><span class="lineNum">     159 </span>                :<span class="lineNoCov">          0 :         reward += (0.2 - state.current.battery_level) * -5.0;</span></a>
+<a name="160"><span class="lineNum">     160 </span>                :            :     }</a>
+<a name="161"><span class="lineNum">     161 </span>                :            : </a>
+<a name="162"><span class="lineNum">     162 </span>                :<span class="lineNoCov">          0 :     return reward;</span></a>
+<a name="163"><span class="lineNum">     163 </span>                :            : }</a>
+<a name="164"><span class="lineNum">     164 </span>                :            : </a>
+<a name="165"><span class="lineNum">     165 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeSmoothnessReward(const HumanoidRewardState&amp; state,</span></a>
+<a name="166"><span class="lineNum">     166 </span>                :            :                                                         const HumanoidRewardConfig&amp; config) {</a>
+<a name="167"><span class="lineNum">     167 </span>                :<span class="lineNoCov">          0 :     double reward = 0.0;</span></a>
+<a name="168"><span class="lineNum">     168 </span>                :            : </a>
+<a name="169"><span class="lineNum">     169 </span>                :            :     // 动作平滑度奖励</a>
+<a name="170"><span class="lineNum">     170 </span>                :<span class="lineNoCov">          0 :     reward += config.smoothness_reward * state.gait_smoothness;</span></a>
+<a name="171"><span class="lineNum">     171 </span>                :            : </a>
+<a name="172"><span class="lineNum">     172 </span>                :            :     // 急剧变化惩罚</a>
+<a name="173"><span class="lineNum">     173 </span>                :<span class="lineNoCov">          0 :     double jerk = computeActionJerk(state.action, state.previous_action);</span></a>
+<a name="174"><span class="lineNum">     174 </span>                :<span class="lineNoCov">          0 :     reward += config.jerk_penalty_scale * jerk;</span></a>
+<a name="175"><span class="lineNum">     175 </span>                :            : </a>
+<a name="176"><span class="lineNum">     176 </span>                :<span class="lineNoCov">          0 :     return reward;</span></a>
+<a name="177"><span class="lineNum">     177 </span>                :            : }</a>
+<a name="178"><span class="lineNum">     178 </span>                :            : </a>
+<a name="179"><span class="lineNum">     179 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeGaitReward(const HumanoidRewardState&amp; state,</span></a>
+<a name="180"><span class="lineNum">     180 </span>                :            :                                                    const HumanoidRewardConfig&amp; config) {</a>
+<a name="181"><span class="lineNum">     181 </span>                :<span class="lineNoCov">          0 :     double reward = 0.0;</span></a>
+<a name="182"><span class="lineNum">     182 </span>                :            : </a>
+<a name="183"><span class="lineNum">     183 </span>                :            :     // 步态对称性奖励</a>
+<a name="184"><span class="lineNum">     184 </span>                :<span class="lineNoCov">          0 :     reward += config.step_symmetry_reward * state.step_symmetry;</span></a>
+<a name="185"><span class="lineNum">     185 </span>                :            : </a>
+<a name="186"><span class="lineNum">     186 </span>                :            :     // 步态一致性奖励 - 检查步频和步长是否合理</a>
+<a name="187"><span class="lineNum">     187 </span>                :<span class="lineNoCov">          0 :     double expected_freq = 1.5;  // 预期步频 Hz</span></a>
+<a name="188"><span class="lineNum">     188 </span>                :<span class="lineNoCov">          0 :     double freq_diff = std::abs(state.current.step_frequency - expected_freq);</span></a>
+<a name="189"><span class="lineNum">     189 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (freq_diff &lt; 0.5) {</span></a>
+<a name="190"><span class="lineNum">     190 </span>                :<span class="lineNoCov">          0 :         reward += config.gait_consistency_reward * (1.0 - freq_diff / 0.5);</span></a>
+<a name="191"><span class="lineNum">     191 </span>                :            :     }</a>
+<a name="192"><span class="lineNum">     192 </span>                :            : </a>
+<a name="193"><span class="lineNum">     193 </span>                :<span class="lineNoCov">          0 :     return reward;</span></a>
+<a name="194"><span class="lineNum">     194 </span>                :            : }</a>
+<a name="195"><span class="lineNum">     195 </span>                :            : </a>
+<a name="196"><span class="lineNum">     196 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeSafetyReward(const HumanoidRewardState&amp; state,</span></a>
+<a name="197"><span class="lineNum">     197 </span>                :            :                                                     const HumanoidRewardConfig&amp; config) {</a>
+<a name="198"><span class="lineNum">     198 </span>                :<span class="lineNoCov">          0 :     double reward = 0.0;</span></a>
+<a name="199"><span class="lineNum">     199 </span>                :            : </a>
+<a name="200"><span class="lineNum">     200 </span>                :            :     // 碰撞惩罚</a>
+<a name="201"><span class="lineNum">     201 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.collision_detected) {</span></a>
+<a name="202"><span class="lineNum">     202 </span>                :<span class="lineNoCov">          0 :         reward += config.collision_penalty;</span></a>
+<a name="203"><span class="lineNum">     203 </span>                :            :     }</a>
+<a name="204"><span class="lineNum">     204 </span>                :            : </a>
+<a name="205"><span class="lineNum">     205 </span>                :            :     // 打滑惩罚</a>
+<a name="206"><span class="lineNum">     206 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.slip_detected) {</span></a>
+<a name="207"><span class="lineNum">     207 </span>                :<span class="lineNoCov">          0 :         reward += config.slip_penalty;</span></a>
+<a name="208"><span class="lineNum">     208 </span>                :            :     }</a>
+<a name="209"><span class="lineNum">     209 </span>                :            : </a>
+<a name="210"><span class="lineNum">     210 </span>                :            :     // 靠近障碍物惩罚</a>
+<a name="211"><span class="lineNum">     211 </span>                :<span class="lineNoCov">          0 :     double obstacle_dist = state.current.obstacle_distance;</span></a>
+<a name="212"><span class="lineNum">     212 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (obstacle_dist &lt; 1.0) {</span></a>
+<a name="213"><span class="lineNum">     213 </span>                :<span class="lineNoCov">          0 :         double proximity = 1.0 - obstacle_dist;</span></a>
+<a name="214"><span class="lineNum">     214 </span>                :<span class="lineNoCov">          0 :         reward += config.near_obstacle_penalty * proximity;</span></a>
+<a name="215"><span class="lineNum">     215 </span>                :            :     }</a>
+<a name="216"><span class="lineNum">     216 </span>                :            : </a>
+<a name="217"><span class="lineNum">     217 </span>                :            :     // 自碰撞检测 - 简化版本</a>
+<a name="218"><span class="lineNum">     218 </span>                :            :     // 检查关节角度是否过于接近</a>
+<a name="219"><span class="lineNum">     219 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     for (size_t i = 0; i &lt; state.current.joint_positions.size(); ++i) {</span></a>
+<a name="220"><span class="lineNum">     220 </span>                :<span class="lineNoCov">          0 :         double angle = std::abs(state.current.joint_positions[i]);</span></a>
+<a name="221"><span class="lineNum">     221 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         if (angle &gt; M_PI * 0.9) {  // 接近180度</span></a>
+<a name="222"><span class="lineNum">     222 </span>                :<span class="lineNoCov">          0 :             reward += config.self_collision_penalty * 0.1;</span></a>
+<a name="223"><span class="lineNum">     223 </span>                :            :         }</a>
+<a name="224"><span class="lineNum">     224 </span>                :            :     }</a>
+<a name="225"><span class="lineNum">     225 </span>                :            : </a>
+<a name="226"><span class="lineNum">     226 </span>                :<span class="lineNoCov">          0 :     return reward;</span></a>
+<a name="227"><span class="lineNum">     227 </span>                :            : }</a>
+<a name="228"><span class="lineNum">     228 </span>                :            : </a>
+<a name="229"><span class="lineNum">     229 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeTimePenalty(const HumanoidRewardState&amp; state,</span></a>
+<a name="230"><span class="lineNum">     230 </span>                :            :                                                    const HumanoidRewardConfig&amp; config) {</a>
+<a name="231"><span class="lineNum">     231 </span>                :<span class="lineNoCov">          0 :     double penalty = 0.0;</span></a>
+<a name="232"><span class="lineNum">     232 </span>                :            : </a>
+<a name="233"><span class="lineNum">     233 </span>                :            :     // 每步惩罚</a>
+<a name="234"><span class="lineNum">     234 </span>                :<span class="lineNoCov">          0 :     penalty += config.step_penalty;</span></a>
+<a name="235"><span class="lineNum">     235 </span>                :            : </a>
+<a name="236"><span class="lineNum">     236 </span>                :            :     // 时间惩罚</a>
+<a name="237"><span class="lineNum">     237 </span>                :<span class="lineNoCov">          0 :     penalty += config.time_penalty * state.episode_time;</span></a>
+<a name="238"><span class="lineNum">     238 </span>                :            : </a>
+<a name="239"><span class="lineNum">     239 </span>                :<span class="lineNoCov">          0 :     return penalty;</span></a>
+<a name="240"><span class="lineNum">     240 </span>                :            : }</a>
+<a name="241"><span class="lineNum">     241 </span>                :            : </a>
+<a name="242"><span class="lineNum">     242 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeReachabilityReward(const HumanoidRewardState&amp; state,</span></a>
+<a name="243"><span class="lineNum">     243 </span>                :            :                                                           const HumanoidRewardConfig&amp; config) {</a>
+<a name="244"><span class="lineNum">     244 </span>                :<span class="lineNoCov">          0 :     double reward = 0.0;</span></a>
+<a name="245"><span class="lineNum">     245 </span>                :            : </a>
+<a name="246"><span class="lineNum">     246 </span>                :            :     // 高可达性奖励</a>
+<a name="247"><span class="lineNum">     247 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.reachability_score &gt; 0.7) {</span></a>
+<a name="248"><span class="lineNum">     248 </span>                :<span class="lineNoCov">          0 :         reward += config.high_reachability_bonus;</span></a>
+<a name="249"><span class="lineNum">     249 </span>                :            :     }</a>
+<a name="250"><span class="lineNum">     250 </span>                :            :     // 低可达性惩罚</a>
+<a name="251"><span class="lineNum">     251 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     else if (state.reachability_score &lt; 0.3) {</span></a>
+<a name="252"><span class="lineNum">     252 </span>                :<span class="lineNoCov">          0 :         reward += config.low_reachability_penalty;</span></a>
+<a name="253"><span class="lineNum">     253 </span>                :            :     }</a>
+<a name="254"><span class="lineNum">     254 </span>                :            : </a>
+<a name="255"><span class="lineNum">     255 </span>                :            :     // 置信度奖励 - 可达性评估越可靠，奖励越高</a>
+<a name="256"><span class="lineNum">     256 </span>                :<span class="lineNoCov">          0 :     reward += config.confidence_bonus * state.reachability_confidence;</span></a>
+<a name="257"><span class="lineNum">     257 </span>                :            : </a>
+<a name="258"><span class="lineNum">     258 </span>                :<span class="lineNoCov">          0 :     return reward;</span></a>
+<a name="259"><span class="lineNum">     259 </span>                :            : }</a>
+<a name="260"><span class="lineNum">     260 </span>                :            : </a>
+<a name="261"><span class="lineNum">     261 </span>                :            : // ===== 辅助函数实现 =====</a>
+<a name="262"><span class="lineNum">     262 </span>                :            : </a>
+<a name="263"><span class="lineNum">     263 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeCOMOffset(const HumanoidStateInfo&amp; state) {</span></a>
+<a name="264"><span class="lineNum">     264 </span>                :<span class="lineNoCov">          0 :     return std::sqrt(state.com_x * state.com_x + state.com_y * state.com_y);</span></a>
+<a name="265"><span class="lineNum">     265 </span>                :            : }</a>
+<a name="266"><span class="lineNum">     266 </span>                :            : </a>
+<a name="267"><span class="lineNum">     267 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeZMPMargin(const HumanoidStateInfo&amp; state) {</span></a>
+<a name="268"><span class="lineNum">     268 </span>                :            :     // 简化计算：使用质心偏移作为ZMP的近似</a>
+<a name="269"><span class="lineNum">     269 </span>                :            :     // 实际实现需要考虑足端位置和压力分布</a>
+<a name="270"><span class="lineNum">     270 </span>                :<span class="lineNoCov">          0 :     double foot_size = 0.1;  // 脚长 (m)</span></a>
+<a name="271"><span class="lineNum">     271 </span>                :<span class="lineNoCov">          0 :     double com_offset = computeCOMOffset(state);</span></a>
+<a name="272"><span class="lineNum">     272 </span>                :<span class="lineNoCov">          0 :     return std::max(0.0, foot_size / 2.0 - com_offset);</span></a>
+<a name="273"><span class="lineNum">     273 </span>                :            : }</a>
+<a name="274"><span class="lineNum">     274 </span>                :            : </a>
+<a name="275"><span class="lineNum">     275 </span>                :<span class="lineNoCov">          0 : bool HumanoidRewardCalculator::detectFall(const HumanoidStateInfo&amp; state) {</span></a>
+<a name="276"><span class="lineNum">     276 </span>                :            :     // 跌倒检测条件：</a>
+<a name="277"><span class="lineNum">     277 </span>                :            :     // 1. 质心高度过低</a>
+<a name="278"><span class="lineNum">     278 </span>                :            :     // 2. 躯干角度过大</a>
+<a name="279"><span class="lineNum">     279 </span>                :            :     // 3. 质心偏移过大</a>
+<a name="280"><span class="lineNum">     280 </span>                :            : </a>
+<a name="281"><span class="lineNum">     281 </span>                :<span class="lineNoCov">          0 :     constexpr double MIN_COM_HEIGHT = 0.3;   // 最小质心高度 (m)</span></a>
+<a name="282"><span class="lineNum">     282 </span>                :<span class="lineNoCov">          0 :     constexpr double MAX_TILT_ANGLE = M_PI / 4;  // 最大倾斜角 (45度)</span></a>
+<a name="283"><span class="lineNum">     283 </span>                :<span class="lineNoCov">          0 :     constexpr double MAX_COM_OFFSET = 0.15;   // 最大质心偏移 (m)</span></a>
+<a name="284"><span class="lineNum">     284 </span>                :            : </a>
+<a name="285"><span class="lineNum">     285 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (state.com_z &lt; MIN_COM_HEIGHT) {</span></a>
+<a name="286"><span class="lineNum">     286 </span>                :<span class="lineNoCov">          0 :         return true;</span></a>
+<a name="287"><span class="lineNum">     287 </span>                :            :     }</a>
+<a name="288"><span class="lineNum">     288 </span>                :            : </a>
+<a name="289"><span class="lineNum">     289 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (std::abs(state.base_roll) &gt; MAX_TILT_ANGLE) {</span></a>
+<a name="290"><span class="lineNum">     290 </span>                :<span class="lineNoCov">          0 :         return true;</span></a>
+<a name="291"><span class="lineNum">     291 </span>                :            :     }</a>
+<a name="292"><span class="lineNum">     292 </span>                :            : </a>
+<a name="293"><span class="lineNum">     293 </span>                :<span class="lineNoCov">          0 :     double com_offset = computeCOMOffset(state);</span></a>
+<a name="294"><span class="lineNum">     294 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (com_offset &gt; MAX_COM_OFFSET) {</span></a>
+<a name="295"><span class="lineNum">     295 </span>                :<span class="lineNoCov">          0 :         return true;</span></a>
+<a name="296"><span class="lineNum">     296 </span>                :            :     }</a>
+<a name="297"><span class="lineNum">     297 </span>                :            : </a>
+<a name="298"><span class="lineNum">     298 </span>                :<span class="lineNoCov">          0 :     return false;</span></a>
+<a name="299"><span class="lineNum">     299 </span>                :            : }</a>
+<a name="300"><span class="lineNum">     300 </span>                :            : </a>
+<a name="301"><span class="lineNum">     301 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeActionJerk(const HumanoidAction&amp; current,</span></a>
+<a name="302"><span class="lineNum">     302 </span>                :            :                                                   const HumanoidAction&amp; previous) {</a>
+<a name="303"><span class="lineNum">     303 </span>                :            :     // 计算动作变化的剧烈程度</a>
+<a name="304"><span class="lineNum">     304 </span>                :<span class="lineNoCov">          0 :     double jerk = 0.0;</span></a>
+<a name="305"><span class="lineNum">     305 </span>                :            : </a>
+<a name="306"><span class="lineNum">     306 </span>                :<span class="lineNoCov">          0 :     auto add_jerk = [&amp;jerk](double curr, double prev) {</span></a>
+<a name="307"><span class="lineNum">     307 </span>                :<span class="lineNoCov">          0 :         double diff = curr - prev;</span></a>
+<a name="308"><span class="lineNum">     308 </span>                :<span class="lineNoCov">          0 :         jerk += diff * diff;</span></a>
+<a name="309"><span class="lineNum">     309 </span>                :<span class="lineNoCov">          0 :     };</span></a>
+<a name="310"><span class="lineNum">     310 </span>                :            : </a>
+<a name="311"><span class="lineNum">     311 </span>                :<span class="lineNoCov">          0 :     add_jerk(current.forward_velocity, previous.forward_velocity);</span></a>
+<a name="312"><span class="lineNum">     312 </span>                :<span class="lineNoCov">          0 :     add_jerk(current.lateral_velocity, previous.lateral_velocity);</span></a>
+<a name="313"><span class="lineNum">     313 </span>                :<span class="lineNoCov">          0 :     add_jerk(current.turn_rate, previous.turn_rate);</span></a>
+<a name="314"><span class="lineNum">     314 </span>                :<span class="lineNoCov">          0 :     add_jerk(current.step_height, previous.step_height);</span></a>
+<a name="315"><span class="lineNum">     315 </span>                :<span class="lineNoCov">          0 :     add_jerk(current.left_hip_pitch_offset, previous.left_hip_pitch_offset);</span></a>
+<a name="316"><span class="lineNum">     316 </span>                :<span class="lineNoCov">          0 :     add_jerk(current.right_hip_pitch_offset, previous.right_hip_pitch_offset);</span></a>
+<a name="317"><span class="lineNum">     317 </span>                :            : </a>
+<a name="318"><span class="lineNum">     318 </span>                :<span class="lineNoCov">          0 :     return std::sqrt(jerk);</span></a>
+<a name="319"><span class="lineNum">     319 </span>                :            : }</a>
+<a name="320"><span class="lineNum">     320 </span>                :            : </a>
+<a name="321"><span class="lineNum">     321 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::computeGaitSymmetry(const HumanoidStateInfo&amp; state) {</span></a>
+<a name="322"><span class="lineNum">     322 </span>                :            :     // 计算左右腿对称性</a>
+<a name="323"><span class="lineNum">     323 </span>                :<span class="lineNoCov">          0 :     double symmetry = 1.0;</span></a>
+<a name="324"><span class="lineNum">     324 </span>                :            : </a>
+<a name="325"><span class="lineNum">     325 </span>                :            :     // 比较左右腿关节角度</a>
+<a name="326"><span class="lineNum">     326 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span> :<span class="lineNoCov">          0 :     for (size_t i = 0; i &lt; 6 &amp;&amp; i &lt; state.joint_positions.size(); ++i) {</span></a>
+<span class="lineNum">         </span>         <span class="branchNoExec" title="Branch 4 was not executed"> # </span><span class="branchNoExec" title="Branch 5 was not executed"> # </span>]
+<a name="327"><span class="lineNum">     327 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         if (i + 6 &lt; state.joint_positions.size()) {</span></a>
+<a name="328"><span class="lineNum">     328 </span>                :<span class="lineNoCov">          0 :             double left = state.joint_positions[i];</span></a>
+<a name="329"><span class="lineNum">     329 </span>                :<span class="lineNoCov">          0 :             double right = state.joint_positions[i + 6];</span></a>
+<a name="330"><span class="lineNum">     330 </span>                :<span class="lineNoCov">          0 :             double diff = std::abs(left - right);</span></a>
+<a name="331"><span class="lineNum">     331 </span>                :<span class="lineNoCov">          0 :             symmetry -= diff * 0.1;  // 每弧度差异降低0.1</span></a>
+<a name="332"><span class="lineNum">     332 </span>                :            :         }</a>
+<a name="333"><span class="lineNum">     333 </span>                :            :     }</a>
+<a name="334"><span class="lineNum">     334 </span>                :            : </a>
+<a name="335"><span class="lineNum">     335 </span>                :<span class="lineNoCov">          0 :     return std::max(0.0, symmetry);</span></a>
+<a name="336"><span class="lineNum">     336 </span>                :            : }</a>
+<a name="337"><span class="lineNum">     337 </span>                :            : </a>
+<a name="338"><span class="lineNum">     338 </span>                :<span class="lineNoCov">          0 : double HumanoidRewardCalculator::estimateInstantPower(const HumanoidStateInfo&amp; state,</span></a>
+<a name="339"><span class="lineNum">     339 </span>                :            :                                                      const HumanoidAction&amp; action) {</a>
+<a name="340"><span class="lineNum">     340 </span>                :            :     // 简化功耗模型</a>
+<a name="341"><span class="lineNum">     341 </span>                :            :     // P = P_base + P_motion + P_balance</a>
+<a name="342"><span class="lineNum">     342 </span>                :            : </a>
+<a name="343"><span class="lineNum">     343 </span>                :<span class="lineNoCov">          0 :     constexpr double P_BASE = 30.0;      // 基础功耗 (W)</span></a>
+<a name="344"><span class="lineNum">     344 </span>                :<span class="lineNoCov">          0 :     constexpr double P_JOINT = 5.0;      // 每个关节的功耗系数 (W/rad/s)</span></a>
+<a name="345"><span class="lineNum">     345 </span>                :            : </a>
+<a name="346"><span class="lineNum">     346 </span>                :<span class="lineNoCov">          0 :     double power = P_BASE;</span></a>
+<a name="347"><span class="lineNum">     347 </span>                :            : </a>
+<a name="348"><span class="lineNum">     348 </span>                :            :     // 关节运动功耗</a>
+<a name="349"><span class="lineNum">     349 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     for (size_t i = 0; i &lt; state.joint_velocities.size(); ++i) {</span></a>
+<a name="350"><span class="lineNum">     350 </span>                :<span class="lineNoCov">          0 :         power += P_JOINT * std::abs(state.joint_velocities[i]);</span></a>
+<a name="351"><span class="lineNum">     351 </span>                :            :     }</a>
+<a name="352"><span class="lineNum">     352 </span>                :            : </a>
+<a name="353"><span class="lineNum">     353 </span>                :            :     // 平衡调节功耗 (与质心偏移相关)</a>
+<a name="354"><span class="lineNum">     354 </span>                :<span class="lineNoCov">          0 :     double com_offset = computeCOMOffset(state);</span></a>
+<a name="355"><span class="lineNum">     355 </span>                :<span class="lineNoCov">          0 :     power += 50.0 * com_offset;</span></a>
+<a name="356"><span class="lineNum">     356 </span>                :            : </a>
+<a name="357"><span class="lineNum">     357 </span>                :            :     // 速度相关功耗</a>
+<a name="358"><span class="lineNum">     358 </span>                :<span class="lineNoCov">          0 :     double velocity = std::sqrt(state.linear_velocity_x * state.linear_velocity_x +</span></a>
+<a name="359"><span class="lineNum">     359 </span>                :<span class="lineNoCov">          0 :                                state.linear_velocity_y * state.linear_velocity_y);</span></a>
+<a name="360"><span class="lineNum">     360 </span>                :<span class="lineNoCov">          0 :     power += 20.0 * velocity;</span></a>
+<a name="361"><span class="lineNum">     361 </span>                :            : </a>
+<a name="362"><span class="lineNum">     362 </span>                :<span class="lineNoCov">          0 :     return power;</span></a>
+<a name="363"><span class="lineNum">     363 </span>                :            : }</a>
+<a name="364"><span class="lineNum">     364 </span>                :            : </a>
+<a name="365"><span class="lineNum">     365 </span>                :<span class="lineNoCov">          0 : std::string HumanoidRewardCalculator::RewardBreakdown::toString() const {</span></a>
+<a name="366"><span class="lineNum">     366 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     std::stringstream ss;</span></a>
+<a name="367"><span class="lineNum">     367 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :     ss &lt;&lt; std::fixed &lt;&lt; std::setprecision(3);</span></a>
+<a name="368"><span class="lineNum">     368 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     ss &lt;&lt; &quot;RewardBreakdown[&quot;;</span></a>
+<a name="369"><span class="lineNum">     369 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span> :<span class="lineNoCov">          0 :     ss &lt;&lt; &quot;data=&quot; &lt;&lt; data_reward &lt;&lt; &quot;, &quot;;</span></a>
+<span class="lineNum">         </span>         <span class="branchNoExec" title="Branch 4 was not executed"> # </span><span class="branchNoExec" title="Branch 5 was not executed"> # </span>]
+<a name="370"><span class="lineNum">     370 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span> :<span class="lineNoCov">          0 :     ss &lt;&lt; &quot;nav=&quot; &lt;&lt; navigation_reward &lt;&lt; &quot;, &quot;;</span></a>
+<span class="lineNum">         </span>         <span class="branchNoExec" title="Branch 4 was not executed"> # </span><span class="branchNoExec" title="Branch 5 was not executed"> # </span>]
+<a name="371"><span class="lineNum">     371 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span> :<span class="lineNoCov">          0 :     ss &lt;&lt; &quot;stab=&quot; &lt;&lt; stability_reward &lt;&lt; &quot;, &quot;;</span></a>
+<span class="lineNum">         </span>         <span class="branchNoExec" title="Branch 4 was not executed"> # </span><span class="branchNoExec" title="Branch 5 was not executed"> # </span>]
+<a name="372"><span class="lineNum">     372 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span> :<span class="lineNoCov">          0 :     ss &lt;&lt; &quot;energy=&quot; &lt;&lt; energy_reward &lt;&lt; &quot;, &quot;;</span></a>
+<span class="lineNum">         </span>         <span class="branchNoExec" title="Branch 4 was not executed"> # </span><span class="branchNoExec" title="Branch 5 was not executed"> # </span>]
+<a name="373"><span class="lineNum">     373 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span> :<span class="lineNoCov">          0 :     ss &lt;&lt; &quot;smooth=&quot; &lt;&lt; smoothness_reward &lt;&lt; &quot;, &quot;;</span></a>
+<span class="lineNum">         </span>         <span class="branchNoExec" title="Branch 4 was not executed"> # </span><span class="branchNoExec" title="Branch 5 was not executed"> # </span>]
+<a name="374"><span class="lineNum">     374 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span> :<span class="lineNoCov">          0 :     ss &lt;&lt; &quot;gait=&quot; &lt;&lt; gait_reward &lt;&lt; &quot;, &quot;;</span></a>
+<span class="lineNum">         </span>         <span class="branchNoExec" title="Branch 4 was not executed"> # </span><span class="branchNoExec" title="Branch 5 was not executed"> # </span>]
+<a name="375"><span class="lineNum">     375 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span> :<span class="lineNoCov">          0 :     ss &lt;&lt; &quot;safety=&quot; &lt;&lt; safety_reward &lt;&lt; &quot;, &quot;;</span></a>
+<span class="lineNum">         </span>         <span class="branchNoExec" title="Branch 4 was not executed"> # </span><span class="branchNoExec" title="Branch 5 was not executed"> # </span>]
+<a name="376"><span class="lineNum">     376 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span> :<span class="lineNoCov">          0 :     ss &lt;&lt; &quot;time=&quot; &lt;&lt; time_penalty &lt;&lt; &quot;, &quot;;</span></a>
+<span class="lineNum">         </span>         <span class="branchNoExec" title="Branch 4 was not executed"> # </span><span class="branchNoExec" title="Branch 5 was not executed"> # </span>]
+<a name="377"><span class="lineNum">     377 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span> :<span class="lineNoCov">          0 :     ss &lt;&lt; &quot;reach=&quot; &lt;&lt; reachability_reward &lt;&lt; &quot;, &quot;;</span></a>
+<span class="lineNum">         </span>         <span class="branchNoExec" title="Branch 4 was not executed"> # </span><span class="branchNoExec" title="Branch 5 was not executed"> # </span>]
+<a name="378"><span class="lineNum">     378 </span>  [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span> :<span class="lineNoCov">          0 :     ss &lt;&lt; &quot;total=&quot; &lt;&lt; total_reward &lt;&lt; &quot;]&quot;;</span></a>
+<span class="lineNum">         </span>         <span class="branchNoExec" title="Branch 4 was not executed"> # </span><span class="branchNoExec" title="Branch 5 was not executed"> # </span>]
+<a name="379"><span class="lineNum">     379 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     return ss.str();</span></a>
+<a name="380"><span class="lineNum">     380 </span>                :<span class="lineNoCov">          0 : }</span></a>
+<a name="381"><span class="lineNum">     381 </span>                :            : </a>
+<a name="382"><span class="lineNum">     382 </span>                :            : // ===== RewardNormalizer 实现 =====</a>
+<a name="383"><span class="lineNum">     383 </span>                :            : </a>
+<a name="384"><span class="lineNum">     384 </span>                :<span class="lineNoCov">          0 : double RewardNormalizer::normalize(double reward) {</span></a>
+<a name="385"><span class="lineNum">     385 </span>                :<span class="lineNoCov">          0 :     double normalized = (reward - running_mean_) / (running_std_ + epsilon_);</span></a>
+<a name="386"><span class="lineNum">     386 </span>                :            :     // 限制在 [-5, 5] 范围内防止梯度爆炸</a>
+<a name="387"><span class="lineNum">     387 </span>                :<span class="lineNoCov">          0 :     return std::max(-5.0, std::min(5.0, normalized));</span></a>
+<a name="388"><span class="lineNum">     388 </span>                :            : }</a>
+<a name="389"><span class="lineNum">     389 </span>                :            : </a>
+<a name="390"><span class="lineNum">     390 </span>                :<span class="lineNoCov">          0 : void RewardNormalizer::update(double reward) {</span></a>
+<a name="391"><span class="lineNum">     391 </span>                :<span class="lineNoCov">          0 :     reward_history_.push_back(reward);</span></a>
+<a name="392"><span class="lineNum">     392 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (reward_history_.size() &gt; max_history_) {</span></a>
+<a name="393"><span class="lineNum">     393 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         reward_history_.erase(reward_history_.begin());</span></a>
+<a name="394"><span class="lineNum">     394 </span>                :            :     }</a>
+<a name="395"><span class="lineNum">     395 </span>                :            : </a>
+<a name="396"><span class="lineNum">     396 </span>                :            :     // 更新均值和标准差</a>
+<a name="397"><span class="lineNum">     397 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if (reward_history_.size() &gt; 1) {</span></a>
+<a name="398"><span class="lineNum">     398 </span>                :<span class="lineNoCov">          0 :         double sum = 0.0;</span></a>
+<a name="399"><span class="lineNum">     399 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         for (double r : reward_history_) {</span></a>
+<a name="400"><span class="lineNum">     400 </span>                :<span class="lineNoCov">          0 :             sum += r;</span></a>
+<a name="401"><span class="lineNum">     401 </span>                :            :         }</a>
+<a name="402"><span class="lineNum">     402 </span>                :<span class="lineNoCov">          0 :         running_mean_ = sum / reward_history_.size();</span></a>
+<a name="403"><span class="lineNum">     403 </span>                :            : </a>
+<a name="404"><span class="lineNum">     404 </span>                :<span class="lineNoCov">          0 :         double var_sum = 0.0;</span></a>
+<a name="405"><span class="lineNum">     405 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :         for (double r : reward_history_) {</span></a>
+<a name="406"><span class="lineNum">     406 </span>                :<span class="lineNoCov">          0 :             double diff = r - running_mean_;</span></a>
+<a name="407"><span class="lineNum">     407 </span>                :<span class="lineNoCov">          0 :             var_sum += diff * diff;</span></a>
+<a name="408"><span class="lineNum">     408 </span>                :            :         }</a>
+<a name="409"><span class="lineNum">     409 </span>                :<span class="lineNoCov">          0 :         running_std_ = std::sqrt(var_sum / reward_history_.size());</span></a>
+<a name="410"><span class="lineNum">     410 </span>                :            :     }</a>
+<a name="411"><span class="lineNum">     411 </span>                :<span class="lineNoCov">          0 : }</span></a>
+<a name="412"><span class="lineNum">     412 </span>                :            : </a>
+<a name="413"><span class="lineNum">     413 </span>                :<span class="lineNoCov">          0 : void RewardNormalizer::reset() {</span></a>
+<a name="414"><span class="lineNum">     414 </span>                :<span class="lineNoCov">          0 :     reward_history_.clear();</span></a>
+<a name="415"><span class="lineNum">     415 </span>                :<span class="lineNoCov">          0 :     running_mean_ = 0.0;</span></a>
+<a name="416"><span class="lineNum">     416 </span>                :<span class="lineNoCov">          0 :     running_std_ = 1.0;</span></a>
+<a name="417"><span class="lineNum">     417 </span>                :<span class="lineNoCov">          0 : }</span></a>
+<a name="418"><span class="lineNum">     418 </span>                :            : </a>
+<a name="419"><span class="lineNum">     419 </span>                :            : // ===== RewardShaper 实现 =====</a>
+<a name="420"><span class="lineNum">     420 </span>                :            : </a>
+<a name="421"><span class="lineNum">     421 </span>                :<span class="lineNoCov">          0 : double RewardShaper::distanceBasedPotential(double current_distance,</span></a>
+<a name="422"><span class="lineNum">     422 </span>                :            :                                           double previous_distance,</a>
+<a name="423"><span class="lineNum">     423 </span>                :            :                                           double gamma) {</a>
+<a name="424"><span class="lineNum">     424 </span>                :            :     // 势函数 = -distance</a>
+<a name="425"><span class="lineNum">     425 </span>                :            :     // F = gamma * Phi(s') - Phi(s)</a>
+<a name="426"><span class="lineNum">     426 </span>                :<span class="lineNoCov">          0 :     double phi_current = -current_distance;</span></a>
+<a name="427"><span class="lineNum">     427 </span>                :<span class="lineNoCov">          0 :     double phi_previous = -previous_distance;</span></a>
+<a name="428"><span class="lineNum">     428 </span>                :<span class="lineNoCov">          0 :     return gamma * phi_current - phi_previous;</span></a>
+<a name="429"><span class="lineNum">     429 </span>                :            : }</a>
+<a name="430"><span class="lineNum">     430 </span>                :            : </a>
+<a name="431"><span class="lineNum">     431 </span>                :<span class="lineNoCov">          0 : double RewardShaper::sparseAreaPotential(double distance_to_sparse,</span></a>
+<a name="432"><span class="lineNum">     432 </span>                :            :                                         double previous_distance,</a>
+<a name="433"><span class="lineNum">     433 </span>                :            :                                         double gamma) {</a>
+<a name="434"><span class="lineNum">     434 </span>                :            :     // 势函数 = -distance_to_sparse</a>
+<a name="435"><span class="lineNum">     435 </span>                :<span class="lineNoCov">          0 :     double phi_current = -distance_to_sparse;</span></a>
+<a name="436"><span class="lineNum">     436 </span>                :<span class="lineNoCov">          0 :     double phi_previous = -previous_distance;</span></a>
+<a name="437"><span class="lineNum">     437 </span>                :<span class="lineNoCov">          0 :     return gamma * phi_current - phi_previous;</span></a>
+<a name="438"><span class="lineNum">     438 </span>                :            : }</a>
+<a name="439"><span class="lineNum">     439 </span>                :            : </a>
+<a name="440"><span class="lineNum">     440 </span>                :<span class="lineNoCov">          0 : double RewardShaper::stabilityBasedPotential(double current_stability,</span></a>
+<a name="441"><span class="lineNum">     441 </span>                :            :                                             double previous_stability,</a>
+<a name="442"><span class="lineNum">     442 </span>                :            :                                             double gamma) {</a>
+<a name="443"><span class="lineNum">     443 </span>                :            :     // 势函数 = stability</a>
+<a name="444"><span class="lineNum">     444 </span>                :<span class="lineNoCov">          0 :     double phi_current = current_stability;</span></a>
+<a name="445"><span class="lineNum">     445 </span>                :<span class="lineNoCov">          0 :     double phi_previous = previous_stability;</span></a>
+<a name="446"><span class="lineNum">     446 </span>                :<span class="lineNoCov">          0 :     return gamma * phi_current - phi_previous;</span></a>
+<a name="447"><span class="lineNum">     447 </span>                :            : }</a>
+<a name="448"><span class="lineNum">     448 </span>                :            : </a>
+<a name="449"><span class="lineNum">     449 </span>                :            : } // namespace aurora::planner</a>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.14</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

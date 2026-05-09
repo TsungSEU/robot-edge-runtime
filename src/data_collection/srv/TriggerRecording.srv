@@ -1,0 +1,16 @@
+# TriggerRecording.srv
+# Service to trigger data recording with context information
+
+# Request
+string business_type      # Business type identifier
+string trigger_id         # Unique trigger identifier
+uint64 trigger_timestamp  # Trigger timestamp (milliseconds)
+string trigger_desc       # Trigger description
+geometry_msgs/Point pos   # Trigger position (x, y, z)
+
+---
+# Response
+bool success              # True if recording triggered successfully
+string message            # Status message
+string bag_path           # Generated bag file path
+uint64 cooldown_remaining # Cooldown time remaining in ms (0 if ready)

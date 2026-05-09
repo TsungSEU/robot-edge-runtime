@@ -13,8 +13,8 @@
 #include "mqtt_wrapper.h"
 #include "common/data.h"
 #include "common/log/logger.h"
-#include "common/log/log_task_queue.hpp"
-#include "common/config/app_config.h"
+#include "../../common/log_task_queue.hpp"
+#include "../../common/app_config.h"
 
 
 enum ErrorCode {
@@ -29,8 +29,7 @@ enum ErrorCode {
     UNKNOWN_ERROR = 8,
 };
 
-namespace dcp::uploader
-{
+namespace aurora::collector {
 
 using json = nlohmann::json;
 
@@ -44,18 +43,18 @@ public:
               const std::string& client_cert_path = "",
               const std::string& client_key_path = "",
               const std::string& ca_cert_path = "");
-    ErrorCode GetQueryTask(const std::string& vin, common::QueryTaskResp& resp);
+    ErrorCode GetQueryTask(const std::string& vin, QueryTaskResp& resp);
     ErrorCode SendUploadMqttCmd(std::atomic<bool>& stop_flag);
-    ErrorCode GetUploadUrl(const common::UploadUrlReq& req, common::UploadUrlResp& resp);
+    ErrorCode GetUploadUrl(const UploadUrlReq& req, UploadUrlResp& resp);
     ErrorCode UploadFileChunk(const std::vector<char>& buffer, const std::string& , std::string& resp);
-    ErrorCode CompleteUpload(const common::CompleteUploadReq& req, common::CompleteUploadResp& resp);
-    ErrorCode GetUploadStatus(const std::string& file_uuid, common::UploadStatusResp& resp);
+    ErrorCode CompleteUpload(const CompleteUploadReq& req, CompleteUploadResp& resp);
+    ErrorCode GetUploadStatus(const std::string& file_uuid, UploadStatusResp& resp);
 
 private:
     CurlWrapper curl_wrapper_;
     std::string url_;
     std::string gateway_;
-    common::AppConfigData::DataUpload config_;
+    AppConfigData::DataUpload config_;
     std::shared_ptr<MqttWrapper> mqtt_wrapper_;
 };
 

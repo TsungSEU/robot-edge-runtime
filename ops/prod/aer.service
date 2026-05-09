@@ -1,0 +1,59 @@
+[Unit]
+Description=Aurora Edge Runtime (AER)
+Documentation=https://github.com/T3CAIC/Aurora-Edge-Runtime
+After=network.target ROS2.service
+
+[Service]
+Type=simple
+User=xucong
+Group=domain^users
+WorkingDirectory=/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime
+
+# 环境变量 - 基础环境
+Environment="PROJECT=Aurora Edge Runtime"
+Environment="VIN=VIN123456789"
+Environment="INSTALL_ROOT_PATH=/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime"
+Environment="ROBOT_ID=RT2"
+Environment="RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
+Environment="AMENT_PREFIX_PATH=/opt/ros/humble"
+Environment="COLCON_PREFIX_PATH=/opt/ros/humble"
+
+# LD_LIBRARY_PATH 将在 ExecStartPre 中通过 source setup.bash 设置
+
+# 从环境文件加载额外配置
+EnvironmentFile=/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/ops/prod/aer.conf
+
+# 启动前先 source 环境脚本
+ExecStartPre=/bin/bash -c '. /home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/resource/scripts/setup.bash && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH'
+
+# 执行命令 - 使用启动脚本来支持 CPU 绑核
+ExecStart=/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/ops/prod/aer-start.sh
+
+# 优雅关闭
+ExecStop=/bin/kill -SIGTERM $MAINPID
+TimeoutStopSec=30
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutSec=60
+
+# 重启策略
+Restart=on-failure
+RestartSec=10
+StartLimitInterval=300
+StartLimitBurst=5
+
+# 安全设置
+NoNewPrivileges=true
+PrivateTmp=true
+
+# 日志
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=aer
+
+# 资源限制
+# MemoryMax=2G
+# CPUQuota=200%
+
+[Install]
+WantedBy=multi-user.target

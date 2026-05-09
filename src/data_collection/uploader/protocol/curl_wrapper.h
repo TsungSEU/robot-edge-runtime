@@ -6,8 +6,7 @@
 #include <curl/curl.h>
 #include <string.h> 
 
-namespace dcp::uploader
-{
+namespace aurora::collector {
 
 class CurlWrapper {
 public:

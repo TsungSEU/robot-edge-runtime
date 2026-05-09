@@ -5,7 +5,7 @@
 
 #include "data.h"
 
-namespace dcp::common{
+namespace aurora::collector {
 void to_json(json& j, UploadType type) {
     j = static_cast<int>(type);
 }

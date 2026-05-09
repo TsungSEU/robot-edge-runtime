@@ -15,8 +15,7 @@
 #include <memory>
 
 
-namespace dcp::trigger
-{
+namespace aurora::collector {
 
 class TriggerChecker {
 public:

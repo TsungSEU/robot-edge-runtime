@@ -2,8 +2,7 @@
 #include <cstring>
 #include "common/log/logger.h"
 
-namespace dcp::uploader
-{
+namespace aurora::collector {
 
 CURLcode CurlWrapper::Init(const std::string& client_cert_path, const std::string& client_key_path, const std::string& ca_cert_path) {
     client_cert_path_ = client_cert_path;//客户端证书路径

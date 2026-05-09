@@ -26,8 +26,7 @@
 #include <openssl/err.h>
 #include <openssl/sha.h>
 
-namespace dcp::uploader
-{
+namespace aurora::collector {
 
 static const char* LOG_TAG = "DATA_ENCRYPTION";
 namespace fs = std::filesystem;

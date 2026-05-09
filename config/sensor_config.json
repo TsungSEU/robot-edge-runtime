@@ -1,0 +1,18 @@
+{
+  "camera_enabled": true,
+  "camera_count": 11,
+  "lidar_enabled": true,
+  "lidar_count": 1,
+  "imu_enabled": true,
+  "imu_count": 1,
+  "description": "传感器配置文件 - 用于启动日志显示",
+  "notes": [
+    "配置: 11路相机 + 1个激光雷达",
+    "camera_enabled: 是否启用相机",
+    "camera_count: 相机数量",
+    "lidar_enabled: 是否启用激光雷达",
+    "lidar_count: 激光雷达数量",
+    "imu_enabled: 是否启用IMU",
+    "imu_count: IMU数量"
+  ]
+}
