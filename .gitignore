@@ -9,3 +9,20 @@ CLAUDE.md
 
 # Sensitive configuration files (use .template versions instead)
 config/app_config.json
+resource/pki/*.pem
+*.key
+*.p12
+*.pfx
+
+# Runtime state
+.pids/
+*.pid
+
+# Generated reports and profiling output
+tools/coverage/results/
+tools/performance/memory_results/
+
+# Temporary archives and scratch trees
+src/tmp/
+src/tmp.zip
+*.tmp
