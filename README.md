@@ -13,7 +13,7 @@
 
 ```bash
 # 克隆项目（含子模块）
-git clone --recursive https://gitlab.t3caic.com/icr11/dataengine/data-infra/Aurora/aurora-edge-runtime.git
+git clone --recursive https://gitlab.orderseek.ai/icr11/dataengine/data-infra/Aurora/aurora-edge-runtime.git
 cd aurora-edge-runtime
 
 # 如果已克隆但未初始化子模块
@@ -154,7 +154,7 @@ See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
 
 本项目采用 Apache License 2.0 开源许可证。
 
-Copyright © 2026 OrderSeek AI Inc. All rights reserved.
+Copyright © 2026 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
 
 ---
 

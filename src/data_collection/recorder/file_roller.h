@@ -1,6 +1,6 @@
 //
 // Created by xucong on 25-5-30.
-// Copyright (c) 2025 T3CAIC. All rights reserved.
+// Copyright (c) 2025 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
 //
 
 #ifndef FILE_ROLLER_H

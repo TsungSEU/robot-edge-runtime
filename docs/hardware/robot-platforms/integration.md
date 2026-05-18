@@ -89,7 +89,7 @@ sudo apt install ros-humble-desktop
 
 ```bash
 # 克隆项目
-git clone https://gitlab.t3caic.com/icr11/dataengine/data-infra/Aurora/aurora-edge-runtime.git
+git clone https://gitlab.orderseek.ai/icr11/dataengine/data-infra/Aurora/aurora-edge-runtime.git
 cd aurora-edge-runtime
 
 # 安装依赖

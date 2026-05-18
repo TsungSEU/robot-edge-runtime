@@ -1,6 +1,6 @@
 //
-// Copyright (c) 2025 T3CAIC. All rights reserved.
-// Tsung Xu<xucong@t3caic.com>
+// Copyright (c) 2025 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
+// Tsung Xu<congx0829@163.com>
 //
 
 #include "ros2bag_recorder.h"

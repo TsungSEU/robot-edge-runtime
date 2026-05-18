@@ -1,6 +1,6 @@
 //
 // Created by Aurora Refactoring on 2026/4/24.
-// Copyright (c) 2026 TsungX. All rights reserved.
+// Copyright (c) 2026 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
 //
 
 #include "robot_controller.h"

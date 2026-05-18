@@ -1,5 +1,5 @@
-// Copyright (c) 2025 T3CAIC. All rights reserved.
-// Tsung Xu<xucong@t3caic.com>
+// Copyright (c) 2025 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
+// Tsung Xu<congx0829@163.com>
 
 #include "metadata_manifest.h"
 
@@ -10,6 +10,9 @@
 
 #include <nlohmann/json.hpp>
 #include <openssl/evp.h>
+
+#include "compliance_v2/policy/compliance_policy.h"
+#include "compliance_v2/manifest/privacy_manifest_v2.h"
 
 #include "common/log/logger.h"
 #include "common/app_config.h"
@@ -28,6 +31,25 @@ std::string formatISO8601(uint64_t timestamp_us) {
     std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", &tm_buf);
     std::ostringstream oss;
     oss << buf << "." << std::setfill('0') << std::setw(3) << (us / 1000) << "Z";
+    return oss.str();
+}
+
+
+std::string sha256String(const std::string& value) {
+    if (value.empty()) return "";
+    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(ctx, EVP_sha256(), nullptr);
+    EVP_DigestUpdate(ctx, value.data(), value.size());
+    unsigned char hash[EVP_MAX_MD_SIZE];
+    unsigned int hash_len = 0;
+    EVP_DigestFinal_ex(ctx, hash, &hash_len);
+    EVP_MD_CTX_free(ctx);
+
+    std::ostringstream oss;
+    oss << "sha256:";
+    for (unsigned int i = 0; i < hash_len; ++i) {
+        oss << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(hash[i]);
+    }
     return oss.str();
 }
 
@@ -87,8 +109,8 @@ RecordingManifest MetadataManifestGenerator::buildManifest(
     try {
         auto& app = AppConfig::getInstance();
         auto cfg = app.GetConfig();
-        m.vin = cfg.dataProto.vin;
-        m.device_id = cfg.dataProto.device_id;
+        m.vin = sha256String(cfg.dataProto.vin);
+        m.device_id = sha256String(cfg.dataProto.device_id);
         m.software_version = cfg.dataProto.software_version;
     } catch (...) {
         // AppConfig may not be initialized in tests
@@ -113,6 +135,10 @@ RecordingManifest MetadataManifestGenerator::buildManifest(
     m.geospatial_offset_radius = masking_config.geospatialOffsetRadius;
     m.image_desensitization_applied = masking_enabled;
     m.image_blur_kernel_size = masking_config.imageBlurKernelSize;
+    m.image_redaction_method = "roi_redaction_solid_fill_with_full_frame_mosaic_fallback";
+    m.geospatial_transform_scope = "session";
+    m.gps_policy = "geohash_6_laplace";
+    m.raw_coordinates_removed = true;
 
     // Sensors: prefer per-topic stats from bag_info, fall back to strategy channels
     if (!bag_info.topics.empty()) {
@@ -137,6 +163,50 @@ RecordingManifest MetadataManifestGenerator::buildManifest(
     m.total_messages = bag_info.total_messages;
     m.total_data_size_bytes = bag_info.total_data_size;
 
+    aurora::collector::compliance_v2::CompliancePolicy policy;
+    policy.visual.enabled = masking_enabled;
+    policy.visual.fallback_mosaic_block_size = masking_config.imageBlurKernelSize;
+    policy.spatial.enabled = masking_enabled;
+    policy.spatial.local_radius_meters = masking_config.geospatialOffsetRadius;
+    policy.policy_hash = m.privacy_policy_hash;
+    for (const auto& ch : channels) {
+        aurora::collector::compliance_v2::TopicPolicy tp;
+        tp.topic = ch.topic;
+        tp.message_type = ch.type;
+        if (ch.type.find("sensor_msgs/msg/Image") != std::string::npos ||
+            ch.type.find("sensor_msgs/msg/CompressedImage") != std::string::npos) {
+            tp.domain = aurora::collector::compliance_v2::PrivacyDomain::Visual;
+        } else if (ch.type.find("sensor_msgs/msg/NavSatFix") != std::string::npos) {
+            tp.domain = aurora::collector::compliance_v2::PrivacyDomain::SpatialGps;
+        } else if (ch.type.find("nav_msgs/msg/Odometry") != std::string::npos ||
+                   ch.type.find("geometry_msgs/msg/PoseStamped") != std::string::npos ||
+                   ch.type.find("nav_msgs/msg/Path") != std::string::npos ||
+                   ch.type.find("tf2_msgs/msg/TFMessage") != std::string::npos ||
+                   ch.type.find("sensor_msgs/msg/PointCloud2") != std::string::npos ||
+                   ch.type.find("visualization_msgs/msg/Marker") != std::string::npos) {
+            tp.domain = aurora::collector::compliance_v2::PrivacyDomain::SpatialLocalFrame;
+        }
+        policy.topics.emplace(ch.topic, tp);
+    }
+    m.privacy_v2 = aurora::collector::compliance_v2::PrivacyManifestV2::buildTemplate(policy);
+
+    // Populate topic-level manifest counters from bag metadata where available.
+    for (const auto& sensor : m.sensors) {
+        auto& topic_json = sensor.type.find("sensor_msgs/msg/Image") != std::string::npos ||
+                           sensor.type.find("sensor_msgs/msg/CompressedImage") != std::string::npos
+            ? m.privacy_v2["visual"]["topics"][sensor.topic]
+            : m.privacy_v2["spatial"]["topics"][sensor.topic];
+        topic_json["messages_seen"] = sensor.message_count;
+        topic_json["messages_sanitized"] = masking_enabled ? sensor.message_count : 0;
+        topic_json["messages_dropped"] = 0;
+        topic_json["raw_forwarded_count"] = 0;
+        if (sensor.type.find("sensor_msgs/msg/Image") != std::string::npos ||
+            sensor.type.find("sensor_msgs/msg/CompressedImage") != std::string::npos) {
+            topic_json["detected_classes"] = nlohmann::json::object();
+            topic_json["redaction_method"] = m.image_redaction_method;
+        }
+    }
+
     return m;
 }
 
@@ -150,8 +220,9 @@ bool MetadataManifestGenerator::generate(const std::string& bag_path,
     j["business_type"] = manifest.business_type;
 
     j["device"] = {
-        {"vin", manifest.vin},
-        {"device_id", manifest.device_id},
+        {"vin_token", manifest.vin},
+        {"device_id_token", manifest.device_id},
+        {"identity_tokenization", "sha256"},
         {"software_version", manifest.software_version}
     };
 
@@ -170,15 +241,26 @@ bool MetadataManifestGenerator::generate(const std::string& bag_path,
     };
 
     j["compliance"] = {
+        {"privacy_policy_version", manifest.privacy_policy_version},
+        {"policy_hash", manifest.privacy_policy_hash},
+        {"fail_mode", manifest.privacy_fail_mode},
+        {"fail_closed", manifest.compliance_fail_closed},
         {"geospatial_obfuscation", {
             {"applied", manifest.geospatial_obfuscation_applied},
-            {"offset_radius_meters", manifest.geospatial_offset_radius}
+            {"policy_radius_meters", manifest.geospatial_offset_radius},
+            {"transform_scope", manifest.geospatial_transform_scope},
+            {"gps_policy", manifest.gps_policy},
+            {"raw_coordinates_removed", manifest.raw_coordinates_removed},
+            {"transform_values_logged", false}
         }},
         {"image_desensitization", {
             {"applied", manifest.image_desensitization_applied},
-            {"blur_kernel_size", manifest.image_blur_kernel_size}
+            {"redaction_method", manifest.image_redaction_method},
+            {"block_size", manifest.image_blur_kernel_size}
         }}
     };
+
+    j["privacy"] = manifest.privacy_v2;
 
     nlohmann::json sensors = nlohmann::json::array();
     for (const auto& s : manifest.sensors) {

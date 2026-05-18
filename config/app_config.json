@@ -52,7 +52,7 @@
       "secretAccessKey": "kosjohkhud5udvairjq5zct3mvk7hrzxj62q3jgb",
       "region": "US",
       "bucketName": "caic-dataset/robot_dev/",
-      "endpointUrl": "caic-obs.t3caic.com"
+      "endpointUrl": "orderseek-obs.orderseek.ai"
     }
   },
   "log":{

@@ -1,5 +1,5 @@
-// Copyright (c) 2025 T3CAIC. All rights reserved.
-// Tsung Xu<xucong@t3caic.com>
+// Copyright (c) 2025 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
+// Tsung Xu<congx0829@163.com>
 
 #pragma once
 
@@ -13,6 +13,7 @@
 #include "compliance_config.h"
 #include "geospatial_obfuscator.h"
 #include "image_desensitizer.h"
+#include "compliance_v2/runtime/compliance_filter_v2.h"
 
 namespace aurora::collector::compliance {
 
@@ -29,8 +30,6 @@ public:
     void setDownstream(const std::shared_ptr<Observer>& downstream);
 
     const ComplianceConfig& config() const { return config_; }
-    double geoOffsetX() const { return geo_ ? geo_->offsetX() : 0.0; }
-    double geoOffsetY() const { return geo_ ? geo_->offsetY() : 0.0; }
 
 private:
     bool isOdomTopic(const std::string& topic) const;
@@ -42,6 +41,7 @@ private:
     std::shared_ptr<Observer> downstream_;
     std::unique_ptr<GeospatialObfuscator> geo_;
     std::unique_ptr<ImageDesensitizer> image_;
+    std::unique_ptr<::aurora::collector::compliance_v2::ComplianceFilterV2> v2_filter_;
 };
 
 }  // namespace aurora::collector::compliance

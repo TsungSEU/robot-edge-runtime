@@ -1,6 +1,6 @@
 [Unit]
 Description=Aurora Edge Runtime (AER)
-Documentation=https://github.com/T3CAIC/Aurora-Edge-Runtime
+Documentation=https://github.com/OrderSeek-AI/Aurora-Edge-Runtime
 After=network.target ROS2.service
 
 [Service]
