@@ -13,6 +13,8 @@
 #include <mutex>
 #include <string>
 #include <functional>
+#include <algorithm>
+#include <utility>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/serialization.hpp"
@@ -33,11 +35,12 @@ public:
     virtual~Subject() = default;
 
     void addObserver(std::shared_ptr<Observer> observer) {
-        observers_.emplace_back(observer);
+        std::lock_guard<std::mutex> lock(observers_mutex_);
+        observers_.emplace_back(std::move(observer));
     }
 
-
     void removeObserver(const std::shared_ptr<Observer>& observer) {
+        std::lock_guard<std::mutex> lock(observers_mutex_);
         auto iter = std::find(observers_.begin(), observers_.end(), observer);
         if (iter != observers_.end()) {
             observers_.erase(iter);
@@ -46,15 +49,27 @@ public:
 
     void notifyAll(const std::string& topic, const rclcpp::SerializedMessage& subject) const
     {
-        for (const auto& observer : observers_) {
-            observer->OnMessageReceived(topic, subject);
+        std::vector<std::shared_ptr<Observer>> observers_snapshot;
+        {
+            std::lock_guard<std::mutex> lock(observers_mutex_);
+            observers_snapshot = observers_;
+        }
+
+        for (const auto& observer : observers_snapshot) {
+            if (observer) {
+                observer->OnMessageReceived(topic, subject);
+            }
         }
     }
 
-    const std::vector<std::shared_ptr<Observer>>& getObservers() const { return observers_; }
+    std::vector<std::shared_ptr<Observer>> getObservers() const {
+        std::lock_guard<std::mutex> lock(observers_mutex_);
+        return observers_;
+    }
 
 protected:
     std::vector<std::shared_ptr<Observer>> observers_;
+    mutable std::mutex observers_mutex_;
 };
 
 }

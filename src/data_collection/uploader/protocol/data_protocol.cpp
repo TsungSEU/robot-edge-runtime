@@ -36,7 +36,7 @@ bool DataProto::Init(const std::string& gateway,
 
     // curl_wrapper_初始化保持不变
     auto ret = curl_wrapper_.Init(client_cert_path, client_key_path, ca_cert_path);
-    return ret == CURLE_OK && mqtt_wrapper_ != nullptr;
+    return ret == CURLE_OK;
 }
 
 ErrorCode DataProto::GetQueryTask(const std::string& vin, QueryTaskResp& resp) {

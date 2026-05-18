@@ -514,7 +514,7 @@ bool DataCollectionExecutor::reloadConfig(const StrategyConfig& new_config) {
     AD_DEBUG(DataCollectionExecutor, "  Strategies: %zu", new_config.strategies.size());
 
     try {
-        // 1. 如果正在录制，等待录制完成
+        // 1. 等待当前手动录制和后台触发录制完成，避免热更新时重建 buffer/订阅
         if (is_recording_.load()) {
             AD_INFO(DataCollectionExecutor, "Waiting for current recording to complete...");
             int wait_count = 0;
@@ -527,6 +527,12 @@ bool DataCollectionExecutor::reloadConfig(const StrategyConfig& new_config) {
                 is_reloading_.store(false);
                 return false;
             }
+        }
+
+        if (!waitForRecordTasksToDrain(std::chrono::seconds(10))) {
+            AD_ERROR(DataCollectionExecutor, "Timeout waiting for queued recording tasks to drain");
+            is_reloading_.store(false);
+            return false;
         }
 
         // 2. 获取新配置中第一个启用的策略
@@ -637,6 +643,26 @@ void DataCollectionExecutor::handleTriggerService(
     AD_INFO(DataCollectionExecutor, "Service trigger received: %s at (%.2f, %.2f)",
             request->trigger_id.c_str(), request->pos.x, request->pos.y);
 
+    std::lock_guard<std::mutex> config_lock(config_mutex_);
+
+    if (is_reloading_.load()) {
+        response->success = false;
+        response->message = "Recording rejected: config reload in progress";
+        response->bag_path = "";
+        response->cooldown_remaining = 0;
+        AD_WARN(DataCollectionExecutor, "Trigger rejected: config reload in progress");
+        return;
+    }
+
+    if (!bag_recorder_) {
+        response->success = false;
+        response->message = "Recording rejected: recorder not initialized";
+        response->bag_path = "";
+        response->cooldown_remaining = 0;
+        AD_ERROR(DataCollectionExecutor, "Trigger rejected: recorder not initialized");
+        return;
+    }
+
     // Check cooldown first
     if (isInCooldown()) {
         response->success = false;
@@ -709,33 +735,45 @@ void DataCollectionExecutor::recordWorkerLoop() {
             if (record_queue_.empty()) continue;
             task = std::move(record_queue_.front());
             record_queue_.pop();
+            record_worker_active_.store(!task.bag_path.empty());
         }
 
         if (!task.bag_path.empty()) {
-            // Step 1: TriggerRecord (includes 5s backward capture wait + ring buffer write)
+            is_recording_.store(true);
+
+            // Step 1: TriggerRecord (includes backward capture wait + ring buffer write)
             AD_INFO(DataCollectionExecutor, "Background recording: %s", task.bag_path.c_str());
-            bag_recorder_->TriggerRecord(task.trigger_timestamp, task.bag_path,
-                                         std::move(task.saved_forward_buffers));
+            bool record_ok = bag_recorder_->TriggerRecord(task.trigger_timestamp, task.bag_path,
+                                                          std::move(task.saved_forward_buffers));
 
-            // Step 2: Generate metadata manifest
-            {
-                auto bag_info = bag_recorder_->GetBagInfo();
-                bool masking_on = strategy_ ? strategy_->enableMasking : false;
-                auto masking_cfg = strategy_ ? strategy_->maskingConfig : MaskingConfig{};
-                auto channels = strategy_ ? strategy_->cyclone.channels : std::vector<Channel>{};
-                auto manifest = compliance::MetadataManifestGenerator::buildManifest(
-                    task.bag_path, bag_info, task.trigger_timestamp,
-                    task.trigger_id, task.business_type,
-                    masking_cfg, masking_on,
-                    task.trigger_x, task.trigger_y, channels);
-                compliance::MetadataManifestGenerator::generate(task.bag_path, manifest);
+            if (record_ok) {
+                // Step 2: Generate metadata manifest
+                {
+                    auto bag_info = bag_recorder_->GetBagInfo();
+                    bool masking_on = strategy_ ? strategy_->enableMasking : false;
+                    auto masking_cfg = strategy_ ? strategy_->maskingConfig : MaskingConfig{};
+                    auto channels = strategy_ ? strategy_->cyclone.channels : std::vector<Channel>{};
+                    auto manifest = compliance::MetadataManifestGenerator::buildManifest(
+                        task.bag_path, bag_info, task.trigger_timestamp,
+                        task.trigger_id, task.business_type,
+                        masking_cfg, masking_on,
+                        task.trigger_x, task.trigger_y, channels);
+                    compliance::MetadataManifestGenerator::generate(task.bag_path, manifest);
+                }
+
+                // Step 3: Compress the bag file
+                AD_INFO(DataCollectionExecutor, "Background compressing: %s", task.bag_path.c_str());
+                if (!compress(task.bag_path)) {
+                    AD_ERROR(DataCollectionExecutor, "Background compress failed: %s", task.bag_path.c_str());
+                }
+            } else {
+                AD_ERROR(DataCollectionExecutor, "Background recording failed: %s", task.bag_path.c_str());
             }
 
-            // Step 3: Compress the bag file
-            AD_INFO(DataCollectionExecutor, "Background compressing: %s", task.bag_path.c_str());
-            if (!compress(task.bag_path)) {
-                AD_ERROR(DataCollectionExecutor, "Background compress failed: %s", task.bag_path.c_str());
-            }
+            last_trigger_finish_time = common::GetCurrentTimestamp();
+            is_recording_.store(false);
+            record_worker_active_.store(false);
+            record_cv_.notify_all();
         }
     }
 
@@ -745,11 +783,24 @@ void DataCollectionExecutor::recordWorkerLoop() {
         auto task = std::move(record_queue_.front());
         record_queue_.pop();
         if (!task.bag_path.empty()) {
+            record_worker_active_.store(true);
+            is_recording_.store(true);
             bag_recorder_->TriggerRecord(task.trigger_timestamp, task.bag_path,
                                          std::move(task.saved_forward_buffers));
             compress(task.bag_path);
+            is_recording_.store(false);
+            record_worker_active_.store(false);
         }
     }
+    record_cv_.notify_all();
+}
+
+bool DataCollectionExecutor::waitForRecordTasksToDrain(std::chrono::milliseconds timeout) {
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
+    std::unique_lock<std::mutex> lock(record_queue_mutex_);
+    return record_cv_.wait_until(lock, deadline, [this]() {
+        return record_queue_.empty() && !record_worker_active_.load();
+    });
 }
 
 } // namespace aurora

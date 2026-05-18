@@ -200,9 +200,9 @@ if(ENABLE_ROS2)
         VERBATIM
     )
 
+    add_dependencies(${ROBOT_SIM_APP} runtime_symlinks)
+    add_dependencies(${EDGE_APP} runtime_symlinks)
 endif()
-add_dependencies(${ROBOT_SIM_APP} runtime_symlinks)
-add_dependencies(${EDGE_APP} runtime_symlinks)
 
 
 # 如果启用了ONNX Runtime，则链接相关库
