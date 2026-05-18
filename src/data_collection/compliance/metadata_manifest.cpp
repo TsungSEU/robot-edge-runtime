@@ -113,6 +113,8 @@ RecordingManifest MetadataManifestGenerator::buildManifest(
     m.geospatial_offset_radius = masking_config.geospatialOffsetRadius;
     m.image_desensitization_applied = masking_enabled;
     m.image_blur_kernel_size = masking_config.imageBlurKernelSize;
+    m.image_redaction_method = "full_frame_mosaic";
+    m.geospatial_transform_scope = "session_se2";
 
     // Sensors: prefer per-topic stats from bag_info, fall back to strategy channels
     if (!bag_info.topics.empty()) {
@@ -170,13 +172,18 @@ bool MetadataManifestGenerator::generate(const std::string& bag_path,
     };
 
     j["compliance"] = {
+        {"privacy_policy_version", manifest.privacy_policy_version},
+        {"fail_closed", manifest.compliance_fail_closed},
         {"geospatial_obfuscation", {
             {"applied", manifest.geospatial_obfuscation_applied},
-            {"offset_radius_meters", manifest.geospatial_offset_radius}
+            {"offset_radius_meters", manifest.geospatial_offset_radius},
+            {"transform_scope", manifest.geospatial_transform_scope},
+            {"transform_values_logged", false}
         }},
         {"image_desensitization", {
             {"applied", manifest.image_desensitization_applied},
-            {"blur_kernel_size", manifest.image_blur_kernel_size}
+            {"redaction_method", manifest.image_redaction_method},
+            {"block_size", manifest.image_blur_kernel_size}
         }}
     };
 

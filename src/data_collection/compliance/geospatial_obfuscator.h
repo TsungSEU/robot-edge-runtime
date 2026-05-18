@@ -15,10 +15,8 @@ public:
 
     bool obfuscate(std::vector<uint8_t>& cdr_buffer);
 
-    double offsetX() const { return offset_x_; }
-    double offsetY() const { return offset_y_; }
-    double rotationRadians() const { return rotation_rad_; }
     double radius() const { return radius_meters_; }
+    const char* transformScope() const { return "session_se2"; }
 
 private:
     double radius_meters_;

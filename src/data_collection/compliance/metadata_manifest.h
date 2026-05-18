@@ -22,7 +22,7 @@ struct ManifestSensorInfo {
 };
 
 struct RecordingManifest {
-    std::string manifest_version = "1.0";
+    std::string manifest_version = "1.1";
     std::string bag_filename;
 
     // Trigger info
@@ -47,10 +47,14 @@ struct RecordingManifest {
     std::string coordinate_system = "odom";
 
     // Compliance
+    std::string privacy_policy_version = "compliance_v1_mosaic_se2";
+    bool compliance_fail_closed = true;
     bool geospatial_obfuscation_applied = false;
     double geospatial_offset_radius = 0.0;
+    std::string geospatial_transform_scope = "session_se2";
     bool image_desensitization_applied = false;
     int image_blur_kernel_size = 0;
+    std::string image_redaction_method = "full_frame_mosaic";
 
     // Sensors
     std::vector<ManifestSensorInfo> sensors;

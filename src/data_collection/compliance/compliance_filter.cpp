@@ -51,23 +51,29 @@ void ComplianceFilter::OnMessageReceived(const std::string& topic,
         const bool requires_geo = config_.geo_enabled && geo_ && isOdomTopic(topic);
         const bool requires_image = config_.image_enabled && image_ && isImageTopic(topic) &&
                                     (!isDepthTopic(topic) || config_.image_depth);
-        const bool requires_compliance = requires_geo || requires_image;
 
         // Geospatial obfuscation for odometry topics
         if (requires_geo) {
-            modified = geo_->obfuscate(buffer);
+            const bool geo_ok = geo_->obfuscate(buffer);
+            if (!geo_ok) {
+                AD_ERROR(ComplianceFilter,
+                         "Geospatial transform failed on %s, dropping raw message",
+                         topic.c_str());
+                return;
+            }
+            modified = true;
         }
 
         // Image desensitization for camera topics
         if (requires_image) {
-            modified = image_->desensitize(buffer, topic) || modified;
-        }
-
-        if (requires_compliance && !modified) {
-            AD_ERROR(ComplianceFilter,
-                     "Compliance transform failed on %s, dropping raw message",
-                     topic.c_str());
-            return;
+            const bool image_ok = image_->desensitize(buffer, topic);
+            if (!image_ok) {
+                AD_ERROR(ComplianceFilter,
+                         "Image desensitization failed on %s, dropping raw message",
+                         topic.c_str());
+                return;
+            }
+            modified = true;
         }
 
         if (modified) {

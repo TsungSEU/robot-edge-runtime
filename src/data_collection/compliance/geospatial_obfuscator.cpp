@@ -55,14 +55,29 @@ bool GeospatialObfuscator::obfuscate(std::vector<uint8_t>& cdr_buffer) {
         odom.pose.pose.position.x = cos_r * x - sin_r * y + offset_x_;
         odom.pose.pose.position.y = sin_r * x + cos_r * y + offset_y_;
 
-        const auto& q = odom.pose.pose.orientation;
-        const double siny_cosp = 2.0 * (q.w * q.z + q.x * q.y);
-        const double cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);
-        const double yaw = std::atan2(siny_cosp, cosy_cosp) + rotation_rad_;
-        odom.pose.pose.orientation.x = 0.0;
-        odom.pose.pose.orientation.y = 0.0;
-        odom.pose.pose.orientation.z = std::sin(yaw * 0.5);
-        odom.pose.pose.orientation.w = std::cos(yaw * 0.5);
+        const auto q = odom.pose.pose.orientation;
+        const double half_rotation = rotation_rad_ * 0.5;
+        const double rz = std::sin(half_rotation);
+        const double rw = std::cos(half_rotation);
+
+        // Left-multiply by a yaw-only rotation so roll/pitch information is
+        // preserved while the odom frame is consistently rotated.
+        odom.pose.pose.orientation.x = rw * q.x - rz * q.y;
+        odom.pose.pose.orientation.y = rw * q.y + rz * q.x;
+        odom.pose.pose.orientation.z = rw * q.z + rz * q.w;
+        odom.pose.pose.orientation.w = rw * q.w - rz * q.z;
+
+        const double norm = std::sqrt(
+            odom.pose.pose.orientation.x * odom.pose.pose.orientation.x +
+            odom.pose.pose.orientation.y * odom.pose.pose.orientation.y +
+            odom.pose.pose.orientation.z * odom.pose.pose.orientation.z +
+            odom.pose.pose.orientation.w * odom.pose.pose.orientation.w);
+        if (norm > 0.0) {
+            odom.pose.pose.orientation.x /= norm;
+            odom.pose.pose.orientation.y /= norm;
+            odom.pose.pose.orientation.z /= norm;
+            odom.pose.pose.orientation.w /= norm;
+        }
 
         // Re-serialize back to CDR
         rclcpp::SerializedMessage output_msg(cdr_buffer.size() + 64);

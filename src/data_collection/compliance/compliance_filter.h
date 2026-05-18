@@ -29,8 +29,6 @@ public:
     void setDownstream(const std::shared_ptr<Observer>& downstream);
 
     const ComplianceConfig& config() const { return config_; }
-    double geoOffsetX() const { return geo_ ? geo_->offsetX() : 0.0; }
-    double geoOffsetY() const { return geo_ ? geo_->offsetY() : 0.0; }
 
 private:
     bool isOdomTopic(const std::string& topic) const;
