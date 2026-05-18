@@ -58,13 +58,25 @@ bool AwsDataUploader::Init(const AppConfigData::DataUpload& config) {
 }
 
 bool AwsDataUploader::Start() {
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (worker_thread_.joinable()) {
+        if (!stop_flag_.load()) {
+            AD_WARN(AwsDataUploader, "AwsDataUploader already running, skip duplicate Start");
+            return true;
+        }
+        lock.unlock();
+        worker_thread_.join();
+        lock.lock();
+    }
+
+    stop_flag_.store(false);
     worker_thread_ = std::thread(&AwsDataUploader::Run, this);
     return true;
 }
 
 bool AwsDataUploader::Stop() {
     AD_INFO(AwsDataUploader, "Stopping AwsDataUploader...");
-    stop_flag_ = true;
+    stop_flag_.store(true);
     cv_.notify_all();
     return true;
 }
@@ -161,7 +173,7 @@ void AwsDataUploader::LoadFileList() {
 
 void AwsDataUploader::Run() {
     AD_INFO(AwsDataUploader, "AwsDataUploader running...");
-    while (!stop_flag_) {
+    while (!stop_flag_.load()) {
         LoadFileList();
         ProcessQueue();
         std::unique_lock<std::mutex> lock(mutex_);
@@ -178,7 +190,7 @@ void AwsDataUploader::ProcessQueue() {
     constexpr int MAX_CONSECUTIVE_FAILURES = 5;
     double backoff_sec = config_.retryIntervalSec;
 
-    while (!stop_flag_) {
+    while (!stop_flag_.load()) {
         if (upload_queue.Empty()) {
             AD_INFO(AwsDataUploader, "No files in upload queue.");
             break;
