@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Refactor
 
 * **submodule:** 将 `src/rl_planner_infer/` 提取为独立 GitLab 仓库 `rl_planning_infer`，以 git submodule 方式引用
-  - 推送到 `gitlab.t3caic.com:icr11/dataengine/data-infra/Aurora/rl_planning_infer.git`
+  - 推送到 `gitlab.orderseek.ai:icr11/dataengine/data-infra/Aurora/rl_planning_infer.git`
   - 本地路径 `src/rl_planning_infer/` → `src/rl_planning_infer/`（匹配远程仓库名）
   - 更新所有 `#include` 路径、CMakeLists.txt glob、测试配置
 

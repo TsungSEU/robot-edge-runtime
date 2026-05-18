@@ -8,7 +8,7 @@ set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
 
 set(CMAKE_SYSROOT "") # sysroot will be stripped from rpath, so empty but means for "/"
-# set(CMAKE_STAGING_PREFIX /opt/t3caic/stoic/staging/x86_64) # path on the host to install to
+# set(CMAKE_STAGING_PREFIX /opt/orderseek/stoic/staging/x86_64) # path on the host to install to
 
 set(CMAKE_C_COMPILER /usr/bin/gcc)
 set(CMAKE_CXX_COMPILER /usr/bin/g++)

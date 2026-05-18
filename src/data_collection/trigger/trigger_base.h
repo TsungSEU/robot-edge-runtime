@@ -1,7 +1,7 @@
 //
 // Created by xucong on 25-2-10.
-// Copyright (c) 2025 T3CAIC. All rights reserved.
-// Tsung Xu<xucong@t3caic.com>
+// Copyright (c) 2025 OrderSeek AI（让机器理解世界的秩序）. All rights reserved.
+// Tsung Xu<congx0829@163.com>
 //
 
 #ifndef TRIGGER_BASE_H

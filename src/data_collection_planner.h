@@ -1,7 +1,7 @@
 //
 // Created by Tsung Xu on 2026/4/2.
 // Refactored on 2026/4/24 — decomposed God Class into thin coordinator.
-// Copyright (c) 2026 TsungX. All rights reserved.
+// Copyright (c) 2026 OrderSeek AI（让机器理解世界的秩序）. All rights reserved.
 //
 
 #ifndef DATA_COLLECTION_PLANNER_H

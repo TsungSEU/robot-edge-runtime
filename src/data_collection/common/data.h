@@ -1,6 +1,6 @@
 //
 // Created by xucong on 25-5-7.
-// Copyright (c) 2025 T3CAIC. All rights reserved.
+// Copyright (c) 2025 OrderSeek AI（让机器理解世界的秩序）. All rights reserved.
 //
 
 #ifndef DATA_H

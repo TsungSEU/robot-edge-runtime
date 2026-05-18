@@ -1,6 +1,6 @@
 //
 // Created by xucong on 26-4-9.
-// Copyright (c) 2026 T3CAIC. All rights reserved.
+// Copyright (c) 2026 OrderSeek AI（让机器理解世界的秩序）. All rights reserved.
 //
 
 #include "startup_logger.h"
