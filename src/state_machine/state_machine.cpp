@@ -32,7 +32,7 @@ void StateMachine::setAuditLogCallback(AuditLogCallback callback) {
 }
 
 void StateMachine::setDegradeMode(bool degraded) {
-    degrade_mode_ = degraded;
+    degrade_mode_.store(degraded);
     if (degraded) {
         AD_WARN(StateMachine, "Entering degrade mode: non-critical operations reduced");
     } else {
@@ -77,7 +77,7 @@ const char* StateMachine::eventToString(StateEvent event) {
 // ===== 事件分发 =====
 
 void StateMachine::handleEvent(StateEvent event) {
-    switch (current_state_) {
+    switch (current_state_.load()) {
         case SystemState::INITIALIZING:
             handleInitializing(event);
             break;
@@ -203,7 +203,7 @@ void StateMachine::handleUploading(StateEvent event) {
         case StateEvent::ERROR_OCCURRED:
             AD_ERROR(StateMachine, "Error occurred during data upload");
             // 降级模式：上传失败不进 ERROR，回 IDLE 继续采集
-            if (degrade_mode_) {
+            if (degrade_mode_.load()) {
                 AD_WARN(StateMachine, "Upload failed in degrade mode, returning to IDLE");
                 transitionToState(SystemState::IDLE, event);
             } else {
@@ -240,8 +240,7 @@ void StateMachine::handleShuttingDown(StateEvent event) {
 // ===== 状态转换 =====
 
 void StateMachine::transitionToState(SystemState new_state, StateEvent event) {
-    SystemState old_state = current_state_;
-    current_state_ = new_state;
+    SystemState old_state = current_state_.exchange(new_state);
 
     // 审计日志
     auto now = std::chrono::steady_clock::now();

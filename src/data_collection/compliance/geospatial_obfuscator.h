@@ -17,12 +17,14 @@ public:
 
     double offsetX() const { return offset_x_; }
     double offsetY() const { return offset_y_; }
+    double rotationRadians() const { return rotation_rad_; }
     double radius() const { return radius_meters_; }
 
 private:
     double radius_meters_;
     double offset_x_;
     double offset_y_;
+    double rotation_rad_;
 };
 
 }  // namespace aurora::collector::compliance

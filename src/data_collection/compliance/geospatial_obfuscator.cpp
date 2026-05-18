@@ -20,14 +20,17 @@ GeospatialObfuscator::GeospatialObfuscator(double radius_meters, uint64_t sessio
     std::mt19937 gen(static_cast<std::mt19937::result_type>(session_seed));
     std::uniform_real_distribution<double> angle_dist(0.0, 2.0 * M_PI);
     std::uniform_real_distribution<double> radius_dist(0.5 * radius_meters, radius_meters);
+    std::uniform_real_distribution<double> rotation_dist(-M_PI, M_PI);
 
     double theta = angle_dist(gen);
     double r = radius_dist(gen);
     offset_x_ = r * std::cos(theta);
     offset_y_ = r * std::sin(theta);
+    rotation_rad_ = rotation_dist(gen);
 
-    AD_INFO(GeospatialObfuscator, "Initialized: radius=%.1fm, offset=(%.3f, %.3f)",
-            radius_meters_, offset_x_, offset_y_);
+    // Do not log the actual transform. It is privacy-sensitive and would make
+    // the obfuscation reversible from logs.
+    AD_INFO(GeospatialObfuscator, "Initialized session spatial transform: radius=%.1fm", radius_meters_);
 }
 
 bool GeospatialObfuscator::obfuscate(std::vector<uint8_t>& cdr_buffer) {
@@ -42,9 +45,24 @@ bool GeospatialObfuscator::obfuscate(std::vector<uint8_t>& cdr_buffer) {
         nav_msgs::msg::Odometry odom;
         serializer.deserialize_message(&serialized_msg, &odom);
 
-        // Apply deterministic offset
-        odom.pose.pose.position.x += offset_x_;
-        odom.pose.pose.position.y += offset_y_;
+        // Apply a session-scoped SE(2) transform instead of a plain offset.
+        // This preserves local geometry for learning while avoiding direct raw
+        // odom coordinates in recorded data.
+        const double x = odom.pose.pose.position.x;
+        const double y = odom.pose.pose.position.y;
+        const double cos_r = std::cos(rotation_rad_);
+        const double sin_r = std::sin(rotation_rad_);
+        odom.pose.pose.position.x = cos_r * x - sin_r * y + offset_x_;
+        odom.pose.pose.position.y = sin_r * x + cos_r * y + offset_y_;
+
+        const auto& q = odom.pose.pose.orientation;
+        const double siny_cosp = 2.0 * (q.w * q.z + q.x * q.y);
+        const double cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);
+        const double yaw = std::atan2(siny_cosp, cosy_cosp) + rotation_rad_;
+        odom.pose.pose.orientation.x = 0.0;
+        odom.pose.pose.orientation.y = 0.0;
+        odom.pose.pose.orientation.z = std::sin(yaw * 0.5);
+        odom.pose.pose.orientation.w = std::cos(yaw * 0.5);
 
         // Re-serialize back to CDR
         rclcpp::SerializedMessage output_msg(cdr_buffer.size() + 64);

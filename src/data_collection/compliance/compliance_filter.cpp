@@ -48,17 +48,26 @@ void ComplianceFilter::OnMessageReceived(const std::string& topic,
         const auto& rcl_msg = msg.get_rcl_serialized_message();
         std::vector<uint8_t> buffer(rcl_msg.buffer, rcl_msg.buffer + rcl_msg.buffer_length);
         bool modified = false;
+        const bool requires_geo = config_.geo_enabled && geo_ && isOdomTopic(topic);
+        const bool requires_image = config_.image_enabled && image_ && isImageTopic(topic) &&
+                                    (!isDepthTopic(topic) || config_.image_depth);
+        const bool requires_compliance = requires_geo || requires_image;
 
         // Geospatial obfuscation for odometry topics
-        if (config_.geo_enabled && geo_ && isOdomTopic(topic)) {
+        if (requires_geo) {
             modified = geo_->obfuscate(buffer);
         }
 
         // Image desensitization for camera topics
-        if (config_.image_enabled && image_ && isImageTopic(topic)) {
-            if (!isDepthTopic(topic) || config_.image_depth) {
-                modified = image_->desensitize(buffer, topic) || modified;
-            }
+        if (requires_image) {
+            modified = image_->desensitize(buffer, topic) || modified;
+        }
+
+        if (requires_compliance && !modified) {
+            AD_ERROR(ComplianceFilter,
+                     "Compliance transform failed on %s, dropping raw message",
+                     topic.c_str());
+            return;
         }
 
         if (modified) {
@@ -77,10 +86,17 @@ void ComplianceFilter::OnMessageReceived(const std::string& topic,
             downstream_->OnMessageReceived(topic, msg);
         }
     } catch (const std::exception& e) {
+        const bool compliance_topic =
+            (config_.geo_enabled && isOdomTopic(topic)) ||
+            (config_.image_enabled && isImageTopic(topic) &&
+             (!isDepthTopic(topic) || config_.image_depth));
         AD_ERROR(ComplianceFilter,
-                 "Compliance filter error on %s: %s, forwarding raw",
-                 topic.c_str(), e.what());
-        downstream_->OnMessageReceived(topic, msg);
+                 "Compliance filter error on %s: %s, %s",
+                 topic.c_str(), e.what(),
+                 compliance_topic ? "dropping raw message" : "forwarding raw");
+        if (!compliance_topic) {
+            downstream_->OnMessageReceived(topic, msg);
+        }
     }
 }
 

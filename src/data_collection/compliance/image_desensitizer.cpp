@@ -20,64 +20,37 @@ ImageDesensitizer::ImageDesensitizer(int blur_kernel_size)
     AD_INFO(ImageDesensitizer, "Initialized: kernel_size=%d", blur_kernel_size_);
 }
 
-void ImageDesensitizer::boxBlurH(uint8_t* data, int width, int height,
-                                  int channels, int radius) {
-    int diam = radius * 2 + 1;
-    std::vector<uint8_t> temp(width * channels);
-
-    for (int y = 0; y < height; ++y) {
-        uint8_t* row = data + y * width * channels;
-        std::memcpy(temp.data(), row, width * channels);
-
-        for (int x = 0; x < width; ++x) {
+void ImageDesensitizer::mosaic(uint8_t* data, int width, int height,
+                                 int channels, int block_size) {
+    for (int by = 0; by < height; by += block_size) {
+        for (int bx = 0; bx < width; bx += block_size) {
+            const int x_end = std::min(width, bx + block_size);
+            const int y_end = std::min(height, by + block_size);
             int sum[4] = {};
             int count = 0;
-            int x0 = std::max(0, x - radius);
-            int x1 = std::min(width - 1, x + radius);
 
-            for (int xi = x0; xi <= x1; ++xi) {
-                for (int c = 0; c < channels; ++c) {
-                    sum[c] += temp[xi * channels + c];
+            for (int y = by; y < y_end; ++y) {
+                for (int x = bx; x < x_end; ++x) {
+                    const uint8_t* px = data + (y * width + x) * channels;
+                    for (int c = 0; c < channels; ++c) {
+                        sum[c] += px[c];
+                    }
+                    ++count;
                 }
-                ++count;
             }
 
+            uint8_t avg[4] = {};
             for (int c = 0; c < channels; ++c) {
-                row[x * channels + c] = static_cast<uint8_t>(sum[c] / count);
+                avg[c] = static_cast<uint8_t>(sum[c] / std::max(1, count));
             }
-        }
-    }
-}
 
-void ImageDesensitizer::boxBlurV(uint8_t* data, int width, int height,
-                                  int channels, int radius) {
-    std::vector<uint8_t> temp(height * channels);
-
-    for (int x = 0; x < width; ++x) {
-        // Extract column
-        for (int y = 0; y < height; ++y) {
-            uint8_t* px = data + (y * width + x) * channels;
-            for (int c = 0; c < channels; ++c) {
-                temp[y * channels + c] = px[c];
-            }
-        }
-
-        for (int y = 0; y < height; ++y) {
-            int sum[4] = {};
-            int count = 0;
-            int y0 = std::max(0, y - radius);
-            int y1 = std::min(height - 1, y + radius);
-
-            for (int yi = y0; yi <= y1; ++yi) {
-                for (int c = 0; c < channels; ++c) {
-                    sum[c] += temp[yi * channels + c];
+            for (int y = by; y < y_end; ++y) {
+                for (int x = bx; x < x_end; ++x) {
+                    uint8_t* px = data + (y * width + x) * channels;
+                    for (int c = 0; c < channels; ++c) {
+                        px[c] = avg[c];
+                    }
                 }
-                ++count;
-            }
-
-            uint8_t* px = data + (y * width + x) * channels;
-            for (int c = 0; c < channels; ++c) {
-                px[c] = static_cast<uint8_t>(sum[c] / count);
             }
         }
     }
@@ -117,9 +90,9 @@ bool ImageDesensitizer::desensitize(std::vector<uint8_t>& cdr_buffer,
             return false;
         }
 
-        // Apply two-pass box blur on pixel data
-        boxBlurH(img.data.data(), width, height, channels, radius);
-        boxBlurV(img.data.data(), width, height, channels, radius);
+        // Apply irreversible full-frame mosaic on pixel data.
+        // This is the configured fallback until ROI-based detectors are wired in.
+        mosaic(img.data.data(), width, height, channels, blur_kernel_size_);
 
         // Re-serialize
         rclcpp::SerializedMessage output_msg(cdr_buffer.size() + 64);

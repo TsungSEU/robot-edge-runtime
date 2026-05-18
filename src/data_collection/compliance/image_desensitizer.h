@@ -19,9 +19,9 @@ public:
     int blurKernelSize() const { return blur_kernel_size_; }
 
 private:
-    // Two-pass separable box blur (no OpenCV)
-    void boxBlurH(uint8_t* data, int width, int height, int channels, int radius);
-    void boxBlurV(uint8_t* data, int width, int height, int channels, int radius);
+    // Irreversible full-frame mosaic fallback. This replaces reversible-looking
+    // blur with block-level pixelation when no ROI detector is available.
+    void mosaic(uint8_t* data, int width, int height, int channels, int block_size);
 
     int blur_kernel_size_;
 };

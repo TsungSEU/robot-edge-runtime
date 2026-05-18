@@ -6,6 +6,7 @@
 #include <functional>
 #include <vector>
 #include <chrono>
+#include <atomic>
 
 namespace aurora::state_machine {
 
@@ -76,10 +77,10 @@ public:
     void handleEvent(StateEvent event);
 
     // 获取当前状态
-    SystemState getCurrentState() const { return current_state_; }
+    SystemState getCurrentState() const { return current_state_.load(); }
 
     // 设置当前状态
-    void setCurrentState(SystemState state) { current_state_ = state; }
+    void setCurrentState(SystemState state) { current_state_.store(state); }
 
     // 设置动作回调
     void setActionCallbacks(const ActionCallbacks& callbacks);
@@ -89,7 +90,7 @@ public:
 
     // 降级模式控制
     void setDegradeMode(bool degraded);
-    bool isDegradeMode() const { return degrade_mode_; }
+    bool isDegradeMode() const { return degrade_mode_.load(); }
 
     // 状态字符串转换
     static const char* stateToString(SystemState state);
@@ -117,10 +118,10 @@ private:
     AuditLogCallback audit_callback_;
 
     // 当前状态
-    SystemState current_state_;
+    std::atomic<SystemState> current_state_;
 
     // 降级模式标志
-    bool degrade_mode_ = false;
+    std::atomic<bool> degrade_mode_{false};
 };
 
 } // namespace aurora::state_machine

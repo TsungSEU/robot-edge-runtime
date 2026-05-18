@@ -12,6 +12,7 @@
 #include <queue>
 #include <unordered_map>
 #include <condition_variable>
+#include <chrono>
 #include "aurora_edge_runtime/srv/trigger_recording.hpp"
 #include "common/utils/utils.h"
 #include "common/types.h"  // For DataPoint
@@ -277,7 +278,9 @@ private:
     std::mutex record_queue_mutex_;
     std::condition_variable record_cv_;
     std::atomic<bool> record_worker_running_{true};
+    std::atomic<bool> record_worker_active_{false};
     void recordWorkerLoop();
+    bool waitForRecordTasksToDrain(std::chrono::milliseconds timeout);
 
     // Service callback handler
     void handleTriggerService(
