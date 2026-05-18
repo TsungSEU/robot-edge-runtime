@@ -12,6 +12,13 @@ namespace aurora::collector::compliance {
 ComplianceFilter::ComplianceFilter(std::shared_ptr<rclcpp::Node> node,
                                    const ComplianceConfig& config)
     : node_(std::move(node)), config_(config) {
+    if (!config_.v2_policy.topics.empty()) {
+        v2_filter_ = std::make_unique<::aurora::collector::compliance_v2::ComplianceFilterV2>(node_, config_.v2_policy);
+        AD_INFO(ComplianceFilter, "Initialized Compliance Pipeline V2: policy=%s topics=%zu",
+                config_.v2_policy.policy_version.c_str(), config_.v2_policy.topics.size());
+        return;
+    }
+
     if (config_.geo_enabled) {
         auto seed = static_cast<uint64_t>(
             std::chrono::steady_clock::now().time_since_epoch().count());
@@ -20,12 +27,15 @@ ComplianceFilter::ComplianceFilter(std::shared_ptr<rclcpp::Node> node,
     if (config_.image_enabled) {
         image_ = std::make_unique<ImageDesensitizer>(config_.image_blur_kernel);
     }
-    AD_INFO(ComplianceFilter, "Initialized: geo=%d image=%d",
+    AD_INFO(ComplianceFilter, "Initialized legacy compliance fallback: geo=%d image=%d",
             config_.geo_enabled, config_.image_enabled);
 }
 
 void ComplianceFilter::setDownstream(const std::shared_ptr<Observer>& downstream) {
     downstream_ = downstream;
+    if (v2_filter_) {
+        v2_filter_->setDownstream(downstream);
+    }
 }
 
 bool ComplianceFilter::isOdomTopic(const std::string& topic) const {
@@ -42,6 +52,11 @@ bool ComplianceFilter::isDepthTopic(const std::string& topic) const {
 
 void ComplianceFilter::OnMessageReceived(const std::string& topic,
                                           const rclcpp::SerializedMessage& msg) {
+    if (v2_filter_) {
+        v2_filter_->OnMessageReceived(topic, msg);
+        return;
+    }
+
     if (!downstream_) return;
 
     try {

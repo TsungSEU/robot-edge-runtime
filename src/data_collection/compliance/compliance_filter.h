@@ -13,6 +13,7 @@
 #include "compliance_config.h"
 #include "geospatial_obfuscator.h"
 #include "image_desensitizer.h"
+#include "compliance_v2/runtime/compliance_filter_v2.h"
 
 namespace aurora::collector::compliance {
 
@@ -40,6 +41,7 @@ private:
     std::shared_ptr<Observer> downstream_;
     std::unique_ptr<GeospatialObfuscator> geo_;
     std::unique_ptr<ImageDesensitizer> image_;
+    std::unique_ptr<::aurora::collector::compliance_v2::ComplianceFilterV2> v2_filter_;
 };
 
 }  // namespace aurora::collector::compliance

@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <nlohmann/json.hpp>
 
 #include "recorder/ros2bag_recorder.h"
 #include "trigger/strategy/strategy_config.h"
@@ -22,7 +23,7 @@ struct ManifestSensorInfo {
 };
 
 struct RecordingManifest {
-    std::string manifest_version = "1.1";
+    std::string manifest_version = "2.0";
     std::string bag_filename;
 
     // Trigger info
@@ -47,14 +48,19 @@ struct RecordingManifest {
     std::string coordinate_system = "odom";
 
     // Compliance
-    std::string privacy_policy_version = "compliance_v1_mosaic_se2";
+    std::string privacy_policy_version = "visual-spatial-v2.1";
+    std::string privacy_policy_hash = "sha256:legacy-adapter";
+    std::string privacy_fail_mode = "fail_closed";
     bool compliance_fail_closed = true;
     bool geospatial_obfuscation_applied = false;
     double geospatial_offset_radius = 0.0;
     std::string geospatial_transform_scope = "session_se2";
     bool image_desensitization_applied = false;
     int image_blur_kernel_size = 0;
-    std::string image_redaction_method = "full_frame_mosaic";
+    std::string image_redaction_method = "roi_redaction_solid_fill_with_full_frame_mosaic_fallback";
+    std::string gps_policy = "geohash_6_laplace";
+    bool raw_coordinates_removed = true;
+    nlohmann::json privacy_v2 = nlohmann::json::object();
 
     // Sensors
     std::vector<ManifestSensorInfo> sensors;
