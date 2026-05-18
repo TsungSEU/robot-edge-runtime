@@ -154,7 +154,7 @@ See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
 
 本项目采用 Apache License 2.0 开源许可证。
 
-Copyright © 2026 OrderSeek AI（让机器理解世界的秩序）. All rights reserved.
+Copyright © 2026 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
 
 ---
 

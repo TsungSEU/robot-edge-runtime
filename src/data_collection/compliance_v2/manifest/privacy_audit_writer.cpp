@@ -1,4 +1,4 @@
-// Copyright (c) 2025 OrderSeek AI（让机器理解世界的秩序）. All rights reserved.
+// Copyright (c) 2025 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
 // Tsung Xu<congx0829@163.com>
 
 #include "privacy_audit_writer.h"
