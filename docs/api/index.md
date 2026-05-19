@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../README.md) / [Api](index.md) / Index
+
 # API 文档
 
 本章节包含 Aurora-Edge-Runtime 的 API 参考文档，面向开发者进行集成和扩展开发。

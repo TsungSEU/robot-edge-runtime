@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Testing](../index.md) / [Performance](index.md) / Readme
+
 # 性能测试文档
 
 本目录包含 Aurora Edge Runtime 项目的性能测试和分析文档。

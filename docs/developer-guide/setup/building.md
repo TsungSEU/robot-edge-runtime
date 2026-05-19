@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Developer Guide](../index.md) / [Setup](index.md) / Building
+
 # 编译指南
 
 本文档介绍 Aurora-Edge-Runtime 的编译系统和构建流程。

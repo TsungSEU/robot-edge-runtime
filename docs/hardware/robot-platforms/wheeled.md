@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Hardware](../index.md) / [Robot Platforms](index.md) / Wheeled
+
 # 轮式机器人平台
 
 本文档描述 Aurora-Edge-Runtime 系统支持的轮式机器人硬件平台规格和集成指南。

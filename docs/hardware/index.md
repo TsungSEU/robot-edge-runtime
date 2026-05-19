@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../README.md) / [Hardware](index.md) / Index
+
 # 硬件文档
 
 本章节面向硬件工程师和系统集成商，提供 Aurora-Edge-Runtime 的硬件需求、兼容性和集成指南。

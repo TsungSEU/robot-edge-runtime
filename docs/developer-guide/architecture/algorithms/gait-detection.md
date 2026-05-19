@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../../README.md) / [Developer Guide](../../index.md) / [Architecture](../index.md) / [Algorithms](index.md) / Gait Detection
+
 # 步态检测算法
 
 ## 概述

@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../README.md) / [Getting Started](index.md) / Index
+
 # 快速入门
 
 欢迎来到 Aurora-Edge-Runtime 快速入门指南。本章节将帮助您在 15 分钟内完成系统安装并运行第一个数据采集任务。

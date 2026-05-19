@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../../README.md) / [Developer Guide](../../index.md) / [Architecture](../index.md) / [Components](index.md) / Uploader
+
 # AWS 数据上传器 (AwsDataUploader)
 
 ## 概述
