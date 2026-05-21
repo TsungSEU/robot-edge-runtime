@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../README.md) / [Faq](index.md) / Index
+
 # 常见问题 (FAQ)
 
 这里是 Aurora-Edge-Runtime 常见问题的解答集合。

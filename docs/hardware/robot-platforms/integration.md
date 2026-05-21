@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Hardware](../index.md) / [Robot Platforms](index.md) / Integration
+
 # 平台集成指南
 
 本文档提供 Aurora-Edge-Runtime 系统与机器人平台集成的详细指南。

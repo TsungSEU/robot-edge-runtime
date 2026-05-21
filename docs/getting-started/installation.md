@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../README.md) / [Getting Started](index.md) / Installation
+
 # 安装指南
 
 本文档介绍如何在不同平台上安装 Aurora-Edge-Runtime。

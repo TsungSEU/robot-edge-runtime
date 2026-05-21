@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Developer Guide](../index.md) / [Setup](index.md) / Dev Environment
+
 # 开发环境搭建
 
 本文档介绍如何搭建 Aurora-Edge-Runtime 的开发环境。

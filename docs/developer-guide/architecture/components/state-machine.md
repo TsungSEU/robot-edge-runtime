@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../../README.md) / [Developer Guide](../../index.md) / [Architecture](../index.md) / [Components](index.md) / State Machine
+
 # 状态机使用说明
 
 ## 概述

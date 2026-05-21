@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Testing](../index.md) / [Performance](index.md) / Deep Optimization Guide
+
 # 第三阶段深度优化文档
 
 **日期**: 2026-03-08

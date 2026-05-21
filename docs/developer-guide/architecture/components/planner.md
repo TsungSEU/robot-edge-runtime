@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../../README.md) / [Developer Guide](../../index.md) / [Architecture](../index.md) / [Components](index.md) / Planner
+
 # 路径规划强化学习环境产品需求文档 (PRD)
 
 ## 1. 文档概述

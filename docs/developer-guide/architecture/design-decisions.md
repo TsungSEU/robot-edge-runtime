@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Developer Guide](../index.md) / [Architecture](index.md) / Design Decisions
+
 # 设计决策记录
 
 本文档记录 Aurora-Edge-Runtime 系统的关键设计决策及其原因。

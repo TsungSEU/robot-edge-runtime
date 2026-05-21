@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Hardware](../index.md) / [Requirements](index.md) / Minimum
+
 # 最低硬件配置
 
 本文档描述 Aurora-Edge-Runtime 系统运行的最低硬件要求。低于此配置可能导致系统运行不稳定或功能受限。

@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Hardware](../index.md) / [Requirements](index.md) / Compatibility
+
 # 硬件兼容性列表
 
 本文档列出了 Aurora-Edge-Runtime 系统已验证的兼容硬件。

@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [User Guide](../index.md) / [Operation](index.md) / Troubleshooting
+
 # 问题排查指南
 
 本文档提供 Aurora-Edge-Runtime 常见问题的诊断和解决方案。

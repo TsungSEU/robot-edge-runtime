@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../../README.md) / [Developer Guide](../../index.md) / [Architecture](../index.md) / [Components](index.md) / Trigger
+
 # 自动驾驶场景实现
 
 本文档详细描述了自动驾驶系统中各类场景触发条件实现。

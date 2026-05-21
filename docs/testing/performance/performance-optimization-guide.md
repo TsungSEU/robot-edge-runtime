@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Testing](../index.md) / [Performance](index.md) / Performance Optimization Guide
+
 # Aurora Edge Runtime 性能优化指南
 
 本文档提供了项目性能优化的全面指南，包括性能分析工具、优化建议和最佳实践。

@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../README.md) / [User Guide](index.md) / Index
+
 # 用户指南
 
 欢迎使用 Aurora-Edge-Runtime 用户指南。本章节面向系统使用者，提供完整的操作说明和配置参考。

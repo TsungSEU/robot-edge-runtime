@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Hardware](../index.md) / [Requirements](index.md) / Recommended
+
 # 推荐硬件配置
 
 本文档描述 Aurora-Edge-Runtime 系统的推荐硬件配置，以获得最佳性能和用户体验。

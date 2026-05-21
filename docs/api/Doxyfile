@@ -1,0 +1,10 @@
+PROJECT_NAME           = "robot-edge-runtime"
+OUTPUT_DIRECTORY       = docs/api/doxygen
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+RECURSIVE              = YES
+INPUT                  = src include
+FILE_PATTERNS          = *.h *.hpp *.cpp *.cc
+EXTRACT_ALL            = YES
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
