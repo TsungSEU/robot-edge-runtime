@@ -1,6 +1,6 @@
 //
 // Created by xucong on 26-4-9.
-// Copyright (c) 2026 T3CAIC. All rights reserved.
+// Copyright (c) 2026 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
 //
 
 #include "sensor_config_manager.h"

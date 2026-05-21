@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../README.md) / [Operations](index.md) / Index
+
 # 运维手册
 
 本章节面向运维工程师和系统管理员，提供 Aurora-Edge-Runtime (AER) 的部署、监控和维护指南。

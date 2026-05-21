@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Developer Guide](../index.md) / [Architecture](index.md) / Integration Flow
+
 # 系统集成流程
 
 Aurora Edge Runtime 作为边云协同系统的边缘侧，介于 LivelyBot 机器人硬件与 aurora-planning-engine 云端训练之间。

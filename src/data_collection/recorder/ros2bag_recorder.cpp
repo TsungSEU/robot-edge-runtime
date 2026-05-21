@@ -1,6 +1,6 @@
 //
-// Copyright (c) 2025 T3CAIC. All rights reserved.
-// Tsung Xu<xucong@t3caic.com>
+// Copyright (c) 2025 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
+// Tsung Xu<congx0829@163.com>
 //
 
 #include "ros2bag_recorder.h"
@@ -341,7 +341,8 @@ void Ros2BagRecorder::snapshotForwardBuffers(
     auto& buffer = pair.second;
 
     std::vector<TimestampedData> saved_data;
-    for (const auto& data : *buffer) {
+    const auto buffer_snapshot = buffer->snapshot();
+    for (const auto& data : buffer_snapshot) {
       if (data.timestamp <= trigger_timestamp &&
           (trigger_timestamp - data.timestamp) <= forward_duration_us) {
         saved_data.push_back(data);
@@ -496,8 +497,8 @@ bool Ros2BagRecorder::write_ringbuffer(const std::string& outputfilePath) {
 
         // 处理当前前向缓冲区中的数据
         if (current_forward_it != forward_ringbuffers_.end() && forward_it != triggered_forward_buffers_.end()) {
-          const auto& current_buffer = current_forward_it->second;
-          for (const auto& data : *current_buffer) {
+          const auto current_buffer_snapshot = current_forward_it->second->snapshot();
+          for (const auto& data : current_buffer_snapshot) {
             if (data.timestamp <= trigger_timestamp_ && data.timestamp >= start_time) {
               if (written_timestamps.find(data.timestamp) == written_timestamps.end()) {
                 min_timestamp = std::min(min_timestamp, data.timestamp);
@@ -520,8 +521,8 @@ bool Ros2BagRecorder::write_ringbuffer(const std::string& outputfilePath) {
 
         // 写入后向数据
         if (backward_it != backward_ringbuffers_.end()) {
-          auto& backward_buf = backward_it->second;
-          for (const auto& data : *backward_buf) {
+          const auto backward_buffer_snapshot = backward_it->second->snapshot();
+          for (const auto& data : backward_buffer_snapshot) {
             if (data.timestamp > trigger_timestamp_ && data.timestamp <= end_time) {
               min_timestamp = std::min(min_timestamp, data.timestamp);
               max_timestamp = std::max(max_timestamp, data.timestamp);
@@ -606,8 +607,9 @@ void Ros2BagRecorder::OnMessageReceived(const std::string& topic, const rclcpp::
   std::lock_guard<std::mutex> lock(buffer_mutex_);
   if (forward_ringbuffers_.count(topic)) {
     uint64_t forward_duration_us = cache_mode_.forwardCaptureDurationSec * 1000000ULL;
-    while (!forward_ringbuffers_[topic]->empty() &&
-           (message_timestamp - forward_ringbuffers_[topic]->front().timestamp) > forward_duration_us) {
+    TimestampedData oldest_forward;
+    while (forward_ringbuffers_[topic]->front(oldest_forward) &&
+           (message_timestamp - oldest_forward.timestamp) > forward_duration_us) {
       forward_ringbuffers_[topic]->pop_front();
     }
     forward_ringbuffers_[topic]->push_back(TimestampedData{std::move(buffer_data), message_timestamp});

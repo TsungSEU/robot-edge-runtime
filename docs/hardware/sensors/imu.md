@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Hardware](../index.md) / [Sensors](index.md) / Imu
+
 # IMU 配置指南
 
 本文档描述 Aurora-Edge-Runtime 系统中惯性测量单元 (IMU) 的配置和使用方法。

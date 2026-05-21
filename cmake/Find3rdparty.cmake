@@ -1,5 +1,5 @@
 ## 3rdparty lib
-SET(THIRD_DEPS_DIR "/home/xucong/caicAD/01datainfra/Aurora/aurora-edge-runtime/3rdparty")
+SET(THIRD_DEPS_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH "Third-party dependency root")
 
 # YAML-CPP
 SET(YAML_CPP_INCLUDE_DIR ${THIRD_DEPS_DIR}/yaml-cpp/include CACHE INTERNAL "yaml-cpp include dir.")

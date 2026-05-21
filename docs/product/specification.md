@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../README.md) / [Product](index.md) / Specification
+
 # Aurora-Edge-Runtime 产品说明书 v1.1.2
 
 ## 文档信息
@@ -703,7 +705,7 @@ private:
     "aws": {
       "enabled": true,
       "bucketName": "caic-dataset",
-      "endpointUrl": "caic-obs.t3caic.com",
+      "endpointUrl": "orderseek-obs.orderseek.ai",
       "region": "US"
     }
   }
@@ -1559,7 +1561,7 @@ Topic: /SHADOW/sd@LFBGEV070LJD45885/tsp/down/response
 
 **端点配置**:
 ```
-Endpoint: caic-obs.t3caic.com
+Endpoint: orderseek-obs.orderseek.ai
 Region: US
 Protocol: HTTPS
 Auth: AWS Signature V2
@@ -2148,7 +2150,7 @@ export PATH=${INSTALL_ROOT_PATH}/install/bin:${PATH}
 export AWS_ACCESS_KEY_ID=your_access_key
 export AWS_SECRET_ACCESS_KEY=your_secret_key
 export AWS_DEFAULT_REGION=us-east-1
-export AWS_ENDPOINT_URL=https://caic-obs.t3caic.com
+export AWS_ENDPOINT_URL=https://orderseek-obs.orderseek.ai
 
 # 调试选项
 export DCP_DEBUG=true

@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Hardware](../index.md) / [Robot Platforms](index.md) / Integration
+
 # 平台集成指南
 
 本文档提供 Aurora-Edge-Runtime 系统与机器人平台集成的详细指南。
@@ -89,7 +91,7 @@ sudo apt install ros-humble-desktop
 
 ```bash
 # 克隆项目
-git clone https://gitlab.t3caic.com/icr11/dataengine/data-infra/Aurora/aurora-edge-runtime.git
+git clone https://gitlab.orderseek.ai/icr11/dataengine/data-infra/Aurora/aurora-edge-runtime.git
 cd aurora-edge-runtime
 
 # 安装依赖

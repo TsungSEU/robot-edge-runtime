@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../README.md) / [Getting Started](index.md) / First Run
+
 # 第一次运行
 
 本文档指导您完成 Aurora-Edge-Runtime (AER) 的第一次运行。

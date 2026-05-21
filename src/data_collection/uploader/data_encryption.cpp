@@ -1,7 +1,7 @@
 //
 // Created by xucong on 25-5-8.
-// Copyright (c) 2025 T3CAIC. All rights reserved.
-// Tsung Xu<xucong@t3caic.com>
+// Copyright (c) 2025 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
+// Tsung Xu<congx0829@163.com>
 //
 
 #include "data_encryption.h"

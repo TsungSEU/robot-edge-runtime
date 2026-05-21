@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../../README.md) / [Developer Guide](../../index.md) / [Architecture](../index.md) / [Components](index.md) / Executor
+
 # 数据采集执行器 (DataCollectionExecutor)
 
 ## 概述

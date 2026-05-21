@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../README.md) / [Developer Guide](index.md) / Index
+
 # 开发者指南
 
 欢迎来到 Aurora-Edge-Runtime 开发者指南。本章节面向开发者，提供架构设计、API 参考和扩展开发指南。

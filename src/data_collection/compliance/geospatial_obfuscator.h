@@ -1,5 +1,5 @@
-// Copyright (c) 2025 T3CAIC. All rights reserved.
-// Tsung Xu<xucong@t3caic.com>
+// Copyright (c) 2025 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
+// Tsung Xu<congx0829@163.com>
 
 #pragma once
 
@@ -15,14 +15,14 @@ public:
 
     bool obfuscate(std::vector<uint8_t>& cdr_buffer);
 
-    double offsetX() const { return offset_x_; }
-    double offsetY() const { return offset_y_; }
     double radius() const { return radius_meters_; }
+    const char* transformScope() const { return "session_se2"; }
 
 private:
     double radius_meters_;
     double offset_x_;
     double offset_y_;
+    double rotation_rad_;
 };
 
 }  // namespace aurora::collector::compliance

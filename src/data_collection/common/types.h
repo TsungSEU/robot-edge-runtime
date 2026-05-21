@@ -1,6 +1,6 @@
 //
 // Created by aurora on 2025-03-11.
-// Copyright (c) 2025 T3CAIC. All rights reserved.
+// Copyright (c) 2025 OrderSeek AI（Order Shapes Intelligence）. All rights reserved.
 //
 
 #ifndef DATA_COLLECTION_TYPES_H

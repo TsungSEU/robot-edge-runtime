@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../README.md) / [Faq](index.md) / Index
+
 # 常见问题 (FAQ)
 
 这里是 Aurora-Edge-Runtime 常见问题的解答集合。
@@ -157,7 +159,7 @@ A: 可能原因：
 
 A: 检查网络和配置：
 
-1. **网络连接**: `ping caic-obs.t3caic.com`
+1. **网络连接**: `ping orderseek-obs.orderseek.ai`
 2. **凭证配置**: 检查 `config/app_config.json` 中的 AWS 配置
 3. **存储空间**: 确保本地有足够空间
 

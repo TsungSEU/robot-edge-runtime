@@ -9,6 +9,7 @@
 #include <cstring>
 #include <algorithm>
 #include <atomic>
+#include <array>
 #include <chrono>
 #include <iostream>
 

@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Hardware](../index.md) / [Sensors](index.md) / Odom
+
 # 里程计配置指南
 
 本文档描述 Aurora-Edge-Runtime 系统中里程计的配置和使用方法。

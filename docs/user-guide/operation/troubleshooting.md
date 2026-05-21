@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [User Guide](../index.md) / [Operation](index.md) / Troubleshooting
+
 # 问题排查指南
 
 本文档提供 Aurora-Edge-Runtime 常见问题的诊断和解决方案。
@@ -277,10 +279,10 @@ chmod 755 /data/dcp/bags
 **诊断步骤**：
 ```bash
 # 1. 检查网络连接
-ping caic-obs.t3caic.com
+ping orderseek-obs.orderseek.ai
 
 # 2. 测试 S3 连接
-aws s3 ls s3://caic-dataset --endpoint-url https://caic-obs.t3caic.com
+aws s3 ls s3://caic-dataset --endpoint-url https://orderseek-obs.orderseek.ai
 
 # 3. 检查凭证
 cat config/app_config.json | grep -A 10 "aws"
@@ -293,7 +295,7 @@ vim config/app_config.json
 
 # 2. 测试上传
 aws s3 cp /tmp/test.txt s3://caic-dataset/test/ \
-  --endpoint-url https://caic-obs.t3caic.com
+  --endpoint-url https://orderseek-obs.orderseek.ai
 
 # 3. 如果证书过期，更新证书
 ./ops/update_cert.sh

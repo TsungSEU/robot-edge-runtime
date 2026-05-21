@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [User Guide](../index.md) / [Configuration](index.md) / Planner Config
+
 # 规划器配置指南
 
 本文档详细说明 `config/planner_weights.yaml` 配置文件的各项参数。

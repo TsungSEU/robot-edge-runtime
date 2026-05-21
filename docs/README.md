@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](README.md) / Readme
+
 # Aurora-Edge-Runtime 文档中心
 
 欢迎来到 Aurora-Edge-Runtime 文档中心。本项目遵循 [Diátaxis Framework](https://diataxis.fr/) 文档组织原则。

@@ -1,3 +1,5 @@
+**Breadcrumbs:** [Docs](../../README.md) / [Developer Guide](../index.md) / [Architecture](index.md) / Readme
+
 # 软件架构文档
 
 ## 概述

@@ -19,7 +19,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CHANGELOG_FILE="${PROJECT_ROOT}/CHANGELOG.md"
 
 # GitLab configuration
-GITLAB_HOST="${GITLAB_HOST:-gitlab.t3caic.com}"
+GITLAB_HOST="${GITLAB_HOST:-gitlab.orderseek.ai}"
 GITLAB_TOKEN="jBfE9eBfYAdfjZ4z4EZY"
 GITLAB_PROJECT="${GITLAB_PROJECT:-icr11/dataengine/data-infra/Aurora/aurora-edge-runtime}"
 PROJECT_ID=$(echo "$GITLAB_PROJECT" | sed 's/\//%2F/g')
@@ -63,7 +63,7 @@ print_usage() {
     echo ""
     echo "Environment Variables:"
     echo "  GITLAB_TOKEN  Personal Access Token for GitLab API (required if glab not available)"
-    echo "  GITLAB_HOST   GitLab host (default: gitlab.t3caic.com)"
+    echo "  GITLAB_HOST   GitLab host (default: gitlab.orderseek.ai)"
     echo ""
     echo "Examples:"
     echo "  $0 v1.1.5                    # Create release for v1.1.5"
